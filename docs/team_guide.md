@@ -9,6 +9,7 @@
 | 3. Régulation Advisor | `backend/agent_regulation/` | rien (peut démarrer en parallèle, le RAG est indépendant) | `regulation_documents`, `dossiers_administratifs` |
 | 4. Monitoring + Marketplace | `backend/agent_monitoring/`, `backend/marketplace/` | Lots 1 et 2 (a besoin des dates de maturité et décisions confirmées) | `alerts`, `monitoring_logs`, `annonces` |
 | 5. Orchestrateur + Frontend | `backend/orchestrator/`, `frontend/` | tous les agents exposent au moins un endpoint stub | routage LangGraph, intégration Lovable |
+| 6. Auth | `backend/auth/` | rien (indépendant, premier module connecté à une vraie PostgreSQL) | `users.role`, `farmer_equipements`, `terrains` |
 
 **Conseil** : commencez tous les lots par un stub qui renvoie des données
 factices respectant le schéma (`database/schema.sql`) — ça permet à

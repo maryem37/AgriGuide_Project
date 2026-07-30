@@ -2,13 +2,17 @@ version: "3.9"
 
 services:
   db:
-    image: postgis/postgis:16-3.4
+    build: ./database
     environment:
       POSTGRES_DB: agriadvisor
       POSTGRES_USER: agriadvisor
       POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
     ports:
-      - "5432:5432"
+      # Port hôte 5434 (et non 5432) pour éviter un conflit avec un Postgres
+      # natif déjà installé sur la machine de dev. Les autres services du
+      # docker-compose se connectent via `db:5432` (réseau interne), non
+      # affecté par ce choix.
+      - "5434:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
       - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
@@ -24,6 +28,13 @@ services:
     ports:
       - "8000:8000"
     depends_on: [db, redis]
+
+  auth:
+    build: ./backend/auth
+    env_file: .env
+    ports:
+      - "8001:8000"
+    depends_on: [db]
 
   agent_agriculture:
     build: ./backend/agent_agriculture

@@ -82,6 +82,15 @@ non des lignes dans les tables en amont.
   suggestion de prix (pour les récoltes, via la même source RNM que Business)
   passent par un appel LLM ponctuel — déclenché par l'agent Monitoring.
 
+### Module Auth (auth/)
+- CRUD classique, pas un agent — premier module réellement connecté à
+  PostgreSQL (les autres utilisent encore des mocks, voir team_guide.md).
+- Gère `users.role` (`farmer` | `acheteur`), `farmer_equipements` et les
+  `terrains` déclarés au sign up (modifiables ensuite depuis le profil).
+- Un `acheteur` n'a accès qu'en lecture au Module Marketplace (pas de dépôt
+  d'annonce) ; un `farmer` a accès à tous les agents + écriture marketplace.
+- Sécurité : mots de passe hachés (bcrypt), session par JWT.
+
 ## 4. Sources de données externes (par agent)
 
 | Agent | Sources |

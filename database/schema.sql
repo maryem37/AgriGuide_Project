@@ -17,9 +17,21 @@ CREATE TABLE users (
     password_hash   VARCHAR(255) NOT NULL,
     nom             VARCHAR(150) NOT NULL,
     telephone       VARCHAR(30),
+    role            VARCHAR(20) NOT NULL DEFAULT 'farmer',  -- 'farmer' | 'acheteur'
     langue_preferee VARCHAR(5) DEFAULT 'fr',   -- 'fr' | 'en'
     created_at      TIMESTAMPTZ DEFAULT now(),
     updated_at      TIMESTAMPTZ DEFAULT now()
+);
+
+-- Matériel agricole déclaré par le farmer au sign up (modifiable ensuite depuis son profil).
+-- Sans objet pour le rôle 'acheteur' (accès marketplace en lecture seule uniquement).
+CREATE TABLE farmer_equipements (
+    id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id         UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    type_equipement VARCHAR(50) NOT NULL,  -- 'tracteur' | 'cultivateur' | 'fraise_rotative' | 'planteuse' |
+                                            -- 'moissonneuse_batteuse' | 'remorque_agricole' | 'pulverisateur' | 'tunnel_plastique'
+    created_at      TIMESTAMPTZ DEFAULT now(),
+    UNIQUE (user_id, type_equipement)
 );
 
 CREATE TABLE notification_preferences (

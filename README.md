@@ -15,6 +15,7 @@ Voir `docs/ARCHITECTURE.md` pour l'architecture multi-agents complète et
 agriadvisor/
 ├── backend/
 │   ├── orchestrator/        # Agent superviseur (LangGraph) — routage
+│   ├── auth/                 # Sign up/sign in, rôles farmer/acheteur, profil
 │   ├── agent_regulation/     # RAG légal (Code Rural, Cerfa, aides)
 │   ├── agent_agriculture/    # Analyse géo/sol/climat + RandomForest
 │   ├── agent_business/       # Scoring des scénarios + étude de marché
