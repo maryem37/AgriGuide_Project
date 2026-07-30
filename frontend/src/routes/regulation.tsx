@@ -1,10 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useMutation } from "@tanstack/react-query";
 import { AppShell } from "@/components/AppShell";
+import { AlertBanner } from "@/components/AlertBanner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { FileText, ExternalLink, Send, ScrollText, Sparkles, ArrowUpRight } from "lucide-react";
+import { FileText, ExternalLink, Send, ScrollText, Sparkles, ArrowUpRight, Loader2 } from "lucide-react";
 import { useState } from "react";
+import { askRegulationAgent, RegulationApiError } from "@/lib/regulationApi";
 
 export const Route = createFileRoute("/regulation")({
   head: () => ({
@@ -39,15 +42,26 @@ function Page() {
   const [input, setInput] = useState("");
   const [progress, setProgress] = useState(0);
 
+  const chatMutation = useMutation({
+    mutationFn: askRegulationAgent,
+    onSuccess: (data) => {
+      setMessages((m) => [...m, { role: "bot", text: data.answer }]);
+    },
+  });
+
   const send = (t: string) => {
-    if (!t.trim()) return;
-    setMessages((m) => [
-      ...m,
-      { role: "user", text: t },
-      { role: "bot", text: "Voici ce que dit la réglementation en vigueur : votre parcelle est éligible à l'aide de base et au paiement redistributif. Consultez le document PAC ci-contre pour les modalités." },
-    ]);
+    if (!t.trim() || chatMutation.isPending) return;
+    setMessages((m) => [...m, { role: "user", text: t }]);
     setInput("");
+    chatMutation.mutate({ question: t });
   };
+
+  const errorMessage =
+    chatMutation.error instanceof RegulationApiError
+      ? chatMutation.error.message
+      : chatMutation.isError
+        ? "Une erreur inattendue est survenue en contactant l'agent réglementaire."
+        : null;
 
   const generate = () => {
     setProgress(10);
@@ -81,12 +95,23 @@ function Page() {
                 className={
                   m.role === "user"
                     ? "ml-auto max-w-[80%] rounded-2xl rounded-tr-sm bg-primary text-primary-foreground px-4 py-3"
-                    : "max-w-[85%] rounded-2xl rounded-tl-sm bg-secondary text-secondary-foreground px-4 py-3"
+                    : "max-w-[85%] rounded-2xl rounded-tl-sm bg-secondary text-secondary-foreground px-4 py-3 whitespace-pre-line"
                 }
               >
                 {m.text}
               </div>
             ))}
+            {chatMutation.isPending && (
+              <div className="max-w-[85%] rounded-2xl rounded-tl-sm bg-secondary text-secondary-foreground px-4 py-3 flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Recherche en cours...
+              </div>
+            )}
+            {errorMessage && (
+              <AlertBanner tone="danger" title="Agent réglementaire indisponible">
+                {errorMessage}
+              </AlertBanner>
+            )}
           </div>
           <div className="border-t border-border p-4">
             <div className="flex gap-2 flex-wrap mb-3">
@@ -94,7 +119,8 @@ function Page() {
                 <button
                   key={s}
                   onClick={() => send(s)}
-                  className="text-xs rounded-full border border-border bg-background px-3 py-1.5 hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+                  disabled={chatMutation.isPending}
+                  className="text-xs rounded-full border border-border bg-background px-3 py-1.5 hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50 disabled:pointer-events-none"
                 >
                   <Sparkles className="inline h-3 w-3 mr-1" />
                   {s}
@@ -107,9 +133,10 @@ function Page() {
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Écrivez votre question..."
                 className="h-12 rounded-xl text-base"
+                disabled={chatMutation.isPending}
                 onKeyDown={(e) => e.key === "Enter" && send(input)}
               />
-              <Button size="lg" className="h-12 rounded-xl" onClick={() => send(input)}>
+              <Button size="lg" className="h-12 rounded-xl" onClick={() => send(input)} disabled={chatMutation.isPending}>
                 <Send className="h-5 w-5" />
               </Button>
             </div>
