@@ -2,12 +2,20 @@ import type { ReactNode } from "react";
 
 /**
  * Rendu minimal du markdown renvoyé par les agents LLM (titres #/##/###, gras
- * **texte**, listes à puces -, liens [texte](url)) — pas de dépendance externe.
+ * **texte**, listes à puces -, liens [texte](url) et URLs brutes) — pas de
+ * dépendance externe.
  */
+
+/** Détache la ponctuation finale (., ;, etc.) d'une URL brute pour ne pas la casser. */
+function splitTrailingPunctuation(url: string): [string, string] {
+  const match = /^(.*[^.,;:!?)\]])([.,;:!?)\]]*)$/.exec(url);
+  if (!match) return [url, ""];
+  return [match[1], match[2]];
+}
 
 function renderInline(text: string, keyPrefix: string): ReactNode[] {
   const parts: ReactNode[] = [];
-  const regex = /\*\*(.+?)\*\*|\[(.+?)\]\((https?:\/\/[^\s)]+)\)/g;
+  const regex = /\*\*(.+?)\*\*|\[(.+?)\]\((https?:\/\/[^\s)]+)\)|(https?:\/\/[^\s)]+)/g;
   let lastIndex = 0;
   let match: RegExpExecArray | null;
   let i = 0;
@@ -28,6 +36,20 @@ function renderInline(text: string, keyPrefix: string): ReactNode[] {
           {match[2]}
         </a>,
       );
+    } else if (match[4] !== undefined) {
+      const [url, trailingPunctuation] = splitTrailingPunctuation(match[4]);
+      parts.push(
+        <a
+          key={`${keyPrefix}-a-${i}`}
+          href={url}
+          target="_blank"
+          rel="noreferrer"
+          className="underline underline-offset-2 break-all"
+        >
+          {url}
+        </a>,
+      );
+      if (trailingPunctuation) parts.push(trailingPunctuation);
     }
     lastIndex = regex.lastIndex;
     i++;

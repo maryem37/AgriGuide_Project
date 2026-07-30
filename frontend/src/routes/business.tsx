@@ -39,13 +39,13 @@ import { useAuth } from "@/lib/auth-context";
 export const Route = createFileRoute("/business")({
   head: () => ({
     meta: [
-      { title: "Conseiller Business — AgriGuide" },
+      { title: "Conseiller Business — AgriMent" },
       {
         name: "description",
         content:
           "Simulez votre budget et comparez trois scénarios de cultures adaptés à votre exploitation.",
       },
-      { property: "og:title", content: "Conseiller Business — AgriGuide" },
+      { property: "og:title", content: "Conseiller Business — AgriMent" },
       {
         property: "og:description",
         content: "Comparez trois scénarios pour tirer le meilleur de votre budget.",

@@ -79,26 +79,26 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "AgriGuide — Bienvenue" },
+      { title: "AgriMent — Bienvenue" },
       {
         name: "description",
         content:
-          "AgriGuide, l'assistant qui aide chaque agriculteur à cultiver, gérer et vendre en toute simplicité.",
+          "AgriMent, l'assistant qui aide chaque agriculteur à cultiver, gérer et vendre en toute simplicité.",
       },
-      { name: "author", content: "AgriGuide" },
-      { property: "og:title", content: "AgriGuide — Bienvenue" },
+      { name: "author", content: "AgriMent" },
+      { property: "og:title", content: "AgriMent — Bienvenue" },
       {
         property: "og:description",
         content:
-          "AgriGuide, l'assistant qui aide chaque agriculteur à cultiver, gérer et vendre en toute simplicité.",
+          "AgriMent, l'assistant qui aide chaque agriculteur à cultiver, gérer et vendre en toute simplicité.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "AgriGuide — Bienvenue" },
+      { name: "twitter:title", content: "AgriMent — Bienvenue" },
       {
         name: "twitter:description",
         content:
-          "AgriGuide, l'assistant qui aide chaque agriculteur à cultiver, gérer et vendre en toute simplicité.",
+          "AgriMent, l'assistant qui aide chaque agriculteur à cultiver, gérer et vendre en toute simplicité.",
       },
       {
         property: "og:image",

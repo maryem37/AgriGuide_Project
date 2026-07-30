@@ -8,12 +8,12 @@ import { useAuth } from "@/lib/auth-context";
 export const Route = createFileRoute("/marketplace")({
   head: () => ({
     meta: [
-      { title: "Marketplace — AgriGuide" },
+      { title: "Marketplace — AgriMent" },
       {
         name: "description",
         content: "Achetez, vendez et échangez récoltes et déchets valorisables entre agriculteurs.",
       },
-      { property: "og:title", content: "Marketplace — AgriGuide" },
+      { property: "og:title", content: "Marketplace — AgriMent" },
       {
         property: "og:description",
         content: "Un marché communautaire pour vos récoltes et vos déchets valorisables.",

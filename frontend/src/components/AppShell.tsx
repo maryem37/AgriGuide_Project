@@ -79,7 +79,7 @@ export function AppShell({
             <Leaf className="h-6 w-6 text-primary-foreground" />
           </div>
           <div>
-            <div className="font-display text-xl font-semibold leading-none">AgriGuide</div>
+            <div className="font-display text-xl font-semibold leading-none">AgriMent</div>
             <div className="text-xs text-muted-foreground mt-1">Votre allié au quotidien</div>
           </div>
         </Link>

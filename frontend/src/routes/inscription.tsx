@@ -15,8 +15,8 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/inscription")({
   head: () => ({
     meta: [
-      { title: "Créer un compte — AgriGuide" },
-      { name: "description", content: "Créez votre compte agriculteur ou acheteur sur AgriGuide." },
+      { title: "Créer un compte — AgriMent" },
+      { name: "description", content: "Créez votre compte agriculteur ou acheteur sur AgriMent." },
     ],
   }),
   component: Page,
@@ -90,7 +90,7 @@ function Page() {
   return (
     <AuthLayout
       title="Créer un compte"
-      subtitle="Rejoignez AgriGuide en tant qu'agriculteur ou acheteur."
+      subtitle="Rejoignez AgriMent en tant qu'agriculteur ou acheteur."
       maxWidth={step === "terrains" ? "max-w-3xl" : "max-w-lg"}
     >
       {step === "role" && (

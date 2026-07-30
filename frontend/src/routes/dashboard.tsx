@@ -6,9 +6,9 @@ import { Sprout, ScrollText, LineChart, Store, CloudSun, Droplets, Wind, ArrowRi
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
     meta: [
-      { title: "Tableau de bord — AgriGuide" },
+      { title: "Tableau de bord — AgriMent" },
       { name: "description", content: "Vue d'ensemble de votre exploitation : météo, alertes et conseils du jour." },
-      { property: "og:title", content: "Tableau de bord — AgriGuide" },
+      { property: "og:title", content: "Tableau de bord — AgriMent" },
       { property: "og:description", content: "Météo, alertes et conseillers en un coup d'œil." },
     ],
   }),
