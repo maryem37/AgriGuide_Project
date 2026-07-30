@@ -20,6 +20,48 @@ import {
 
 const SESSION_KEY = "agriguide.session";
 
+/**
+ * Mode dev SANS backend Auth / PostgreSQL : utile pour tester une
+ * fonctionnalité isolée sans avoir à installer Docker/Postgres.
+ *
+ * Activation : mettre `VITE_SKIP_AUTH=true` dans `frontend/.env.local`
+ * (fichier non commité, cf. `.gitignore`). Optionnellement `VITE_SKIP_AUTH_ROLE`
+ * ("farmer" par défaut, ou "acheteur") pour choisir le rôle simulé.
+ *
+ * À NE JAMAIS activer en production — désactivé par défaut, et sans impact
+ * sur le code d'authentification réel (aucune route/API n'est modifiée).
+ */
+export const SKIP_AUTH: boolean = import.meta.env.VITE_SKIP_AUTH === "true";
+const SKIP_AUTH_ROLE: Role = (import.meta.env.VITE_SKIP_AUTH_ROLE as Role | undefined) ?? "farmer";
+
+function buildDevBypassUser(role: Role): UserOut {
+  return {
+    id: "dev-bypass-user",
+    email: "dev@local.test",
+    nom: "Utilisateur Dev",
+    telephone: null,
+    role,
+    equipements: role === "farmer" ? ["tracteur", "pulverisateur"] : [],
+    terrains:
+      role === "farmer"
+        ? [
+            {
+              id: "dev-bypass-terrain",
+              nom: "Terrain de démonstration",
+              superficie_ha: 12.5,
+              region: "Zone de test",
+              points: [
+                [46.8, 2.3],
+                [46.81, 2.32],
+                [46.79, 2.33],
+                [46.78, 2.31],
+              ],
+            },
+          ]
+        : [],
+  };
+}
+
 type StoredSession = { token: string; user: UserOut };
 
 function loadStoredSession(): StoredSession | null {
@@ -64,6 +106,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Le localStorage n'existe pas côté serveur (SSR) — on charge la session
   // uniquement après le montage côté client, comme lib/terrain.ts.
   useEffect(() => {
+    if (SKIP_AUTH) {
+      setSession({ token: "dev-bypass-token", user: buildDevBypassUser(SKIP_AUTH_ROLE) });
+      setStatus("authenticated");
+      return;
+    }
+
     const stored = loadStoredSession();
     if (!stored) {
       setStatus("anonymous");
