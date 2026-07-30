@@ -20,26 +20,47 @@ import {
 
 const SESSION_KEY = "agriguide.session";
 
-// --- DEV ONLY : contournement temporaire du service Auth réel (backend/auth + Postgres). ---
-// Permet de se connecter et de naviguer dans le site sans base de données ni service Auth
-// démarré. À retirer une fois le service Auth (Postgres) disponible en local :
-// il suffit de supprimer ce bloc et le `if` correspondant dans `signIn` ci-dessous.
-const DEV_MOCK_CREDENTIALS: SignInRequest = { email: "demo@agriguide.fr", password: "demo1234" };
-const DEV_MOCK_USER: UserOut = {
-  id: "dev-mock-user-id",
-  email: DEV_MOCK_CREDENTIALS.email,
-  nom: "Jean Demo",
-  telephone: null,
-  role: "farmer",
-  equipements: [],
-  terrains: [],
-};
-const DEV_MOCK_AUTH_RESPONSE: AuthResponse = {
-  access_token: "dev-mock-token",
-  token_type: "bearer",
-  user: DEV_MOCK_USER,
-};
-// --- FIN DEV ONLY ---
+/**
+ * Mode dev SANS backend Auth / PostgreSQL : utile pour tester une
+ * fonctionnalité isolée sans avoir à installer Docker/Postgres.
+ *
+ * Activation : mettre `VITE_SKIP_AUTH=true` dans `frontend/.env.local`
+ * (fichier non commité, cf. `.gitignore`). Optionnellement `VITE_SKIP_AUTH_ROLE`
+ * ("farmer" par défaut, ou "acheteur") pour choisir le rôle simulé.
+ *
+ * À NE JAMAIS activer en production — désactivé par défaut, et sans impact
+ * sur le code d'authentification réel (aucune route/API n'est modifiée).
+ */
+export const SKIP_AUTH: boolean = import.meta.env.VITE_SKIP_AUTH === "true";
+const SKIP_AUTH_ROLE: Role = (import.meta.env.VITE_SKIP_AUTH_ROLE as Role | undefined) ?? "farmer";
+
+function buildDevBypassUser(role: Role): UserOut {
+  return {
+    id: "dev-bypass-user",
+    email: "dev@local.test",
+    nom: "Utilisateur Dev",
+    telephone: null,
+    role,
+    equipements: role === "farmer" ? ["tracteur", "pulverisateur"] : [],
+    terrains:
+      role === "farmer"
+        ? [
+            {
+              id: "dev-bypass-terrain",
+              nom: "Terrain de démonstration",
+              superficie_ha: 12.5,
+              region: "Zone de test",
+              points: [
+                [46.8, 2.3],
+                [46.81, 2.32],
+                [46.79, 2.33],
+                [46.78, 2.31],
+              ],
+            },
+          ]
+        : [],
+  };
+}
 
 type StoredSession = { token: string; user: UserOut };
 
@@ -85,6 +106,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Le localStorage n'existe pas côté serveur (SSR) — on charge la session
   // uniquement après le montage côté client, comme lib/terrain.ts.
   useEffect(() => {
+    if (SKIP_AUTH) {
+      setSession({ token: "dev-bypass-token", user: buildDevBypassUser(SKIP_AUTH_ROLE) });
+      setStatus("authenticated");
+      return;
+    }
+
     const stored = loadStoredSession();
     if (!stored) {
       setStatus("anonymous");
@@ -117,16 +144,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signIn = useCallback(
-    async (payload: SignInRequest) => {
-      // DEV ONLY : voir DEV_MOCK_CREDENTIALS plus haut.
-      if (
-        payload.email === DEV_MOCK_CREDENTIALS.email &&
-        payload.password === DEV_MOCK_CREDENTIALS.password
-      ) {
-        return applyAuthResponse(DEV_MOCK_AUTH_RESPONSE);
-      }
-      return applyAuthResponse(await apiSignIn(payload));
-    },
+    async (payload: SignInRequest) => applyAuthResponse(await apiSignIn(payload)),
     [applyAuthResponse],
   );
 
