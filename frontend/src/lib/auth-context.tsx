@@ -20,6 +20,27 @@ import {
 
 const SESSION_KEY = "agriguide.session";
 
+// --- DEV ONLY : contournement temporaire du service Auth réel (backend/auth + Postgres). ---
+// Permet de se connecter et de naviguer dans le site sans base de données ni service Auth
+// démarré. À retirer une fois le service Auth (Postgres) disponible en local :
+// il suffit de supprimer ce bloc et le `if` correspondant dans `signIn` ci-dessous.
+const DEV_MOCK_CREDENTIALS: SignInRequest = { email: "demo@agriguide.fr", password: "demo1234" };
+const DEV_MOCK_USER: UserOut = {
+  id: "dev-mock-user-id",
+  email: DEV_MOCK_CREDENTIALS.email,
+  nom: "Jean Demo",
+  telephone: null,
+  role: "farmer",
+  equipements: [],
+  terrains: [],
+};
+const DEV_MOCK_AUTH_RESPONSE: AuthResponse = {
+  access_token: "dev-mock-token",
+  token_type: "bearer",
+  user: DEV_MOCK_USER,
+};
+// --- FIN DEV ONLY ---
+
 type StoredSession = { token: string; user: UserOut };
 
 function loadStoredSession(): StoredSession | null {
@@ -96,7 +117,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signIn = useCallback(
-    async (payload: SignInRequest) => applyAuthResponse(await apiSignIn(payload)),
+    async (payload: SignInRequest) => {
+      // DEV ONLY : voir DEV_MOCK_CREDENTIALS plus haut.
+      if (
+        payload.email === DEV_MOCK_CREDENTIALS.email &&
+        payload.password === DEV_MOCK_CREDENTIALS.password
+      ) {
+        return applyAuthResponse(DEV_MOCK_AUTH_RESPONSE);
+      }
+      return applyAuthResponse(await apiSignIn(payload));
+    },
     [applyAuthResponse],
   );
 
