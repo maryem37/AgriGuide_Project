@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { FileText, ExternalLink, Send, ScrollText, Sparkles, ArrowUpRight, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { askRegulationAgent, RegulationApiError } from "@/lib/regulationApi";
+import { MarkdownLite } from "@/lib/markdownLite";
 
 export const Route = createFileRoute("/regulation")({
   head: () => ({
@@ -41,6 +42,7 @@ function Page() {
   ]);
   const [input, setInput] = useState("");
   const [progress, setProgress] = useState(0);
+  const scrollAnchorRef = useRef<HTMLDivElement>(null);
 
   const chatMutation = useMutation({
     mutationFn: askRegulationAgent,
@@ -48,6 +50,11 @@ function Page() {
       setMessages((m) => [...m, { role: "bot", text: data.answer }]);
     },
   });
+
+  // Fait défiler vers le dernier message plutôt que de laisser la carte grandir.
+  useEffect(() => {
+    scrollAnchorRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [messages, chatMutation.isPending]);
 
   const send = (t: string) => {
     if (!t.trim() || chatMutation.isPending) return;
@@ -87,7 +94,7 @@ function Page() {
 
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
         {/* Chat */}
-        <div className="card-soft flex flex-col overflow-hidden min-h-[560px]">
+        <div className="card-soft flex flex-col overflow-hidden h-140">
           <div className="flex-1 overflow-y-auto p-6 space-y-4">
             {messages.map((m, i) => (
               <div
@@ -95,10 +102,10 @@ function Page() {
                 className={
                   m.role === "user"
                     ? "ml-auto max-w-[80%] rounded-2xl rounded-tr-sm bg-primary text-primary-foreground px-4 py-3"
-                    : "max-w-[85%] rounded-2xl rounded-tl-sm bg-secondary text-secondary-foreground px-4 py-3 whitespace-pre-line"
+                    : "max-w-[85%] rounded-2xl rounded-tl-sm bg-secondary text-secondary-foreground px-4 py-3"
                 }
               >
-                {m.text}
+                {m.role === "bot" ? <MarkdownLite text={m.text} /> : m.text}
               </div>
             ))}
             {chatMutation.isPending && (
@@ -112,6 +119,7 @@ function Page() {
                 {errorMessage}
               </AlertBanner>
             )}
+            <div ref={scrollAnchorRef} />
           </div>
           <div className="border-t border-border p-4">
             <div className="flex gap-2 flex-wrap mb-3">
