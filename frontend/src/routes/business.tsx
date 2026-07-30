@@ -33,7 +33,7 @@ import {
   type DetailCalculMetrique,
   type FarmerDecisionResponse,
 } from "@/lib/businessApi";
-import { MOCK_CROP_RECOMMENDATIONS, cultureLabel } from "@/lib/cropRecommendations";
+import { MOCK_CROP_RECOMMENDATIONS, loadRealCropRecommendations, cultureLabel } from "@/lib/cropRecommendations";
 import { useAuth } from "@/lib/auth-context";
 
 export const Route = createFileRoute("/business")({
@@ -107,19 +107,25 @@ function Page() {
   const terrainId = terrains[0]?.id ?? "fallback-sans-terrain";
 
   // Liaison réelle avec backend/agent_business — POST /business/scenarios.
-  // `crop_recommendations` vient normalement de l'agent Agriculture ; en
-  // attendant que ce dernier expose un endpoint, on envoie les mêmes données
-  // factices que celles utilisées par l'agent Business en interne (voir
-  // frontend/src/lib/cropRecommendations.ts).
+  // `crop_recommendations` vient de la dernière analyse réelle de l'agent
+  // Agriculture pour ce terrain (voir routes/agriculture.tsx), mise en cache
+  // via lib/cropRecommendations.ts ; tant qu'aucune analyse n'a été faite
+  // pour ce terrain, on retombe sur des données factices pour rester
+  // utilisable indépendamment.
+  const cropRecommendations = useMemo(
+    () => loadRealCropRecommendations(terrainId) ?? MOCK_CROP_RECOMMENDATIONS,
+    [terrainId],
+  );
+
   const scenariosQuery = useQuery({
-    queryKey: ["business-scenarios", debouncedBudget, superficieDisponibleHa],
+    queryKey: ["business-scenarios", debouncedBudget, superficieDisponibleHa, terrainId],
     queryFn: () =>
       fetchBusinessScenarios({
         terrain_id: terrainId,
         superficie_disponible_ha: superficieDisponibleHa,
         budget_input: debouncedBudget,
         date_plantation_prevue: datePlantationPrevue(),
-        crop_recommendations: MOCK_CROP_RECOMMENDATIONS,
+        crop_recommendations: cropRecommendations,
         nb_scenarios: 3,
       }),
     placeholderData: keepPreviousData,
