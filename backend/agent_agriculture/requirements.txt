@@ -25,6 +25,14 @@ sentence-transformers==3.1.1
 mistralai==1.2.3
 unstructured[pdf]==0.15.13
 
+# unstructured==0.15.13 does not pin pdfminer.six, so an unconstrained
+# `pip install` resolves to whatever is newest on PyPI at install time. Newer
+# pdfminer.six releases removed `PSSyntaxError` from `pdfminer.pdfparser`,
+# which unstructured's PDF partitioner still imports, breaking with
+# `ImportError: cannot import name 'PSSyntaxError'`. Pin to a version
+# contemporaneous with unstructured 0.15.13's original release.
+pdfminer.six==20240706
+
 # Optional Phase B — DL crop classifier (BreizhCrops-pretrained TempCNN).
 # Heavy dependencies: only needed for app/services/dl_service.py and
 # scripts/finetune_dl_service.py. The service degrades gracefully

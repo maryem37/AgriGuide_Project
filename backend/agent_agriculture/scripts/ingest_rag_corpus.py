@@ -10,6 +10,7 @@ paths updated to the `app.*` package layout). Run from
     python -m scripts.ingest_rag_corpus --input ./corpus_ble --crop ble_tendre --region "Ile-de-France" --topic fertilisation
 """
 import argparse
+import mimetypes
 from pathlib import Path
 from unstructured.partition.auto import partition
 from app.services.rag_service import chunk_document, index_chunks, _collection
@@ -20,9 +21,26 @@ from app.taxonomy import normalize_crop
 # you specifically need a large file included.
 _MAX_FILE_SIZE_MB = 25
 
+# `unstructured`'s auto-partitioner falls back to `python-magic` (a wrapper
+# around the libmagic C library) whenever no content-type is given — Windows
+# has no libmagic by default, so that fallback hard-crashes with
+# `ImportError: failed to find libmagic` instead of degrading gracefully.
+# Passing an explicit content-type (for the file types this project actually
+# downloads — see fetch_hal_documents.py, always PDFs) skips libmagic
+# entirely; only truly unknown extensions still risk hitting it.
+_EXTENSION_CONTENT_TYPES = {
+    ".pdf": "application/pdf",
+    ".html": "text/html",
+    ".htm": "text/html",
+    ".md": "text/markdown",
+    ".markdown": "text/markdown",
+    ".txt": "text/plain",
+}
+
 
 def extract_text(path: Path) -> str:
-    elements = partition(filename=str(path))
+    content_type = _EXTENSION_CONTENT_TYPES.get(path.suffix.lower()) or mimetypes.guess_type(str(path))[0]
+    elements = partition(filename=str(path), content_type=content_type)
     return "\n\n".join(str(e) for e in elements)
 
 
@@ -45,12 +63,12 @@ def main():
 
     folder = Path(args.input)
     if not folder.exists():
-        print(f"⚠️  Input folder does not exist: {folder}")
+        print(f"[ATTENTION] Input folder does not exist: {folder}")
         return
     all_files = [p for p in sorted(folder.glob("**/*")) if p.is_file()]
     if not all_files:
         print(
-            f"⚠️  No files found in {folder} — nothing to ingest. "
+            f"[ATTENTION] No files found in {folder} — nothing to ingest. "
             f"If this came from fetch_hal_documents.py, check its output "
             f"for '0 PDFs downloaded' before re-running this step."
         )
@@ -61,14 +79,14 @@ def main():
     for path in all_files:
         size_mb = path.stat().st_size / (1024 * 1024)
         if size_mb > args.max_size_mb:
-            print(f"⏭️  Skipping {path.name} ({size_mb:.1f} MB > {args.max_size_mb} MB limit)")
+            print(f"[SKIP] Skipping {path.name} ({size_mb:.1f} MB > {args.max_size_mb} MB limit)")
             skipped.append(path.name)
             continue
 
         if not args.force:
             existing = _collection.get(where={"source_document": path.name}, limit=1)
             if existing["ids"]:
-                print(f"⏭️  {path.name} already indexed — skipping (use --force to re-index)")
+                print(f"[SKIP] {path.name} already indexed — skipping (use --force to re-index)")
                 already_indexed.append(path.name)
                 continue
 
@@ -87,7 +105,7 @@ def main():
             print(f"Indexed {len(chunks)} chunks from {path.name}")
             succeeded.append(path.name)
         except Exception as e:
-            print(f"❌ Failed on {path.name}: {e}")
+            print(f"[ERREUR] Failed on {path.name}: {e}")
             failed.append(path.name)
             continue  # never let one bad file kill the whole run
 

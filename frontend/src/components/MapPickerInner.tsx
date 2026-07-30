@@ -29,6 +29,7 @@ export default function MapPickerInner({
   onPoint,
   markerPosition,
   overlayGeometry,
+  neighborGeometries,
   height = 480,
   center = [46.7, 2.5],
   zoom = 6,
@@ -43,6 +44,8 @@ export default function MapPickerInner({
   markerPosition?: [number, number] | null;
   /** En mode "point" : polygone GeoJSON à afficher en surimpression (ex. contour cadastral résolu). */
   overlayGeometry?: PolygonGeometry | MultiPolygonGeometry | null;
+  /** En mode "point" : parcelles voisines (contexte RPG) à afficher en surimpression, en pointillés orange. */
+  neighborGeometries?: (PolygonGeometry | MultiPolygonGeometry)[];
   height?: number | string;
   center?: [number, number];
   zoom?: number;
@@ -70,6 +73,7 @@ export default function MapPickerInner({
   }
 
   const overlayPositions = overlayToLatLngRings(overlayGeometry);
+  const neighborPositions = (neighborGeometries ?? []).flatMap((g) => overlayToLatLngRings(g));
 
   return (
     <div className="relative">
@@ -86,6 +90,14 @@ export default function MapPickerInner({
             <Polygon positions={points} pathOptions={{ color: "#3d8f5a", fillColor: "#7fbf95", fillOpacity: 0.35 }} />
           )}
           {mode === "point" && point && <Marker position={point} />}
+          {mode === "point" &&
+            neighborPositions.map((ring, i) => (
+              <Polygon
+                key={`neighbor-${i}`}
+                positions={ring}
+                pathOptions={{ color: "#e0983c", fillColor: "#e0983c", fillOpacity: 0.08, weight: 1.5, dashArray: "6 6" }}
+              />
+            ))}
           {mode === "point" &&
             overlayPositions.map((ring, i) => (
               <Polygon

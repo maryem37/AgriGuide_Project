@@ -110,6 +110,26 @@ python -m scripts.dedupe_chroma --apply   # nettoyage ponctuel des doublons
 `chroma_store/` (persistance du vector store) est monté en volume Docker
 (voir `docker-compose.yml`) pour survivre aux redémarrages du conteneur.
 
+**Sur Windows**, `python -m scripts.ingest_rag_corpus` doit être lancé avec le
+`python` du venv (`.venv\Scripts\python.exe`, pas le `python` global) puisque
+`unstructured[pdf]` (et sa dépendance `pdfminer.six==20240706`, voir
+`requirements.txt`) ne sont installés que dans le venv du projet. Le script
+contourne aussi lui-même deux pièges Windows :
+
+- **Pas de `libmagic`** (bibliothèque C absente par défaut sur Windows) :
+  `unstructured` retombe dessus (via `python-magic`) pour la détection MIME
+  quand aucun `content_type` n'est fourni, ce qui plantait avec
+  `ImportError: failed to find libmagic`. Le script passe désormais un
+  `content_type` explicite (déduit de l'extension) pour éviter ce chemin.
+- **Console cp1252** : les anciens messages avec emojis (`⚠️`, `❌`, `⏭️`)
+  provoquaient un `UnicodeEncodeError` à l'impression sur un terminal Windows
+  par défaut, masquant l'erreur réelle. Remplacés par des tags ASCII
+  (`[ATTENTION]`, `[ERREUR]`, `[SKIP]`).
+
+Le parsing PDF via `pdfminer` reste lent pour des thèses/articles longs
+(plusieurs minutes pour 20-30 PDFs) — c'est normal, le script continue en
+arrière-plan fichier par fichier sans planter sur un document problématique.
+
 ## Classifieur DL (optionnel, Phase B)
 
 Observation satellite indépendante du scoring (jamais utilisée pour classer

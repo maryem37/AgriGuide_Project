@@ -198,6 +198,11 @@ export function resolveParcel(request: ParcelRequest): Promise<ParcelResolution>
   return postJson<ParcelResolution>("/agriculture/parcel/resolve", request);
 }
 
+/** POST /agriculture/parcel/neighbors — répartition des cultures déclarées dans un rayon donné, sans persistance. */
+export function getNeighbors(request: ParcelRequest, radiusM = 800): Promise<NeighborCropContext> {
+  return postJson<NeighborCropContext>(`/agriculture/parcel/neighbors?radius_m=${radiusM}`, request);
+}
+
 /** POST /agriculture/analyze — pipeline complet (sol/météo/satellite/scoring/rapport), persisté si `terrain_id` est fourni. */
 export function analyzeParcel(request: AnalyzeRequest): Promise<AnalyzeResponse> {
   return postJson<AnalyzeResponse>("/agriculture/analyze", request);

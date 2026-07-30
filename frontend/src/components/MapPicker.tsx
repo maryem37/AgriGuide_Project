@@ -11,6 +11,7 @@ export function MapPicker(props: {
   onPoint?: (point: [number, number]) => void;
   markerPosition?: [number, number] | null;
   overlayGeometry?: PolygonGeometry | MultiPolygonGeometry | null;
+  neighborGeometries?: (PolygonGeometry | MultiPolygonGeometry)[];
   height?: number | string;
   center?: [number, number];
   zoom?: number;

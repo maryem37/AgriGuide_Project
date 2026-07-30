@@ -6,6 +6,7 @@ import { AlertBanner } from "@/components/AlertBanner";
 import { ReportMarkdown } from "@/components/ReportMarkdown";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
@@ -30,8 +31,13 @@ import {
   Loader2,
   FileText,
   Bug,
+  Leaf,
+  CheckCircle2,
+  CircleSlash,
+  Users,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { getCropVisual, scoreTone } from "@/lib/cropVisual";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   Dialog,
   DialogContent,
@@ -43,6 +49,7 @@ import { useAuth } from "@/lib/auth-context";
 import { centroid } from "@/lib/terrain";
 import {
   resolveParcel,
+  getNeighbors,
   analyzeParcel,
   AgricultureApiError,
   type AnalyzeResponse,
@@ -51,6 +58,7 @@ import {
   type AgroCalcEstimate,
   type NeighborCropContext,
   type CropRecommendationOut,
+  type ParcelResolution,
 } from "@/lib/agricultureApi";
 import { saveRealCropRecommendations, cultureLabel } from "@/lib/cropRecommendations";
 
@@ -128,6 +136,9 @@ function topNeighborCrops(neighbors: NeighborCropContext, limit = 3): string {
 
 type SourceMode = "terrain" | "carte";
 
+/** Doit rester en phase avec le défaut `radius_m` de `POST /agriculture/parcel/neighbors` côté backend. */
+const NEIGHBORS_RADIUS_M = 800;
+
 function Page() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -147,6 +158,13 @@ function Page() {
   const previewQuery = useQuery({
     queryKey: ["agriculture-parcel-preview", clickedPoint?.[0], clickedPoint?.[1]],
     queryFn: () => resolveParcel({ point: { lat: clickedPoint![0], lon: clickedPoint![1] } }),
+    enabled: sourceMode === "carte" && clickedPoint !== null,
+    retry: false,
+  });
+
+  const neighborsQuery = useQuery({
+    queryKey: ["agriculture-neighbors-preview", clickedPoint?.[0], clickedPoint?.[1]],
+    queryFn: () => getNeighbors({ point: { lat: clickedPoint![0], lon: clickedPoint![1] } }, NEIGHBORS_RADIUS_M),
     enabled: sourceMode === "carte" && clickedPoint !== null,
     retry: false,
   });
@@ -176,6 +194,11 @@ function Page() {
     sourceMode === "carte" && previewQuery.data?.geometry
       ? (previewQuery.data.geometry as unknown as { type: "Polygon"; coordinates: number[][][] } | { type: "MultiPolygon"; coordinates: number[][][][] })
       : null;
+
+  const neighborGeometries =
+    sourceMode === "carte" && neighborsQuery.data?.neighbors
+      ? (neighborsQuery.data.neighbors.map((n) => n.geometry) as unknown as ({ type: "Polygon"; coordinates: number[][][] } | { type: "MultiPolygon"; coordinates: number[][][][] })[])
+      : [];
 
   return (
     <AppShell>
@@ -245,37 +268,46 @@ function Page() {
               onPoint={setClickedPoint}
               markerPosition={clickedPoint}
               overlayGeometry={overlayGeometry}
+              neighborGeometries={neighborGeometries}
               height={420}
               hint="Cliquez sur une parcelle pour la résoudre (cadastre / RPG), puis lancez l'analyse."
             />
             {clickedPoint && (
-              <div className="rounded-2xl border border-border bg-secondary/40 p-4">
-                {previewQuery.isPending && <Skeleton className="h-5 w-2/3" />}
+              <div className="space-y-4">
+                {previewQuery.isPending && (
+                  <div className="rounded-2xl border border-border bg-secondary/40 p-4">
+                    <Skeleton className="h-5 w-2/3" />
+                  </div>
+                )}
                 {previewQuery.isError && (
-                  <p className="text-sm text-destructive">Impossible de résoudre la parcelle à ce point.</p>
+                  <div className="rounded-2xl border border-border bg-secondary/40 p-4">
+                    <p className="text-sm text-destructive">Impossible de résoudre la parcelle à ce point.</p>
+                  </div>
                 )}
                 {previewQuery.data && (
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <div className="text-sm">
-                      {previewQuery.data.resolved ? (
-                        <>
-                          <span className="font-medium">Parcelle résolue</span> ({previewQuery.data.source}) —{" "}
-                          {previewQuery.data.area_ha ? `${previewQuery.data.area_ha.toFixed(2)} ha` : "surface inconnue"}
-                          {previewQuery.data.crop_declared && ` · Culture déclarée : ${displayCrop(previewQuery.data.crop_declared)}`}
-                        </>
-                      ) : (
-                        <span className="text-muted-foreground">{previewQuery.data.warning ?? "Aucune parcelle cadastrale trouvée à cet endroit."}</span>
-                      )}
+                  <>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <ParcelInfoCard parcel={previewQuery.data} />
+                      {neighborsQuery.isPending ? (
+                        <div className="card-soft p-5 space-y-3">
+                          <Skeleton className="h-4 w-1/2" />
+                          <Skeleton className="h-16 w-full" />
+                        </div>
+                      ) : neighborsQuery.data ? (
+                        <NeighborsPreviewCard neighbors={neighborsQuery.data} radiusM={NEIGHBORS_RADIUS_M} />
+                      ) : null}
                     </div>
-                    <Button
-                      className="rounded-xl shrink-0"
-                      disabled={analyzeMutation.isPending}
-                      onClick={handleAnalyzePoint}
-                    >
-                      {analyzeMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sprout className="h-4 w-4 mr-2" />}
-                      Analyser cette parcelle
-                    </Button>
-                  </div>
+                    <div className="flex justify-end">
+                      <Button
+                        className="rounded-xl shrink-0"
+                        disabled={analyzeMutation.isPending}
+                        onClick={handleAnalyzePoint}
+                      >
+                        {analyzeMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sprout className="h-4 w-4 mr-2" />}
+                        Analyser cette parcelle
+                      </Button>
+                    </div>
+                  </>
                 )}
               </div>
             )}
@@ -357,8 +389,20 @@ function Page() {
 
           {analysis.report ? (
             <div className="mt-10 card-soft p-6 md:p-8">
-              <div className="flex items-center gap-2 text-xs font-semibold tracking-widest text-muted-foreground uppercase mb-2">
-                <FileText className="h-4 w-4" /> Rapport agronomique complet (IA)
+              <div className="flex items-center gap-3 mb-6">
+                <div className="h-11 w-11 rounded-2xl bg-primary/15 text-primary flex items-center justify-center shrink-0">
+                  <FileText className="h-5 w-5" />
+                </div>
+                <div>
+                  <div className="font-display text-xl font-semibold">
+                    Rapport
+                    {(analysis.report.parcel_id ?? analysis.parcel.parcel_id) &&
+                      ` — Réf. ${analysis.report.parcel_id ?? analysis.parcel.parcel_id}`}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Généré le {new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+                  </div>
+                </div>
               </div>
               <ReportMarkdown markdown={analysis.report.report_markdown} />
               {analysis.report.unverified_figures.length > 0 && (
@@ -404,16 +448,17 @@ function Page() {
 }
 
 function SoilCard({ soil }: { soil: SoilData }) {
-  const rows: { label: string; value: string }[] = [];
+  const rows: { label: string; value: ReactNode }[] = [];
   if (soil.ph !== null) rows.push({ label: "pH", value: `${soil.ph.toFixed(1)} — ${phQualifier(soil.ph)}` });
   if (soil.organic_carbon_g_kg !== null) rows.push({ label: "Matière organique", value: `${soil.organic_carbon_g_kg.toFixed(1)} g/kg` });
   if (soil.nitrogen_g_kg !== null) rows.push({ label: "Azote total", value: `${soil.nitrogen_g_kg.toFixed(2)} g/kg` });
-  if (soil.clay_pct !== null || soil.sand_pct !== null || soil.silt_pct !== null) {
-    rows.push({ label: "Texture", value: `Argile ${fmtPct(soil.clay_pct)} · Sable ${fmtPct(soil.sand_pct)} · Limon ${fmtPct(soil.silt_pct)}` });
+  if (soil.cec_cmolkg !== null) {
+    rows.push({ label: "Capacité d'échange cationique", value: `${soil.cec_cmolkg.toFixed(1)} cmol+/kg` });
   }
-  if (soil.cec_cmolkg !== null) rows.push({ label: "CEC", value: `${soil.cec_cmolkg.toFixed(1)} cmol+/kg` });
   if (soil.bulk_density_kg_dm3 !== null) rows.push({ label: "Densité apparente", value: `${soil.bulk_density_kg_dm3.toFixed(2)} kg/dm³` });
   if (soil.coarse_fragments_pct !== null) rows.push({ label: "Éléments grossiers", value: `${soil.coarse_fragments_pct.toFixed(0)}%` });
+
+  const hasTexture = soil.clay_pct !== null || soil.sand_pct !== null || soil.silt_pct !== null;
 
   return (
     <div className="card-soft p-6">
@@ -421,10 +466,29 @@ function SoilCard({ soil }: { soil: SoilData }) {
         <Layers className="h-4 w-4" />
         Analyse du sol
       </div>
-      {rows.length === 0 ? (
+      {rows.length === 0 && !hasTexture ? (
         <p className="mt-4 text-sm text-muted-foreground">{soil.warning ?? "Données de sol indisponibles pour cette parcelle."}</p>
       ) : (
         <div className="mt-4 space-y-2.5 text-sm">
+          {hasTexture && (
+            <div className="border-b border-border pb-2.5">
+              <span className="text-muted-foreground">Texture</span>
+              <div className="mt-1.5 space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Argile</span>
+                  <span className="font-medium">{fmtPct(soil.clay_pct)}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Sable</span>
+                  <span className="font-medium">{fmtPct(soil.sand_pct)}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Limon</span>
+                  <span className="font-medium">{fmtPct(soil.silt_pct)}</span>
+                </div>
+              </div>
+            </div>
+          )}
           {rows.map((r) => (
             <div key={r.label} className="flex items-center justify-between gap-3 border-b border-border pb-2 last:border-none">
               <span className="text-muted-foreground">{r.label}</span>
@@ -481,6 +545,101 @@ function NdviCard({ vegetation }: { vegetation: VegetationData }) {
             </p>
           )}
         </>
+      )}
+    </div>
+  );
+}
+
+function ParcelInfoCard({ parcel }: { parcel: ParcelResolution }) {
+  if (!parcel.resolved) {
+    return (
+      <div className="card-soft p-5">
+        <div className="flex items-center gap-2 text-xs font-semibold tracking-widest text-muted-foreground uppercase mb-3">
+          <MapPin className="h-4 w-4" /> Parcelle
+        </div>
+        <p className="text-sm text-muted-foreground">
+          {parcel.warning ?? "Aucune parcelle cadastrale trouvée à cet endroit."}
+        </p>
+      </div>
+    );
+  }
+
+  const ref = parcel.parcel_id ?? parcel.rpg_id_parcel;
+  const sourceLabel =
+    parcel.source === "cadastre" ? "Cadastre (IGN)" : parcel.source === "rpg" ? "RPG" : "Tracé manuel";
+
+  return (
+    <div className="card-soft p-5">
+      {ref && (
+        <div className="text-xs font-semibold tracking-widest text-muted-foreground uppercase mb-3">Réf. {ref}</div>
+      )}
+      <div className="space-y-2.5 text-sm">
+        <InfoRow icon={MapPin} label="Source" value={sourceLabel} />
+        <InfoRow
+          icon={Sprout}
+          label="Statut"
+          value={
+            parcel.is_agricultural === true ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 text-primary px-2.5 py-0.5 text-xs font-semibold">
+                <CheckCircle2 className="h-3.5 w-3.5" /> Terre agricole (RPG)
+              </span>
+            ) : parcel.is_agricultural === false ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-waste/15 text-waste-foreground px-2.5 py-0.5 text-xs font-semibold">
+                <CircleSlash className="h-3.5 w-3.5" /> Non déclarée RPG
+              </span>
+            ) : (
+              <span className="text-muted-foreground">Non vérifié</span>
+            )
+          }
+        />
+        <InfoRow icon={Leaf} label="Culture" value={displayCrop(parcel.crop_declared)} />
+        <InfoRow
+          icon={Ruler}
+          label="Surface"
+          value={parcel.area_ha !== null ? `${parcel.area_ha.toFixed(2)} ha` : "Inconnue"}
+        />
+      </div>
+      {parcel.agricultural_note && parcel.is_agricultural === false && (
+        <p className="mt-3 text-xs text-muted-foreground">{parcel.agricultural_note}</p>
+      )}
+    </div>
+  );
+}
+
+function InfoRow({ icon: Icon, label, value }: { icon: typeof Droplets; label: string; value: ReactNode }) {
+  return (
+    <div className="flex items-center justify-between gap-3 border-b border-border pb-2.5 last:border-none last:pb-0">
+      <span className="flex items-center gap-2 text-muted-foreground">
+        <Icon className="h-4 w-4 shrink-0" /> {label}
+      </span>
+      <span className="font-medium text-right">{value}</span>
+    </div>
+  );
+}
+
+function NeighborsPreviewCard({ neighbors, radiusM }: { neighbors: NeighborCropContext; radiusM: number }) {
+  const entries = Object.entries(neighbors.crop_distribution_pct).sort((a, b) => b[1] - a[1]);
+
+  return (
+    <div className="card-soft p-5">
+      <div className="flex items-center gap-2 text-xs font-semibold tracking-widest text-muted-foreground uppercase mb-4">
+        <Users className="h-4 w-4" />
+        Cultures voisines — {neighbors.neighbor_count} parcelle{neighbors.neighbor_count > 1 ? "s" : ""} ({radiusM} m)
+      </div>
+      {entries.length === 0 ? (
+        <p className="text-sm text-muted-foreground">{neighbors.note}</p>
+      ) : (
+        <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
+          {entries.map(([crop, pct]) => (
+            <div key={crop}>
+              <div className="flex items-center justify-between gap-2 text-sm mb-1">
+                <span className="truncate">{crop}</span>
+                <span className="font-semibold text-primary shrink-0">{pct.toFixed(1)}%</span>
+              </div>
+              <Progress value={pct} className="h-1.5" />
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );
@@ -563,19 +722,30 @@ function AgroCalcCard({ estimate, cropCode }: { estimate: AgroCalcEstimate; crop
 function CropCard({ crop, onDetails }: { crop: CropRecommendationOut; onDetails: () => void }) {
   const factors = topContributingFactors(crop.feature_importance);
   const nDose = crop.besoins_engrais?.n_dose_kg_ha;
+  const cropLabel = displayCrop(crop.culture);
+  const { icon: CropIcon, bg: iconBg, fg: iconFg } = getCropVisual(cropLabel);
+  const tone = scoreTone(crop.score_compatibilite);
   return (
     <div className="card-soft p-6 flex flex-col">
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="text-xs font-semibold text-harvest tracking-wide">#{crop.rang}</div>
-          <div className="font-display text-2xl font-semibold mt-1">{displayCrop(crop.culture)}</div>
-          {factors.length > 0 && (
-            <p className="text-sm text-muted-foreground mt-2">Facteurs favorables : {factors.join(", ")}</p>
-          )}
+        <div className="min-w-0 flex gap-3">
+          <div
+            className="h-11 w-11 rounded-2xl flex items-center justify-center shrink-0"
+            style={{ background: iconBg, color: iconFg }}
+          >
+            <CropIcon className="h-5 w-5" />
+          </div>
+          <div className="min-w-0">
+            <div className="text-xs font-semibold text-harvest tracking-wide">#{crop.rang}</div>
+            <div className="font-display text-2xl font-semibold mt-1">{cropLabel}</div>
+            {factors.length > 0 && (
+              <p className="text-sm text-muted-foreground mt-2">Facteurs favorables : {factors.join(", ")}</p>
+            )}
+          </div>
         </div>
         <div
           className="h-14 w-14 rounded-full flex items-center justify-center font-display text-xl font-semibold shrink-0"
-          style={{ background: "oklch(0.88 0.05 150)", color: "oklch(0.35 0.08 150)" }}
+          style={{ background: tone.bg, color: tone.fg }}
         >
           {Math.round(crop.score_compatibilite)}
         </div>
