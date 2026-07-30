@@ -12,7 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
-import { AuthProvider } from "@/lib/auth-context";
+import { AuthProvider, SKIP_AUTH } from "@/lib/auth-context";
 
 function NotFoundComponent() {
   return (
@@ -147,6 +147,11 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+        {SKIP_AUTH && (
+          <div className="fixed bottom-2 right-2 z-50 rounded-full bg-amber-500 px-3 py-1.5 text-xs font-semibold text-amber-950 shadow-lg">
+            Mode dev — auth désactivée (VITE_SKIP_AUTH)
+          </div>
+        )}
         <Outlet />
         <Toaster />
       </AuthProvider>
