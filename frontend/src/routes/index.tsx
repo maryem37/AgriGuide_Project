@@ -5,17 +5,17 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "AgriGuide — Bienvenue" },
+      { title: "AgriMent — Bienvenue" },
       {
         name: "description",
         content:
-          "AgriGuide, l'assistant qui aide chaque agriculteur à cultiver, gérer et vendre en toute simplicité.",
+          "AgriMent, l'assistant qui aide chaque agriculteur à cultiver, gérer et vendre en toute simplicité.",
       },
-      { property: "og:title", content: "AgriGuide — Bienvenue" },
+      { property: "og:title", content: "AgriMent — Bienvenue" },
       {
         property: "og:description",
         content:
-          "AgriGuide, l'assistant qui aide chaque agriculteur à cultiver, gérer et vendre en toute simplicité.",
+          "AgriMent, l'assistant qui aide chaque agriculteur à cultiver, gérer et vendre en toute simplicité.",
       },
     ],
   }),
@@ -41,7 +41,7 @@ function Welcome() {
           <div className="h-11 w-11 rounded-2xl bg-primary-foreground/15 flex items-center justify-center backdrop-blur">
             <Leaf className="h-6 w-6" />
           </div>
-          <div className="font-display text-xl font-semibold">AgriGuide</div>
+          <div className="font-display text-xl font-semibold">AgriMent</div>
         </div>
 
         <div className="mt-14 md:mt-20 max-w-3xl text-primary-foreground">
@@ -53,7 +53,7 @@ function Welcome() {
             <span className="italic">ensemble</span>.
           </h1>
           <p className="mt-5 text-lg md:text-xl text-primary-foreground/90 max-w-2xl">
-            AgriGuide vous accompagne, du choix de vos cultures à la vente de votre récolte. Simple,
+            AgriMent vous accompagne, du choix de vos cultures à la vente de votre récolte. Simple,
             clair, sans jargon — comme un conseiller de confiance à vos côtés.
           </p>
 
@@ -112,7 +112,7 @@ function Welcome() {
         </div>
 
         <p className="text-center mt-16 mb-10 text-sm text-muted-foreground">
-          Déjà plus de 12 000 agriculteurs français cultivent avec AgriGuide.
+          Déjà plus de 12 000 agriculteurs français cultivent avec AgriMent.
         </p>
       </div>
     </div>

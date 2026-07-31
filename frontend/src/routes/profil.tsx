@@ -19,7 +19,7 @@ import {
 export const Route = createFileRoute("/profil")({
   head: () => ({
     meta: [
-      { title: "Mon profil — AgriGuide" },
+      { title: "Mon profil — AgriMent" },
       {
         name: "description",
         content: "Modifiez votre matériel agricole et vos terrains déclarés.",

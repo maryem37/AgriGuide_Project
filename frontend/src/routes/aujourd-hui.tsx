@@ -7,9 +7,9 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGri
 export const Route = createFileRoute("/aujourd-hui")({
   head: () => ({
     meta: [
-      { title: "Aujourd'hui — AgriGuide" },
+      { title: "Aujourd'hui — AgriMent" },
       { name: "description", content: "Conseils du jour, carnet de bord et suivi du budget pour votre exploitation." },
-      { property: "og:title", content: "Aujourd'hui — AgriGuide" },
+      { property: "og:title", content: "Aujourd'hui — AgriMent" },
       { property: "og:description", content: "Vos actions du jour et le suivi de votre exploitation." },
     ],
   }),

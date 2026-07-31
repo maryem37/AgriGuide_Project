@@ -65,9 +65,9 @@ import { saveRealCropRecommendations, cultureLabel } from "@/lib/cropRecommendat
 export const Route = createFileRoute("/agriculture")({
   head: () => ({
     meta: [
-      { title: "Conseiller Agricole — AgriGuide" },
+      { title: "Conseiller Agricole — AgriMent" },
       { name: "description", content: "Analyse du sol, données satellite et top 5 des cultures recommandées pour votre parcelle." },
-      { property: "og:title", content: "Conseiller Agricole — AgriGuide" },
+      { property: "og:title", content: "Conseiller Agricole — AgriMent" },
       { property: "og:description", content: "Découvrez les cultures les plus adaptées à votre terrain." },
     ],
   }),

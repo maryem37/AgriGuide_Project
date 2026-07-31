@@ -8,9 +8,9 @@ import { saveTerrain } from "@/lib/terrain";
 export const Route = createFileRoute("/onboarding/terrain")({
   head: () => ({
     meta: [
-      { title: "Choisir mon terrain — AgriGuide" },
+      { title: "Choisir mon terrain — AgriMent" },
       { name: "description", content: "Tracez votre parcelle sur la carte pour recevoir des conseils personnalisés." },
-      { property: "og:title", content: "Choisir mon terrain — AgriGuide" },
+      { property: "og:title", content: "Choisir mon terrain — AgriMent" },
       { property: "og:description", content: "Sélectionnez votre parcelle en quelques touches." },
     ],
   }),
