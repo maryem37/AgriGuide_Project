@@ -19,7 +19,7 @@ _APP_DIR = Path(__file__).resolve().parent.parent  # backend/agent_agriculture/
 class Settings(BaseSettings):
     # --- LLM (Mistral) ---
     mistral_api_key: str = ""  # free tier key from console.mistral.ai
-    mistral_model: str = "mistral-small-latest"
+    mistral_model: str = "mistral-medium-latest"
     mistral_embed_model: str = "mistral-embed"
 
     # --- Fallback embeddings (used if no Mistral key / quota hit) ---

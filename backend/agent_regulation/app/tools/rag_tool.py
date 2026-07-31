@@ -24,7 +24,6 @@ def _format_chunks(chunks) -> str:
         source_url = meta.get("source_url")
         url_line = f"\nURL : {source_url}" if source_url else ""
         blocks.append(f"[R{i}] Certifié par : {certifying_body} — {reference}{url_line}\n{chunk.text}")
-    print("Chunks: ",blocks)
     return "\n\n".join(blocks)
 
 

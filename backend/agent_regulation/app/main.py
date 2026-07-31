@@ -3,6 +3,8 @@
 Lancement local : uvicorn app.main:app --reload
 """
 
+import app.boot_encoding  # noqa: F401 — UTF-8 stdout/stderr avant tout le reste
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
