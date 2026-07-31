@@ -1,18 +1,48 @@
 /**
- * Espace réservé pour la sortie de l'agent Agriculture (`crop_recommendations`).
+ * `backend/agent_agriculture` expose maintenant `POST /agriculture/analyze`
+ * (voir `frontend/src/lib/agricultureApi.ts` et `routes/agriculture.tsx`).
  *
- * `backend/agent_agriculture` n'expose pas encore d'endpoint HTTP (voir son
- * README), donc en attendant on envoie à l'agent Business les mêmes données
- * factices que celui-ci utilise déjà en interne
- * (`backend/agent_business/app/data/mock_crop_recommendations.py`), pour que
- * les scénarios affichés soient cohérents avec sa propre démo.
- *
- * À remplacer par un vrai appel à `POST /agriculture/analyze` une fois cet
- * agent branché — le reste du flux (business.tsx, businessApi.ts) n'aura pas
- * à changer, seul l'appelant de `crop_recommendations` change.
+ * `saveRealCropRecommendations` / `loadRealCropRecommendations` mettent en
+ * cache (localStorage) la dernière analyse réelle d'une parcelle, pour que
+ * `business.tsx` puisse la réutiliser directement plutôt que d'envoyer les
+ * données factices ci-dessous à l'agent Business — même principe que
+ * `lib/terrain.ts`. Tant qu'aucune analyse réelle n'a été faite (ou que le
+ * cache a expiré), `business.tsx` retombe sur `MOCK_CROP_RECOMMENDATIONS`
+ * pour rester utilisable de façon indépendante (cf. README agent_business
+ * §"Prochaines étapes").
  */
 
 import type { CropRecommendation } from "@/lib/businessApi";
+
+const REAL_RECOMMENDATIONS_KEY = "agriguide.agriculture.crop_recommendations";
+
+type StoredRealRecommendations = {
+  terrainId: string;
+  recommendations: CropRecommendation[];
+  savedAt: string;
+};
+
+export function saveRealCropRecommendations(terrainId: string, recommendations: CropRecommendation[]) {
+  try {
+    const payload: StoredRealRecommendations = { terrainId, recommendations, savedAt: new Date().toISOString() };
+    localStorage.setItem(REAL_RECOMMENDATIONS_KEY, JSON.stringify(payload));
+  } catch {
+    // ignore (mode privé, quota...)
+  }
+}
+
+/** Renvoie l'analyse réelle la plus récente pour ce terrain, ou `null` si aucune n'existe encore. */
+export function loadRealCropRecommendations(terrainId: string): CropRecommendation[] | null {
+  try {
+    const raw = localStorage.getItem(REAL_RECOMMENDATIONS_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as StoredRealRecommendations;
+    if (parsed.terrainId !== terrainId || !Array.isArray(parsed.recommendations)) return null;
+    return parsed.recommendations;
+  } catch {
+    return null;
+  }
+}
 
 export const MOCK_TERRAIN_ID = "11111111-1111-1111-1111-111111111111";
 
@@ -73,6 +103,11 @@ const CULTURE_LABELS: Record<string, string> = {
   tomate: "Tomate",
   pomme_de_terre: "Pomme de terre",
   ble: "Blé",
+  // Les 5 cultures notées par `backend/agent_agriculture/app/services/ml_service.py`
+  // (voir `_CROP_PROFILES`) — clés distinctes des données factices ci-dessus.
+  ble_tendre: "Blé tendre",
+  colza: "Colza",
+  orge: "Orge",
   mais: "Maïs",
   tournesol: "Tournesol",
 };

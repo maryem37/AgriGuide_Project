@@ -111,7 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setStatus("authenticated");
       return;
     }
-
+    
     const stored = loadStoredSession();
     if (!stored) {
       setStatus("anonymous");

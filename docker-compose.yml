@@ -40,6 +40,9 @@ services:
     build: ./backend/agent_agriculture
     env_file: .env
     depends_on: [db]
+    volumes:
+      - agri_chroma_store:/app/chroma_store
+      - agri_dl_checkpoints:/app/dl_checkpoints
 
   agent_business:
     build: ./backend/agent_business
@@ -69,3 +72,5 @@ services:
 
 volumes:
   db_data:
+  agri_chroma_store:
+  agri_dl_checkpoints:

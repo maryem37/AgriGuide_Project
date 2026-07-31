@@ -1,0 +1,29 @@
+.claude
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Environnements virtuels
+.venv/
+venv/
+env/
+
+# Variables sensibles
+.env
+
+# Vector store local (données embeddées)
+data/vectorstore/
+
+# Outils / IDE
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.vscode/
+.idea/

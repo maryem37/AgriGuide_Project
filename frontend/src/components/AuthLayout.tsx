@@ -20,7 +20,7 @@ export function AuthLayout({
           <div className="h-11 w-11 rounded-2xl bg-gradient-hero flex items-center justify-center shadow-sm">
             <Leaf className="h-6 w-6 text-primary-foreground" />
           </div>
-          <div className="font-display text-xl font-semibold">AgriGuide</div>
+          <div className="font-display text-xl font-semibold">AgriMent</div>
         </Link>
         <h1 className="font-display text-3xl md:text-4xl font-semibold">{title}</h1>
         {subtitle && <p className="mt-2 text-muted-foreground">{subtitle}</p>}
