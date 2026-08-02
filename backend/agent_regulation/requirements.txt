@@ -10,3 +10,4 @@ streamlit
 python-dotenv
 pydantic-settings
 pypdf
+psycopg2-binary==2.9.9
