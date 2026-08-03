@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Check, LineChart, ScrollText, Sprout } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AgriLogo } from "@/components/AgriLogo";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -10,23 +11,98 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "AgriMent accompagne les agriculteurs : parcelle, insectes auxiliaires, budget et aides — avec Mistral.",
+          "AgriMent est la plateforme qui relie conseil agronomique, scénarios financiers et réglementation pour les exploitations agricoles.",
       },
       { property: "og:title", content: "AgriMent — Bienvenue" },
       {
         property: "og:description",
         content:
-          "Du sol aux insectes du champ, un conseil agricole clair. En partenariat avec Mistral.",
+          "Analysez votre parcelle, simulez votre budget et comprenez vos aides — une seule plateforme, propulsée par Mistral.",
       },
     ],
   }),
   component: Welcome,
 });
 
+/** Parcours conseil — 3 étapes séquentielles (comme la référence visuelle). */
+const JOURNEY = [
+  {
+    to: "/regulation" as const,
+    step: 1,
+    title: "Conseiller réglementaire",
+    body: "Indiquez votre situation. Obtenez les règles applicables, les certifications, les aides et le cadre à respecter — sans jargon.",
+    image: "/img/journey/regulation.jpg",
+    icon: ScrollText,
+    accent: "#2F5230",
+    accentSoft: "rgba(47, 82, 48, 0.12)",
+    points: [
+      "Cadre légal par région",
+      "Certifications qualité",
+      "Aides & subventions",
+      "Obligations expliquées clairement",
+    ],
+  },
+  {
+    to: "/agriculture" as const,
+    step: 2,
+    title: "Conseiller agricole",
+    body: "Nous analysons votre parcelle, le sol, le climat et les signaux du vivant — dont les insectes auxiliaires — pour recommander les meilleures cultures.",
+    image: "/img/journey/agriculture.jpg",
+    icon: Sprout,
+    accent: "#C46A2B",
+    accentSoft: "rgba(196, 106, 43, 0.14)",
+    points: [
+      "Analyse du sol",
+      "Lecture parcelle & climat",
+      "Insectes auxiliaires",
+      "Top cultures recommandées",
+    ],
+  },
+  {
+    to: "/business" as const,
+    step: 3,
+    title: "Conseiller business",
+    body: "Équilibrez budget, étude de marché et risque pour obtenir des scénarios rentables et une vision claire de vos hectares.",
+    image: "/img/journey/business.jpg",
+    icon: LineChart,
+    accent: "#2B6CB0",
+    accentSoft: "rgba(43, 108, 176, 0.14)",
+    points: [
+      "3 scénarios optimisés",
+      "Score de matching",
+      "Allocation des hectares",
+      "Profit & risque estimés",
+    ],
+  },
+] as const;
+
+const REFERENCES = [
+  {
+    name: "FAOSTAT",
+    href: "https://www.fao.org/faostat/",
+    src: "/img/references/faostat.gif",
+  },
+  {
+    name: "FranceAgriMer",
+    href: "https://www.franceagrimer.fr/",
+    src: "/img/references/franceagrimer.jpg",
+  },
+  {
+    name: "Légifrance",
+    href: "https://www.legifrance.gouv.fr/",
+    src: "/img/references/legifrance.jpg",
+  },
+  {
+    name: "agriculture.gouv.fr",
+    href: "https://agriculture.gouv.fr/",
+    src: "/img/references/republique_france.png",
+  },
+] as const;
+
 function Welcome() {
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#E7F0E8] text-[#1C2B1C] flex flex-col">
-      {/* Hero — one composition: brand, line, sentence, CTAs, full-bleed field */}
+      {/* Hero */}
       <section className="relative min-h-[100svh] flex flex-col">
         <img
           src="/img/landing-hero-field.jpg?v=2"
@@ -43,7 +119,12 @@ function Welcome() {
         />
 
         <header className="relative z-10 flex items-center justify-between gap-4 px-5 pt-7 md:px-10 md:pt-9">
-          <AgriLogo size={42} withWordmark tagline={null} className="landing-rise [&_span]:!text-[#1C2B1C]" />
+          <AgriLogo
+            size={42}
+            withWordmark
+            tagline={null}
+            className="landing-rise [&_span]:!text-[#1C2B1C]"
+          />
           <Link
             to="/connexion"
             className="landing-rise landing-rise-delay-1 text-sm font-semibold text-[#1C2B1C]/80 underline-offset-4 hover:underline"
@@ -53,16 +134,18 @@ function Welcome() {
         </header>
 
         <div className="relative z-10 mt-auto px-5 pb-14 pt-24 md:px-10 md:pb-20">
-          <div className="max-w-3xl">
+          <div className="max-w-2xl">
             <p className="landing-rise font-display text-[clamp(3.5rem,11vw,7rem)] font-semibold leading-[0.9] tracking-tight text-white drop-shadow-sm">
               AgriMent
             </p>
-            <h1 className="landing-rise landing-rise-delay-1 mt-5 max-w-lg font-display text-xl md:text-2xl font-medium leading-snug text-white/95">
-              Cultiver avec le vivant — y compris les insectes du champ.
+            <h1 className="landing-rise landing-rise-delay-1 mt-5 font-display text-xl md:text-2xl font-medium leading-snug text-white/95">
+              La plateforme qui relie votre parcelle, votre budget et vos aides.
             </h1>
-            <p className="landing-rise landing-rise-delay-2 mt-3 max-w-md text-base text-white/80 leading-relaxed">
-              Un conseiller de terrain pour vos cultures, votre budget et vos aides. Construit avec
-              Mistral.
+            <p className="landing-rise landing-rise-delay-2 mt-4 max-w-xl text-base md:text-[1.05rem] text-white/80 leading-relaxed">
+              AgriMent aide les agriculteurs à décider sur le terrain : analyser une
+              parcelle (sol, climat, insectes auxiliaires), simuler des scénarios
+              financiers réalistes, et comprendre la réglementation et les aides —
+              trois conseillers IA, une seule plateforme, propulsée avec Mistral.
             </p>
             <div className="landing-rise landing-rise-delay-3 mt-8 flex flex-col sm:flex-row gap-3">
               <Button
@@ -87,44 +170,94 @@ function Welcome() {
         </div>
       </section>
 
-      {/* Single purpose: what you get — open layout, no card grid */}
-      <section className="px-5 py-16 md:px-10 md:py-24">
-        <div className="mx-auto max-w-5xl">
-          <h2 className="font-display text-3xl md:text-4xl font-semibold tracking-tight max-w-xl">
-            Trois regards sur votre exploitation
-          </h2>
-          <p className="mt-3 max-w-lg text-[#1C2B1C]/65">
-            Agriculture, business et réglementation — reliés, sans vous noyer sous les tableaux.
-          </p>
+      {/* Advisory journey — 3 sequential steps */}
+      <section className="px-5 py-16 md:px-10 md:py-24 bg-[#F3F6F2]">
+        <div className="mx-auto max-w-6xl">
+          <div className="text-center max-w-2xl mx-auto">
+            <h2 className="font-display text-3xl md:text-4xl font-semibold tracking-tight text-[#2F5230]">
+              Votre parcours conseil
+            </h2>
+            <p className="mt-3 text-[#1C2B1C]/65">
+              Trois modules qui s’enchaînent — chacun s’appuie sur le précédent.
+            </p>
+          </div>
 
-          <div className="mt-14 space-y-0 divide-y divide-[#1C2B1C]/12">
-            {[
-              {
-                title: "Le champ & ses insectes",
-                body: "Analysez votre parcelle, le sol, le climat — et les signaux du vivant. Les auxiliaires comptent autant que le rendement.",
-              },
-              {
-                title: "Le budget qui tient",
-                body: "Saisissez votre enveloppe, générez l’étude financière et comparez des scénarios de cultures réalistes.",
-              },
-              {
-                title: "Les règles, dites simplement",
-                body: "Aides, cadre PAC et obligations expliqués comme à un voisin — pas comme un formulaire.",
-              },
-            ].map((row, i) => (
-              <div
-                key={row.title}
-                className="grid gap-3 py-8 md:grid-cols-[8rem_1fr] md:gap-10 md:py-10"
-              >
-                <span className="font-display text-4xl font-semibold text-[#5A8F4A]/45 tabular-nums">
-                  0{i + 1}
-                </span>
-                <div>
-                  <h3 className="font-display text-2xl font-semibold">{row.title}</h3>
-                  <p className="mt-2 max-w-xl text-[#1C2B1C]/65 leading-relaxed">{row.body}</p>
-                </div>
-              </div>
-            ))}
+          <div className="mt-12 grid gap-6 md:grid-cols-3">
+            {JOURNEY.map((step) => {
+              const Icon = step.icon;
+              return (
+                <Link
+                  key={step.to}
+                  to={step.to}
+                  className="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-[0_8px_30px_-18px_rgba(28,43,28,0.35)] ring-1 ring-[#1C2B1C]/08 transition hover:-translate-y-1 hover:shadow-[0_18px_40px_-20px_rgba(28,43,28,0.4)]"
+                >
+                  <div className="relative aspect-[16/10] overflow-hidden">
+                    <img
+                      src={step.image}
+                      alt=""
+                      className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
+                      loading="lazy"
+                    />
+                    <div className="absolute left-3 top-3 flex items-center gap-2">
+                      <span
+                        className="flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold text-white shadow-sm"
+                        style={{ backgroundColor: step.accent }}
+                      >
+                        {step.step}
+                      </span>
+                      <span className="rounded-full bg-white/95 px-3 py-1 text-xs font-semibold text-[#1C2B1C] shadow-sm">
+                        Étape {step.step} sur 3
+                      </span>
+                    </div>
+                    <span className="absolute bottom-3 right-3 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm">
+                      <Icon className="h-5 w-5" style={{ color: step.accent }} />
+                    </span>
+                  </div>
+
+                  <div className="flex flex-1 flex-col p-5 md:p-6">
+                    <h3 className="font-display text-xl font-semibold tracking-tight text-[#1C2B1C]">
+                      {step.title}
+                    </h3>
+                    <p className="mt-2 text-sm leading-relaxed text-[#1C2B1C]/65">{step.body}</p>
+                    <ul className="mt-5 space-y-2.5">
+                      {step.points.map((point) => (
+                        <li key={point} className="flex items-start gap-2.5 text-sm text-[#1C2B1C]/80">
+                          <span
+                            className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
+                            style={{ backgroundColor: step.accentSoft, color: step.accent }}
+                          >
+                            <Check className="h-3 w-3" strokeWidth={3} />
+                          </span>
+                          {point}
+                        </li>
+                      ))}
+                    </ul>
+                    <span
+                      className={cn(
+                        "mt-6 inline-flex items-center gap-1.5 text-sm font-semibold",
+                        "opacity-80 transition group-hover:opacity-100 group-hover:gap-2.5",
+                      )}
+                      style={{ color: step.accent }}
+                    >
+                      Ouvrir <ArrowRight className="h-4 w-4" />
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+
+          <div className="mt-10 flex justify-center">
+            <Button
+              asChild
+              size="lg"
+              className="h-14 px-7 rounded-xl bg-[#2F5230] text-[#E7F0E8] hover:bg-[#264226] font-semibold"
+            >
+              <Link to="/regulation">
+                Commencer par l’étape 1 — Réglementation
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
@@ -174,7 +307,8 @@ function Welcome() {
             <div>
               <AgriLogo size={44} withWordmark tagline="Conseil de terrain" variant="onDark" />
               <p className="mt-4 max-w-xs text-sm text-[#E7F0E8]/55 leading-relaxed">
-                Assistant agricole pour cultiver, gérer et décider — du sol aux insectes du champ.
+                Plateforme de conseil agricole : cultures, budget et réglementation — du sol aux
+                insectes du champ.
               </p>
             </div>
             <div className="grid grid-cols-2 gap-10 sm:gap-16">
@@ -197,16 +331,53 @@ function Welcome() {
               </div>
               <div>
                 <div className="text-xs font-semibold tracking-[0.18em] uppercase text-[#E7F0E8]/40">
-                  Produit
+                  Conseillers
                 </div>
-                <ul className="mt-3 space-y-2 text-sm text-[#E7F0E8]/80">
-                  <li>Cultures & insectes</li>
-                  <li>Budget & scénarios</li>
-                  <li>Réglementation</li>
+                <ul className="mt-3 space-y-2 text-sm">
+                  {JOURNEY.map((f) => (
+                    <li key={f.to}>
+                      <Link to={f.to} className="text-[#E7F0E8]/80 hover:text-white">
+                        {f.title}
+                      </Link>
+                    </li>
+                  ))}
                 </ul>
               </div>
             </div>
           </div>
+
+          {/* Data / legal references */}
+          <div className="mt-12 border-t border-white/10 pt-8">
+            <div className="text-xs font-semibold tracking-[0.18em] uppercase text-[#E7F0E8]/40">
+              Sources & références
+            </div>
+            <p className="mt-2 max-w-2xl text-sm text-[#E7F0E8]/50">
+              AgriMent s’appuie sur des données et référentiels publics pour ses analyses de marché
+              et son conseil réglementaire.
+            </p>
+            <ul className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {REFERENCES.map((ref) => (
+                <li key={ref.name}>
+                  <a
+                    href={ref.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex h-24 flex-col items-center justify-center gap-1.5 rounded-xl bg-white px-3 py-3 transition hover:ring-2 hover:ring-[#D4F07A]/60"
+                    title={`Ouvrir ${ref.name}`}
+                  >
+                    <img
+                      src={ref.src}
+                      alt={ref.name}
+                      className="max-h-14 w-auto max-w-full object-contain"
+                      loading="lazy"
+                    />
+                    <span className="text-[11px] font-medium text-[#1C2B1C]/65">{ref.name}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
           <div className="mt-10 flex flex-col gap-2 border-t border-white/10 pt-6 text-xs text-[#E7F0E8]/40 sm:flex-row sm:items-center sm:justify-between">
             <span>© {new Date().getFullYear()} AgriMent. Tous droits réservés.</span>
             <span>Construit avec Mistral</span>
@@ -217,7 +388,6 @@ function Welcome() {
   );
 }
 
-/** Decorative ladybug silhouette for the insect band. */
 function LadybugTrail({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 120 120" className={className} fill="none" aria-hidden>
