@@ -28,10 +28,28 @@ export const EQUIPEMENT_OPTIONS: { value: EquipementType; label: string; icon: L
   { value: "tunnel_plastique", label: "Tunnels plastiques", icon: Warehouse },
 ];
 
-const EQUIPEMENT_LABELS: Record<EquipementType, string> = Object.fromEntries(
+const EQUIPEMENT_LABELS: Record<string, string> = Object.fromEntries(
   EQUIPEMENT_OPTIONS.map((o) => [o.value, o.label]),
-) as Record<EquipementType, string>;
+);
+
+/** Normalise un libellé libre vers une clé stockable (aligné backend auth). */
+export function slugifyEquipement(label: string): EquipementType | null {
+  const cleaned = label
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+  if (cleaned.length < 2 || cleaned.length > 50) return null;
+  return cleaned;
+}
 
 export function equipementLabel(type: EquipementType): string {
-  return EQUIPEMENT_LABELS[type] ?? type;
+  if (EQUIPEMENT_LABELS[type]) return EQUIPEMENT_LABELS[type];
+  return type
+    .split("_")
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
 }

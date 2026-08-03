@@ -49,6 +49,16 @@ class EtudeMarche(BaseModel):
     date_recolte_estimee: date
     profit_brut_par_ha: float
     source: str
+    # Enrichissement Agreste / RAG (optionnels, rétrocompatibles)
+    indice_pct_change: Optional[float] = None
+    latest_index: Optional[float] = None
+    produit_agreste: Optional[str] = None
+    justification_marche: Optional[str] = None
+    market_score: Optional[float] = None
+    tendance_label: Optional[str] = None
+    demande: Optional[str] = None  # forte|moderee|faible|inconnue
+    concurrence: Optional[str] = None
+
 
 
 class EtudeRisque(BaseModel):

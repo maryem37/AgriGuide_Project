@@ -47,6 +47,15 @@ export type EtudeMarche = {
   date_recolte_estimee: string;
   profit_brut_par_ha: number;
   source: string;
+  /** Variation d'indice Agreste IPPAP sur ~6 mois (%) */
+  indice_pct_change?: number | null;
+  latest_index?: number | null;
+  produit_agreste?: string | null;
+  justification_marche?: string | null;
+  market_score?: number | null;
+  tendance_label?: string | null;
+  demande?: string | null;
+  concurrence?: string | null;
 };
 
 /** Explique comment une métrique a été calculée : formule, valeurs intermédiaires, sources. */

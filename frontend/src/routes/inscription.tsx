@@ -2,7 +2,6 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState, type ReactNode } from "react";
 import { AuthLayout } from "@/components/AuthLayout";
 import { EquipementPicker } from "@/components/EquipementPicker";
-import { TerrainListEditor, type DraftTerrain } from "@/components/TerrainListEditor";
 import { AlertBanner } from "@/components/AlertBanner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +21,7 @@ export const Route = createFileRoute("/inscription")({
   component: Page,
 });
 
-type Step = "role" | "compte" | "materiel" | "terrains";
+type Step = "role" | "compte" | "materiel";
 
 function Page() {
   const navigate = useNavigate();
@@ -38,7 +37,6 @@ function Page() {
   const [telephone, setTelephone] = useState("");
 
   const [equipements, setEquipements] = useState<EquipementType[]>([]);
-  const [terrains, setTerrains] = useState<DraftTerrain[]>([]);
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -74,10 +72,8 @@ function Page() {
         telephone: telephone || undefined,
         role: finalRole,
         equipements: finalRole === "farmer" ? equipements : undefined,
-        terrains:
-          finalRole === "farmer"
-            ? terrains.map((t) => ({ nom: t.nom, points: t.points }))
-            : undefined,
+        // Les terrains se déclarent ensuite depuis la page Agriculture.
+        terrains: finalRole === "farmer" ? [] : undefined,
       });
       navigate({ to: user.role === "farmer" ? "/dashboard" : "/marketplace" });
     } catch (err) {
@@ -91,7 +87,7 @@ function Page() {
     <AuthLayout
       title="Créer un compte"
       subtitle="Rejoignez AgriMent en tant qu'agriculteur ou acheteur."
-      maxWidth={step === "terrains" ? "max-w-3xl" : "max-w-lg"}
+      maxWidth="max-w-lg"
     >
       {step === "role" && (
         <div className="grid gap-4 sm:grid-cols-2">
@@ -200,24 +196,10 @@ function Page() {
           <StepHeader onBack={() => setStep("compte")} label="Votre matériel agricole" />
           <p className="text-sm text-muted-foreground -mt-4">
             Cochez le matériel que vous possédez (les images seront ajoutées prochainement).
-            Modifiable à tout moment depuis votre profil.
+            Modifiable à tout moment depuis votre profil. Vos terrains se déclarent ensuite depuis
+            la page Agriculture.
           </p>
           <EquipementPicker selected={equipements} onChange={setEquipements} />
-          <Button onClick={() => setStep("terrains")} className="w-full h-12 rounded-xl">
-            Continuer <ArrowRight className="h-4 w-4 ml-2" />
-          </Button>
-        </div>
-      )}
-
-      {step === "terrains" && (
-        <div className="space-y-6">
-          <StepHeader onBack={() => setStep("materiel")} label="Vos terrains" />
-          <p className="text-sm text-muted-foreground -mt-4">
-            Tracez le contour de chaque parcelle et donnez-lui un nom (ex. "Parcelle Nord"). Vous
-            pourrez en ajouter, renommer ou supprimer plus tard depuis votre profil.
-          </p>
-
-          <TerrainListEditor terrains={terrains} onChange={setTerrains} />
 
           {error && (
             <AlertBanner tone="danger" title="Impossible de créer le compte">
@@ -227,17 +209,12 @@ function Page() {
 
           <Button
             onClick={() => void submit("farmer")}
-            disabled={terrains.length === 0 || submitting}
+            disabled={submitting}
             className="w-full h-12 rounded-xl"
           >
             {submitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             Créer mon compte
           </Button>
-          {terrains.length === 0 && (
-            <p className="text-xs text-center text-muted-foreground">
-              Ajoutez au moins un terrain pour continuer.
-            </p>
-          )}
         </div>
       )}
 

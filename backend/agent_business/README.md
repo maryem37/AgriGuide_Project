@@ -3,71 +3,76 @@
 **Rôle** : à partir des crop_recommendations + budget, proposer 3 scénarios
 chiffrés (quantité/ha, profit estimé, risque, solution au risque).
 
-## État actuel
-
-Implémenté avec données **simulées** (voir `app/data/`) pour permettre le
-développement indépendant des autres agents. À remplacer progressivement par
-de vraies sources (RNM/FranceAgriMer, BSV régional, barèmes de coûts).
+## Pipeline marché (réel)
 
 ```
-app/
-├── main.py                        # point d'entrée FastAPI
-├── models/schemas.py               # Pydantic, alignés sur schema.sql
-├── data/
-│   ├── mock_crop_recommendations.py   # simule la sortie de l'agent Agriculture
-│   ├── mock_market_prices.py          # simule RNM/FranceAgriMer
-│   ├── mock_risks.py                  # simule le croisement BSV régional
-│   └── mock_production_costs.py       # coûts de production par ha
-├── services/
-│   ├── market_study.py              # prix, rendement, date de récolte estimée
-│   ├── risk_study.py                # risque_score = probabilite * impact
-│   ├── scoring.py                   # formule explicite du matching_score
-│   ├── scenario_generator.py        # assemble tout -> N scénarios triés
-│   └── decision_service.py          # human-in-the-loop, calcule cout_final
-├── routers/business.py              # POST /business/scenarios, /business/decision
-└── tests/
-    ├── demo_pipeline.py              # démo bout-en-bout en local (sans serveur)
-    └── test_endpoints.py             # tests des endpoints FastAPI
+data/
+  FDS_IPPAP_*.csv          → tendances d'indice Agreste (pandas)
+  FranceAgriMer_*.pdf     → bulletins (RAG Chroma + Mistral)
+        ↓
+market_intelligence.provider.get_market_price()
+        ↓
+market_study.estimer_marche() → scénarios Business
 ```
 
-## Lancer la démo
+| Signal | Source |
+|--------|--------|
+| Tendance de prix | Agreste IPPAP (CSV) |
+| Demande / concurrence / justification | FranceAgriMer PDF via RAG + Mistral |
+| Prix €/kg + rendement | Barème de référence (IPPAP = indice, pas €) |
+| Risques / coûts de production | Encore simulés |
+
+RAG s'active **automatiquement** si l'index vectoriel local existe et
+`MISTRAL_API_KEY` est défini. Désactiver avec `MARKET_RAG_ENABLED=0`.
+
+## Setup local
 
 ```bash
 cd backend/agent_business
+python -m venv .venv
+# Windows:
+.venv\Scripts\activate
 pip install -r requirements.txt
-python -m app.tests.demo_pipeline      # pipeline complet en console
-python -m app.tests.test_endpoints     # tests des endpoints FastAPI
-uvicorn app.main:app --reload          # lancer le serveur (docs sur /docs)
+
+# 1) Indexer les PDF + CSV du dossier data/ (à faire une fois, ou après ajout de fichiers)
+python -m app.market_intelligence.rag.ingest
+
+# 2) Lancer l'API (utiliser le venv)
+uvicorn app.main:app --reload --port 8000
 ```
 
-## Prochaines étapes (remplacement progressif des mocks)
+Vérifier : `GET http://127.0.0.1:8000/health` → `market.rag_active: true` une fois
+l'index créé (`app/market_intelligence/rag/vector_store/`).
 
-1. Brancher `mock_market_prices.py` sur la vraie API RNM/FranceAgriMer
-2. Brancher `mock_risks.py` sur les Bulletins de Santé du Végétal régionaux réels
-3. Remplacer `mock_crop_recommendations.py` par un appel HTTP à l'agent Agriculture
-4. Persister les résultats dans PostgreSQL (`business_scenarios`,
-   `farmer_decisions`, `decision_allocations`) au lieu de les retourner en
-   mémoire uniquement
-5. Calibrer les poids `POIDS_PROFIT / POIDS_RISQUE / POIDS_BUDGET_FIT` dans
-   `scoring.py` avec l'équipe une fois de vraies données disponibles
+L'index utilise les embeddings **Mistral** (`mistral-embed`) — nécessite
+`MISTRAL_API_KEY` dans le `.env` racine.
 
-## Entrée
-- `crop_recommendations` (top 5 + besoins) du terrain
-- `budget_input` fourni par le farmer
+### Données
 
-## Calcul du matching score (formule explicite, PAS le LLM)
+Par défaut : `AgriGuide/data/` (CSVs + PDFs). Surcharge possible :
+
+```
+MARKET_DATA_DIR=C:\chemin\vers\data
+```
+
+## Endpoints
+
+- `GET /health` — statut + diagnostics marché
+- `POST /business/scenarios` — 3 scénarios
+- `POST /business/decision` — confirmation farmer
+
+## Matching score (déterministe)
+
 ```
 score = w1 * profit_normalise + w2 * (1 - risque_normalise) + w3 * fit_budget
 ```
-Les poids w1/w2/w3 sont à calibrer et documenter ici une fois fixés.
-Le LLM (Mistral) sert uniquement à rédiger la narration/explication du
-scénario, jamais à calculer le score lui-même.
 
-## Sources de données
-Prix de marché réels via RNM / FranceAgriMer (pas une pure estimation LLM).
+Le LLM enrichit l'étude de marché (justification, demande, concurrence), jamais
+le matching_score.
 
-## Sortie (écrit en base)
-- `business_scenarios` : 3 scénarios par culture retenue
-- Après confirmation du farmer (human-in-the-loop) :
-  `farmer_decisions` + `decision_allocations`
-  (inclut `date_maturite_prevue`, utilisée plus tard par l'agent Monitoring)
+## Prochaines étapes
+
+1. Flux RNM live pour les prix €/kg
+2. BSV réel pour les risques
+3. Planning PDF après confirmation de scénario
+4. Persistance PostgreSQL des décisions
