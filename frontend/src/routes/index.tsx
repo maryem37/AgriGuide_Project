@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Leaf, Sprout, ShieldCheck, LineChart, ArrowRight, Users, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AgriLogo } from "@/components/AgriLogo";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -9,13 +10,13 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "AgriMent, l'assistant qui aide chaque agriculteur à cultiver, gérer et vendre en toute simplicité.",
+          "AgriMent accompagne les agriculteurs : parcelle, insectes auxiliaires, budget et aides — avec Mistral.",
       },
       { property: "og:title", content: "AgriMent — Bienvenue" },
       {
         property: "og:description",
         content:
-          "AgriMent, l'assistant qui aide chaque agriculteur à cultiver, gérer et vendre en toute simplicité.",
+          "Du sol aux insectes du champ, un conseil agricole clair. En partenariat avec Mistral.",
       },
     ],
   }),
@@ -24,97 +25,214 @@ export const Route = createFileRoute("/")({
 
 function Welcome() {
   return (
-    <div className="min-h-screen bg-background overflow-hidden">
-      {/* subtle top pattern */}
-      <div className="absolute inset-x-0 top-0 h-[520px] bg-gradient-hero opacity-95" aria-hidden />
-      <div
-        className="absolute inset-x-0 top-0 h-[520px] opacity-20"
-        aria-hidden
-        style={{
-          backgroundImage:
-            "radial-gradient(circle at 20% 30%, oklch(0.99 0 0 / .4), transparent 45%), radial-gradient(circle at 80% 70%, oklch(0.99 0 0 / .3), transparent 40%)",
-        }}
-      />
+    <div className="min-h-screen overflow-x-hidden bg-[#E7F0E8] text-[#1C2B1C] flex flex-col">
+      {/* Hero — one composition: brand, line, sentence, CTAs, full-bleed field */}
+      <section className="relative min-h-[100svh] flex flex-col">
+        <img
+          src="/img/landing-hero-field.jpg?v=2"
+          alt="Coccinelle sur une feuille au bord d’un champ"
+          className="absolute inset-0 h-full w-full object-cover object-[center_40%]"
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(231,240,232,0.55) 0%, rgba(231,240,232,0.15) 28%, rgba(28,43,28,0.15) 55%, rgba(28,43,28,0.72) 100%)",
+          }}
+          aria-hidden
+        />
 
-      <div className="relative mx-auto max-w-6xl px-5 pt-8 md:pt-12">
-        <div className="flex items-center gap-3 text-primary-foreground">
-          <div className="h-11 w-11 rounded-2xl bg-primary-foreground/15 flex items-center justify-center backdrop-blur">
-            <Leaf className="h-6 w-6" />
+        <header className="relative z-10 flex items-center justify-between gap-4 px-5 pt-7 md:px-10 md:pt-9">
+          <AgriLogo size={42} withWordmark tagline={null} className="landing-rise [&_span]:!text-[#1C2B1C]" />
+          <Link
+            to="/connexion"
+            className="landing-rise landing-rise-delay-1 text-sm font-semibold text-[#1C2B1C]/80 underline-offset-4 hover:underline"
+          >
+            Connexion
+          </Link>
+        </header>
+
+        <div className="relative z-10 mt-auto px-5 pb-14 pt-24 md:px-10 md:pb-20">
+          <div className="max-w-3xl">
+            <p className="landing-rise font-display text-[clamp(3.5rem,11vw,7rem)] font-semibold leading-[0.9] tracking-tight text-white drop-shadow-sm">
+              AgriMent
+            </p>
+            <h1 className="landing-rise landing-rise-delay-1 mt-5 max-w-lg font-display text-xl md:text-2xl font-medium leading-snug text-white/95">
+              Cultiver avec le vivant — y compris les insectes du champ.
+            </h1>
+            <p className="landing-rise landing-rise-delay-2 mt-3 max-w-md text-base text-white/80 leading-relaxed">
+              Un conseiller de terrain pour vos cultures, votre budget et vos aides. Construit avec
+              Mistral.
+            </p>
+            <div className="landing-rise landing-rise-delay-3 mt-8 flex flex-col sm:flex-row gap-3">
+              <Button
+                asChild
+                size="lg"
+                className="h-14 px-7 text-base rounded-xl bg-white text-[#1C2B1C] hover:bg-white/90 font-semibold"
+              >
+                <Link to="/inscription">
+                  Créer un compte <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="h-14 px-7 text-base rounded-xl border-white/50 bg-transparent text-white hover:bg-white/10 hover:text-white"
+              >
+                <Link to="/connexion">Se connecter</Link>
+              </Button>
+            </div>
           </div>
-          <div className="font-display text-xl font-semibold">AgriMent</div>
         </div>
+      </section>
 
-        <div className="mt-14 md:mt-20 max-w-3xl text-primary-foreground">
-          <div className="inline-flex items-center gap-2 rounded-full bg-primary-foreground/15 backdrop-blur px-3 py-1.5 text-xs font-semibold">
-            <Sparkles className="h-3.5 w-3.5" /> Propulsé par l'intelligence artificielle
-          </div>
-          <h1 className="mt-5 font-display text-5xl md:text-6xl font-semibold leading-[1.05]">
-            Bonjour, cultivons&nbsp;
-            <span className="italic">ensemble</span>.
-          </h1>
-          <p className="mt-5 text-lg md:text-xl text-primary-foreground/90 max-w-2xl">
-            AgriMent vous accompagne, du choix de vos cultures à la vente de votre récolte. Simple,
-            clair, sans jargon — comme un conseiller de confiance à vos côtés.
+      {/* Single purpose: what you get — open layout, no card grid */}
+      <section className="px-5 py-16 md:px-10 md:py-24">
+        <div className="mx-auto max-w-5xl">
+          <h2 className="font-display text-3xl md:text-4xl font-semibold tracking-tight max-w-xl">
+            Trois regards sur votre exploitation
+          </h2>
+          <p className="mt-3 max-w-lg text-[#1C2B1C]/65">
+            Agriculture, business et réglementation — reliés, sans vous noyer sous les tableaux.
           </p>
 
-          <div className="mt-8 flex flex-col sm:flex-row gap-3">
-            <Button
-              asChild
-              size="lg"
-              className="h-14 px-8 text-base rounded-2xl bg-primary-foreground text-primary hover:bg-primary-foreground/90"
-            >
-              <Link to="/inscription">
-                Créer un compte <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              className="h-14 px-8 text-base rounded-2xl bg-transparent border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10"
-            >
-              <Link to="/connexion">Se connecter</Link>
-            </Button>
+          <div className="mt-14 space-y-0 divide-y divide-[#1C2B1C]/12">
+            {[
+              {
+                title: "Le champ & ses insectes",
+                body: "Analysez votre parcelle, le sol, le climat — et les signaux du vivant. Les auxiliaires comptent autant que le rendement.",
+              },
+              {
+                title: "Le budget qui tient",
+                body: "Saisissez votre enveloppe, générez l’étude financière et comparez des scénarios de cultures réalistes.",
+              },
+              {
+                title: "Les règles, dites simplement",
+                body: "Aides, cadre PAC et obligations expliqués comme à un voisin — pas comme un formulaire.",
+              },
+            ].map((row, i) => (
+              <div
+                key={row.title}
+                className="grid gap-3 py-8 md:grid-cols-[8rem_1fr] md:gap-10 md:py-10"
+              >
+                <span className="font-display text-4xl font-semibold text-[#5A8F4A]/45 tabular-nums">
+                  0{i + 1}
+                </span>
+                <div>
+                  <h3 className="font-display text-2xl font-semibold">{row.title}</h3>
+                  <p className="mt-2 max-w-xl text-[#1C2B1C]/65 leading-relaxed">{row.body}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
+      </section>
 
-        <div className="relative mt-16 md:mt-24 grid gap-4 md:grid-cols-4">
-          {[
-            {
-              icon: Sprout,
-              title: "Choisir ses cultures",
-              text: "Analyse du sol, climat et rendement historique.",
-            },
-            {
-              icon: ShieldCheck,
-              title: "Comprendre les règles",
-              text: "Aides, PAC et certifications expliquées simplement.",
-            },
-            {
-              icon: LineChart,
-              title: "Gérer au jour le jour",
-              text: "Météo, alertes, budget et carnet de bord.",
-            },
-            {
-              icon: Users,
-              title: "Vendre et échanger",
-              text: "Marketplace pour récoltes et déchets valorisables.",
-            },
-          ].map(({ icon: Icon, title, text }) => (
-            <div key={title} className="card-soft p-5">
-              <div className="h-11 w-11 rounded-xl bg-secondary flex items-center justify-center text-primary">
-                <Icon className="h-6 w-6" />
-              </div>
-              <div className="mt-3 font-semibold">{title}</div>
-              <p className="mt-1 text-sm text-muted-foreground leading-snug">{text}</p>
-            </div>
-          ))}
+      {/* Insect motif band */}
+      <section className="relative overflow-hidden bg-[#2F5230] text-[#E7F0E8] px-5 py-16 md:px-10 md:py-20">
+        <LadybugTrail className="pointer-events-none absolute -right-6 top-8 h-40 w-40 opacity-20 md:right-16 md:top-12 md:h-56 md:w-56 landing-float" />
+        <div className="relative mx-auto max-w-5xl md:pr-48">
+          <h2 className="font-display text-3xl md:text-4xl font-semibold tracking-tight">
+            Pourquoi une coccinelle sur le logo&nbsp;?
+          </h2>
+          <p className="mt-4 max-w-xl text-[#E7F0E8]/75 leading-relaxed">
+            Parce que l’agriculture durable s’écrit aussi avec ses alliés. AgriMent place les
+            insectes auxiliaires au centre du récit produit — visibles pour vous, et pour nos
+            partenaires.
+          </p>
         </div>
+      </section>
 
-        <p className="text-center mt-16 mb-10 text-sm text-muted-foreground">
-          Déjà plus de 12 000 agriculteurs français cultivent avec AgriMent.
-        </p>
-      </div>
+      {/* Closing CTA */}
+      <section className="px-5 py-16 md:px-10 md:py-20">
+        <div className="mx-auto max-w-5xl flex flex-col md:flex-row md:items-end md:justify-between gap-8">
+          <div>
+            <h2 className="font-display text-3xl font-semibold tracking-tight">
+              Prêt à regarder votre parcelle autrement&nbsp;?
+            </h2>
+            <p className="mt-3 max-w-sm text-[#1C2B1C]/65">
+              Créez votre compte et lancez votre première analyse de terrain.
+            </p>
+          </div>
+          <Button
+            asChild
+            size="lg"
+            className="h-14 px-8 rounded-xl bg-[#2F5230] text-[#E7F0E8] hover:bg-[#264226] font-semibold"
+          >
+            <Link to="/inscription">
+              Rejoindre AgriMent <ArrowRight className="ml-2 h-5 w-5" />
+            </Link>
+          </Button>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="mt-auto border-t border-[#1C2B1C]/12 bg-[#1C2B1C] text-[#E7F0E8]">
+        <div className="mx-auto max-w-5xl px-5 py-12 md:px-10">
+          <div className="flex flex-col gap-10 md:flex-row md:justify-between">
+            <div>
+              <AgriLogo size={44} withWordmark tagline="Conseil de terrain" variant="onDark" />
+              <p className="mt-4 max-w-xs text-sm text-[#E7F0E8]/55 leading-relaxed">
+                Assistant agricole pour cultiver, gérer et décider — du sol aux insectes du champ.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-10 sm:gap-16">
+              <div>
+                <div className="text-xs font-semibold tracking-[0.18em] uppercase text-[#E7F0E8]/40">
+                  Compte
+                </div>
+                <ul className="mt-3 space-y-2 text-sm">
+                  <li>
+                    <Link to="/inscription" className="text-[#E7F0E8]/80 hover:text-white">
+                      Créer un compte
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/connexion" className="text-[#E7F0E8]/80 hover:text-white">
+                      Se connecter
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <div className="text-xs font-semibold tracking-[0.18em] uppercase text-[#E7F0E8]/40">
+                  Produit
+                </div>
+                <ul className="mt-3 space-y-2 text-sm text-[#E7F0E8]/80">
+                  <li>Cultures & insectes</li>
+                  <li>Budget & scénarios</li>
+                  <li>Réglementation</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div className="mt-10 flex flex-col gap-2 border-t border-white/10 pt-6 text-xs text-[#E7F0E8]/40 sm:flex-row sm:items-center sm:justify-between">
+            <span>© {new Date().getFullYear()} AgriMent. Tous droits réservés.</span>
+            <span>Construit avec Mistral</span>
+          </div>
+        </div>
+      </footer>
     </div>
+  );
+}
+
+/** Decorative ladybug silhouette for the insect band. */
+function LadybugTrail({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 120 120" className={className} fill="none" aria-hidden>
+      <ellipse cx="58" cy="68" rx="34" ry="30" fill="currentColor" />
+      <path d="M24 68h68" stroke="#2F5230" strokeWidth="3" strokeLinecap="round" opacity="0.35" />
+      <circle cx="42" cy="58" r="5" fill="#2F5230" opacity="0.4" />
+      <circle cx="68" cy="56" r="4.5" fill="#2F5230" opacity="0.4" />
+      <circle cx="55" cy="78" r="4" fill="#2F5230" opacity="0.4" />
+      <circle cx="88" cy="66" r="12" fill="currentColor" />
+      <path
+        d="M94 56c4-8 10-12 16-13M96 62c6-5 12-6 18-3"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }
