@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { AppShell } from "@/components/AppShell";
 import { AlertBanner } from "@/components/AlertBanner";
-import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -24,11 +24,12 @@ import {
   Info,
   Quote,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   fetchBusinessScenarios,
   confirmFarmerDecision,
   BusinessApiError,
+  type BusinessAdvisorResponse,
   type BusinessScenario,
   type DetailCalculMetrique,
   type FarmerDecisionResponse,
@@ -78,18 +79,18 @@ const riskColor: Record<RiskLevel, string> = {
   Élevé: "bg-destructive/10 text-destructive border-destructive/30",
 };
 
-function useDebouncedValue<T>(value: T, delayMs: number): T {
-  const [debounced, setDebounced] = useState(value);
-  useEffect(() => {
-    const timer = setTimeout(() => setDebounced(value), delayMs);
-    return () => clearTimeout(timer);
-  }, [value, delayMs]);
-  return debounced;
+function parseBudgetInput(raw: string): number | null {
+  const cleaned = raw.replace(/\s/g, "").replace(",", ".");
+  if (!cleaned) return null;
+  const value = Number(cleaned);
+  if (!Number.isFinite(value) || value <= 0) return null;
+  return Math.round(value);
 }
 
 function Page() {
-  const [budget, setBudget] = useState(25000);
-  const debouncedBudget = useDebouncedValue(budget, 350);
+  const [budgetText, setBudgetText] = useState("25000");
+  const [budgetError, setBudgetError] = useState<string | null>(null);
+  const [report, setReport] = useState<BusinessAdvisorResponse | null>(null);
 
   const [selected, setSelected] = useState<BusinessScenario | null>(null);
   const [decision, setDecision] = useState<FarmerDecisionResponse | null>(null);
@@ -117,31 +118,44 @@ function Page() {
     [terrainId],
   );
 
-  const scenariosQuery = useQuery({
-    queryKey: ["business-scenarios", debouncedBudget, superficieDisponibleHa, terrainId],
-    queryFn: () =>
-      fetchBusinessScenarios({
-        terrain_id: terrainId,
-        superficie_disponible_ha: superficieDisponibleHa,
-        budget_input: debouncedBudget,
-        date_plantation_prevue: datePlantationPrevue(),
-        crop_recommendations: cropRecommendations,
-        nb_scenarios: 3,
-      }),
-    placeholderData: keepPreviousData,
-    retry: false,
-  });
-
   const decisionMutation = useMutation({
     mutationFn: confirmFarmerDecision,
     onSuccess: (data, variables) => {
       setDecision(data);
-      const chosen = scenariosQuery.data?.scenarios.find(
+      const chosen = report?.scenarios.find(
         (s) => s.culture === variables.allocations[0]?.culture,
       );
       if (chosen) setSelected(chosen);
     },
   });
+
+  const scenariosMutation = useMutation({
+    mutationFn: (budget: number) =>
+      fetchBusinessScenarios({
+        terrain_id: terrainId,
+        superficie_disponible_ha: superficieDisponibleHa,
+        budget_input: budget,
+        date_plantation_prevue: datePlantationPrevue(),
+        crop_recommendations: cropRecommendations,
+        nb_scenarios: 3,
+      }),
+    onSuccess: (data) => {
+      setReport(data);
+      setSelected(null);
+      setDecision(null);
+      decisionMutation.reset();
+    },
+  });
+
+  function generateReport() {
+    const budget = parseBudgetInput(budgetText);
+    if (budget == null) {
+      setBudgetError("Indiquez un budget valide en euros (ex. : 25000).");
+      return;
+    }
+    setBudgetError(null);
+    scenariosMutation.mutate(budget);
+  }
 
   function chooseScenario(scenario: BusinessScenario) {
     decisionMutation.mutate({
@@ -241,24 +255,50 @@ function Page() {
 
       <div className="grid gap-5 md:grid-cols-5">
         <div className="card-soft p-6 md:p-8 md:col-span-3">
-          <div className="flex items-baseline justify-between">
-            <div className="text-sm text-muted-foreground">Votre budget de départ</div>
-            <div className="font-display text-3xl font-semibold text-primary">
-              {budget.toLocaleString("fr-FR")} €
+          <div className="text-sm text-muted-foreground">Votre budget de départ</div>
+          <div className="mt-4 flex flex-col sm:flex-row gap-3 sm:items-start">
+            <div className="relative flex-1">
+              <Input
+                type="text"
+                inputMode="decimal"
+                value={budgetText}
+                onChange={(e) => {
+                  setBudgetText(e.target.value);
+                  setBudgetError(null);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    generateReport();
+                  }
+                }}
+                placeholder="Ex. : 25000"
+                aria-label="Budget en euros"
+                className="h-12 rounded-xl pr-10 text-base font-display font-semibold"
+              />
+              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                €
+              </span>
+              {budgetError && <p className="mt-1.5 text-xs text-destructive">{budgetError}</p>}
             </div>
+            <Button
+              type="button"
+              className="h-12 rounded-xl shrink-0"
+              disabled={scenariosMutation.isPending}
+              onClick={generateReport}
+            >
+              {scenariosMutation.isPending ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <LineChart className="h-4 w-4 mr-2" />
+              )}
+              Générer le rapport et les scénarios
+            </Button>
           </div>
-          <Slider
-            value={[budget]}
-            onValueChange={(v) => setBudget(v[0])}
-            min={5000}
-            max={80000}
-            step={1000}
-            className="mt-6"
-          />
-          <div className="flex justify-between text-xs text-muted-foreground mt-2">
-            <span>5 000 €</span>
-            <span>80 000 €</span>
-          </div>
+          <p className="mt-3 text-xs text-muted-foreground">
+            Saisissez votre budget, puis lancez l’étude financière et les trois scénarios de
+            cultures.
+          </p>
         </div>
 
         <div className="card-soft p-6 md:col-span-2 bg-gradient-sky text-sky-foreground">
@@ -298,12 +338,14 @@ function Page() {
         </div>
       </div>
 
-      <h2 className="font-display text-2xl font-semibold mt-10 mb-4">Trois scénarios pour vous</h2>
+      <h2 className="font-display text-2xl font-semibold mt-10 mb-4">
+        Rapport financier et scénarios
+      </h2>
 
-      {scenariosQuery.isError && (
+      {scenariosMutation.isError && (
         <AlertBanner tone="danger" title="Agent Business injoignable">
-          {scenariosQuery.error instanceof BusinessApiError
-            ? scenariosQuery.error.message
+          {scenariosMutation.error instanceof BusinessApiError
+            ? scenariosMutation.error.message
             : "Une erreur inattendue est survenue."}
         </AlertBanner>
       )}
@@ -318,7 +360,14 @@ function Page() {
         </div>
       )}
 
-      {scenariosQuery.isPending && (
+      {!report && !scenariosMutation.isPending && !scenariosMutation.isError && (
+        <p className="text-sm text-muted-foreground">
+          Aucun rapport pour l’instant. Indiquez votre budget puis cliquez sur « Générer le rapport
+          et les scénarios ».
+        </p>
+      )}
+
+      {scenariosMutation.isPending && (
         <div className="grid gap-5 md:grid-cols-3">
           {[0, 1, 2].map((i) => (
             <div key={i} className="card-soft p-6 space-y-4">
@@ -332,11 +381,37 @@ function Page() {
         </div>
       )}
 
-      {scenariosQuery.data && (
-        <div
-          className={`grid gap-5 md:grid-cols-3 transition-opacity ${scenariosQuery.isFetching ? "opacity-60" : "opacity-100"}`}
-        >
-          {scenariosQuery.data.scenarios.map((s, i) => {
+      {report && !scenariosMutation.isPending && (
+        <>
+          <div className="card-soft p-5 mb-5">
+            <div className="text-sm font-medium">Synthèse du rapport financier</div>
+            <div className="mt-3 grid gap-3 sm:grid-cols-3 text-sm">
+              <div className="rounded-xl bg-secondary/60 p-3">
+                <div className="text-xs text-muted-foreground">Budget analysé</div>
+                <div className="font-display text-xl font-semibold">
+                  {report.budget_input.toLocaleString("fr-FR")} €
+                </div>
+              </div>
+              <div className="rounded-xl bg-secondary/60 p-3">
+                <div className="text-xs text-muted-foreground">Meilleur profit estimé</div>
+                <div className="font-display text-xl font-semibold text-primary">
+                  {Math.max(...report.scenarios.map((s) => s.profit_estime)).toLocaleString(
+                    "fr-FR",
+                  )}{" "}
+                  €
+                </div>
+              </div>
+              <div className="rounded-xl bg-secondary/60 p-3">
+                <div className="text-xs text-muted-foreground">Culture recommandée</div>
+                <div className="font-display text-xl font-semibold">
+                  {cultureLabel(report.scenarios[0]?.culture ?? "—")}
+                </div>
+              </div>
+            </div>
+          </div>
+
+        <div className="grid gap-5 md:grid-cols-3">
+          {report.scenarios.map((s, i) => {
             const risk = riskLevel(s.risque_score);
             const isBestScore = i === 0;
             const isChoosingThis =
@@ -406,6 +481,7 @@ function Page() {
             );
           })}
         </div>
+        </>
       )}
 
       <Dialog open={!!detailScenario} onOpenChange={(open) => !open && setDetailScenario(null)}>

@@ -6,7 +6,6 @@ import {
   LineChart,
   CalendarDays,
   Store,
-  Leaf,
   LogOut,
   User,
   Loader2,
@@ -15,6 +14,7 @@ import { useEffect, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth, roleLabel } from "@/lib/auth-context";
 import type { Role } from "@/lib/authApi";
+import { AgriLogo } from "@/components/AgriLogo";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -74,14 +74,8 @@ export function AppShell({
     <div className="min-h-screen bg-background pb-24 md:pb-0 md:pl-72">
       {/* Sidebar (desktop) */}
       <aside className="hidden md:flex fixed left-0 top-0 h-screen w-72 flex-col border-r border-border bg-card px-6 py-8 gap-2">
-        <Link to="/dashboard" className="flex items-center gap-3 mb-8">
-          <div className="h-11 w-11 rounded-2xl bg-gradient-hero flex items-center justify-center shadow-sm">
-            <Leaf className="h-6 w-6 text-primary-foreground" />
-          </div>
-          <div>
-            <div className="font-display text-xl font-semibold leading-none">AgriMent</div>
-            <div className="text-xs text-muted-foreground mt-1">Votre allié au quotidien</div>
-          </div>
+        <Link to="/dashboard" className="mb-8 inline-flex">
+          <AgriLogo withWordmark size={44} tagline="Votre allié au quotidien" />
         </Link>
         <nav className="flex flex-col gap-1">
           {visibleNav.map(({ to, label, icon: Icon }) => {
