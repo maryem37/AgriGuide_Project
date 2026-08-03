@@ -7,9 +7,9 @@ Modèles Pydantic du service Auth.
 
 from __future__ import annotations
 from enum import Enum
-from typing import Optional
+from typing import Annotated, Optional
 
-from pydantic import BaseModel, EmailStr, Field, model_validator
+from pydantic import AfterValidator, BaseModel, EmailStr, Field, model_validator
 
 
 class RoleEnum(str, Enum):
@@ -17,15 +17,30 @@ class RoleEnum(str, Enum):
     acheteur = "acheteur"
 
 
-class EquipementType(str, Enum):
-    tracteur = "tracteur"
-    cultivateur = "cultivateur"
-    fraise_rotative = "fraise_rotative"
-    planteuse = "planteuse"
-    moissonneuse_batteuse = "moissonneuse_batteuse"
-    remorque_agricole = "remorque_agricole"
-    pulverisateur = "pulverisateur"
-    tunnel_plastique = "tunnel_plastique"
+# Presets proposés à l'inscription ; les libellés « Autres » sont aussi
+# acceptés (clé snake_case, max 50 car. = VARCHAR farmer_equipements).
+KNOWN_EQUIPEMENTS = frozenset({
+    "tracteur",
+    "cultivateur",
+    "fraise_rotative",
+    "planteuse",
+    "moissonneuse_batteuse",
+    "remorque_agricole",
+    "pulverisateur",
+    "tunnel_plastique",
+})
+
+
+def _normalize_equipement(value: str) -> str:
+    cleaned = value.strip().lower().replace(" ", "_")
+    if len(cleaned) < 2 or len(cleaned) > 50:
+        raise ValueError("type_equipement must be 2–50 characters")
+    if not all(c.isalnum() or c == "_" for c in cleaned):
+        raise ValueError("type_equipement must be alphanumeric / underscore")
+    return cleaned
+
+
+EquipementType = Annotated[str, AfterValidator(_normalize_equipement)]
 
 
 # ---------------------------------------------------------------------------
@@ -70,10 +85,8 @@ class SignUpRequest(BaseModel):
 
     @model_validator(mode="after")
     def _valider_champs_farmer(self) -> "SignUpRequest":
-        if self.role == RoleEnum.farmer and len(self.terrains) == 0:
-            raise ValueError(
-                "Un farmer doit déclarer au moins un terrain (tracé sur la carte) à l'inscription."
-            )
+        # Les terrains se déclarent après inscription (page Agriculture / Profil),
+        # plus à la création du compte.
         if self.role == RoleEnum.acheteur:
             # Un acheteur n'a ni matériel ni terrain — on ignore silencieusement
             # plutôt que de rejeter, au cas où le frontend enverrait des valeurs par défaut.

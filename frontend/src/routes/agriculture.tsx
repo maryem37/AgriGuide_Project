@@ -7,7 +7,6 @@ import { ReportMarkdown } from "@/components/ReportMarkdown";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -15,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import {
   Sprout,
   Droplets,
@@ -26,7 +26,6 @@ import {
   Info,
   TrendingUp,
   MapPin,
-  Map as MapIcon,
   Ruler,
   Loader2,
   FileText,
@@ -35,6 +34,23 @@ import {
   CheckCircle2,
   CircleSlash,
   Users,
+  BookmarkPlus,
+  Trash2,
+  Cloud,
+  CloudLightning,
+  CloudRain,
+  CloudFog,
+  CloudSun,
+  Snowflake,
+  Wind,
+  Droplet,
+  Sunrise,
+  Sunset,
+  Thermometer,
+  ChevronDown,
+  ChevronUp,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { getCropVisual, scoreTone } from "@/lib/cropVisual";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
@@ -46,7 +62,13 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { useAuth } from "@/lib/auth-context";
-import { centroid } from "@/lib/terrain";
+import { centroid, type LatLng } from "@/lib/terrain";
+import {
+  addTerrain,
+  deleteTerrain,
+  fetchMe,
+  AuthApiError,
+} from "@/lib/authApi";
 import {
   resolveParcel,
   getNeighbors,
@@ -55,12 +77,44 @@ import {
   type AnalyzeResponse,
   type SoilData,
   type VegetationData,
+  type WeatherData,
   type AgroCalcEstimate,
   type NeighborCropContext,
   type CropRecommendationOut,
   type ParcelResolution,
 } from "@/lib/agricultureApi";
 import { saveRealCropRecommendations, cultureLabel } from "@/lib/cropRecommendations";
+
+type GeoPolygon =
+  | { type: "Polygon"; coordinates: number[][][] }
+  | { type: "MultiPolygon"; coordinates: number[][][][] };
+
+/** Convertit un contour terrain [lat,lng] en GeoJSON Polygon [lng,lat] pour la carte. */
+function pointsToPolygon(points: LatLng[]): GeoPolygon | null {
+  if (points.length < 3) return null;
+  const ring = points.map(([lat, lng]) => [lng, lat]);
+  const [fLng, fLat] = ring[0];
+  const [lLng, lLat] = ring[ring.length - 1];
+  if (fLng !== lLng || fLat !== lLat) ring.push([fLng, fLat]);
+  return { type: "Polygon", coordinates: [ring] };
+}
+
+/** Extrait l'anneau extérieur d'une géométrie cadastre/RPG → points [lat,lng] pour l'API auth. */
+function geometryToPoints(geometry: Record<string, unknown> | null | undefined): LatLng[] | null {
+  if (!geometry || typeof geometry.type !== "string") return null;
+  let ring: number[][] | undefined;
+  if (geometry.type === "Polygon") {
+    ring = (geometry.coordinates as number[][][])?.[0];
+  } else if (geometry.type === "MultiPolygon") {
+    ring = (geometry.coordinates as number[][][][])?.[0]?.[0];
+  }
+  if (!ring || ring.length < 3) return null;
+  const points: LatLng[] = ring.map(([lng, lat]) => [lat, lng]);
+  const first = points[0];
+  const last = points[points.length - 1];
+  if (first[0] === last[0] && first[1] === last[1]) points.pop();
+  return points.length >= 3 ? points : null;
+}
 
 export const Route = createFileRoute("/agriculture")({
   head: () => ({
@@ -134,71 +188,175 @@ function topNeighborCrops(neighbors: NeighborCropContext, limit = 3): string {
   return entries.map(([code, pct]) => `${displayCrop(code)} (${Math.round(pct)}%)`).join(", ");
 }
 
-type SourceMode = "terrain" | "carte";
-
 /** Doit rester en phase avec le défaut `radius_m` de `POST /agriculture/parcel/neighbors` côté backend. */
 const NEIGHBORS_RADIUS_M = 800;
+const EXPLORE_VALUE = "__explore__";
 
 function Page() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, token, setUser } = useAuth();
   const terrains = useMemo(() => user?.terrains ?? [], [user]);
 
-  const [sourceMode, setSourceMode] = useState<SourceMode>(terrains.length > 0 ? "terrain" : "carte");
   const [selectedTerrainId, setSelectedTerrainId] = useState<string | undefined>(terrains[0]?.id);
+  /** "terrain" = sélection dans la liste ; "carte" = point cliqué (exploration). */
+  const [selectionSource, setSelectionSource] = useState<"terrain" | "carte">(
+    terrains.length > 0 ? "terrain" : "carte",
+  );
   const [clickedPoint, setClickedPoint] = useState<[number, number] | null>(null);
   const [openCrop, setOpenCrop] = useState<CropRecommendationOut | null>(null);
+  const [showReport, setShowReport] = useState(false);
+  const [saveName, setSaveName] = useState("");
+  const [savingTerrain, setSavingTerrain] = useState(false);
+  const [showSaveForm, setShowSaveForm] = useState(false);
+  const [terrainError, setTerrainError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!selectedTerrainId && terrains[0]) setSelectedTerrainId(terrains[0].id);
+    if (!selectedTerrainId && terrains[0]) {
+      setSelectedTerrainId(terrains[0].id);
+      setSelectionSource("terrain");
+    }
   }, [terrains, selectedTerrainId]);
 
   const selectedTerrain = terrains.find((t) => t.id === selectedTerrainId) ?? null;
+  const terrainCentroid = selectedTerrain ? centroid(selectedTerrain.points) : null;
+
+  const activePoint: [number, number] | null =
+    selectionSource === "terrain" && terrainCentroid
+      ? terrainCentroid
+      : selectionSource === "carte"
+        ? clickedPoint
+        : null;
 
   const previewQuery = useQuery({
-    queryKey: ["agriculture-parcel-preview", clickedPoint?.[0], clickedPoint?.[1]],
-    queryFn: () => resolveParcel({ point: { lat: clickedPoint![0], lon: clickedPoint![1] } }),
-    enabled: sourceMode === "carte" && clickedPoint !== null,
+    queryKey: ["agriculture-parcel-preview", activePoint?.[0], activePoint?.[1], selectionSource],
+    queryFn: () => resolveParcel({ point: { lat: activePoint![0], lon: activePoint![1] } }),
+    enabled: activePoint !== null,
     retry: false,
   });
 
   const neighborsQuery = useQuery({
-    queryKey: ["agriculture-neighbors-preview", clickedPoint?.[0], clickedPoint?.[1]],
-    queryFn: () => getNeighbors({ point: { lat: clickedPoint![0], lon: clickedPoint![1] } }, NEIGHBORS_RADIUS_M),
-    enabled: sourceMode === "carte" && clickedPoint !== null,
+    queryKey: ["agriculture-neighbors-preview", activePoint?.[0], activePoint?.[1]],
+    queryFn: () => getNeighbors({ point: { lat: activePoint![0], lon: activePoint![1] } }, NEIGHBORS_RADIUS_M),
+    enabled: activePoint !== null,
     retry: false,
   });
 
   const analyzeMutation = useMutation({
     mutationFn: analyzeParcel,
     onSuccess: (data) => {
+      setShowReport(false);
       if (data.terrain_id) saveRealCropRecommendations(data.terrain_id, data.crop_recommendations);
     },
   });
 
   const analysis: AnalyzeResponse | null = analyzeMutation.data ?? null;
 
-  function handleAnalyzeTerrain() {
-    if (!selectedTerrain) return;
-    const c = centroid(selectedTerrain.points);
-    if (!c) return;
-    analyzeMutation.mutate({ point: { lat: c[0], lon: c[1] }, terrain_id: selectedTerrain.id });
+  function handleSelectTerrain(value: string) {
+    if (value === EXPLORE_VALUE) {
+      setSelectionSource("carte");
+      setSelectedTerrainId(undefined);
+      return;
+    }
+    setSelectedTerrainId(value);
+    setSelectionSource("terrain");
+    setClickedPoint(null);
   }
 
-  function handleAnalyzePoint() {
-    if (!clickedPoint) return;
-    analyzeMutation.mutate({ point: { lat: clickedPoint[0], lon: clickedPoint[1] } });
+  function handleMapPoint(point: [number, number]) {
+    setClickedPoint(point);
+    setSelectionSource("carte");
+    setShowSaveForm(false);
+    setTerrainError(null);
   }
 
-  const overlayGeometry =
-    sourceMode === "carte" && previewQuery.data?.geometry
-      ? (previewQuery.data.geometry as unknown as { type: "Polygon"; coordinates: number[][][] } | { type: "MultiPolygon"; coordinates: number[][][][] })
-      : null;
+  function handleAnalyze() {
+    if (!activePoint) return;
+    if (selectionSource === "terrain" && selectedTerrain) {
+      analyzeMutation.mutate({
+        point: { lat: activePoint[0], lon: activePoint[1] },
+        terrain_id: selectedTerrain.id,
+      });
+      return;
+    }
+    analyzeMutation.mutate({ point: { lat: activePoint[0], lon: activePoint[1] } });
+  }
+
+  const terrainPolygon = selectionSource === "terrain" && selectedTerrain
+    ? pointsToPolygon(selectedTerrain.points)
+    : null;
+
+  const overlayGeometry: GeoPolygon | null =
+    terrainPolygon ??
+    (selectionSource === "carte" && previewQuery.data?.geometry
+      ? (previewQuery.data.geometry as unknown as GeoPolygon)
+      : null);
 
   const neighborGeometries =
-    sourceMode === "carte" && neighborsQuery.data?.neighbors
-      ? (neighborsQuery.data.neighbors.map((n) => n.geometry) as unknown as ({ type: "Polygon"; coordinates: number[][][] } | { type: "MultiPolygon"; coordinates: number[][][][] })[])
+    neighborsQuery.data?.neighbors
+      ? (neighborsQuery.data.neighbors.map((n) => n.geometry) as unknown as GeoPolygon[])
       : [];
+
+  const mapCenter = activePoint ?? ([46.7, 2.5] as [number, number]);
+  const mapZoom = activePoint ? 15 : 6;
+
+  const selectValue =
+    selectionSource === "terrain" && selectedTerrainId ? selectedTerrainId : EXPLORE_VALUE;
+
+  const canSaveExplored =
+    selectionSource === "carte" &&
+    !!token &&
+    !!previewQuery.data?.resolved &&
+    !!geometryToPoints(previewQuery.data.geometry);
+
+  async function handleSaveTerrain() {
+    if (!token || !previewQuery.data?.resolved) return;
+    const points = geometryToPoints(previewQuery.data.geometry);
+    if (!points) {
+      setTerrainError("Contour cadastral introuvable — impossible d'enregistrer ce terrain.");
+      return;
+    }
+    const nom = saveName.trim() || previewQuery.data.parcel_id || "Ma parcelle";
+    setSavingTerrain(true);
+    setTerrainError(null);
+    try {
+      const created = await addTerrain(token, {
+        nom,
+        points,
+        superficie_ha: previewQuery.data.area_ha ?? undefined,
+      });
+      const me = await fetchMe(token);
+      setUser(me);
+      setSelectedTerrainId(created.id);
+      setSelectionSource("terrain");
+      setClickedPoint(null);
+      setShowSaveForm(false);
+      setSaveName("");
+    } catch (err) {
+      setTerrainError(err instanceof AuthApiError ? err.message : "Impossible d'enregistrer ce terrain.");
+    } finally {
+      setSavingTerrain(false);
+    }
+  }
+
+  async function handleDeleteTerrain(terrainId: string) {
+    if (!token) return;
+    setDeletingId(terrainId);
+    setTerrainError(null);
+    try {
+      await deleteTerrain(token, terrainId);
+      const me = await fetchMe(token);
+      setUser(me);
+      if (selectedTerrainId === terrainId) {
+        setSelectedTerrainId(me.terrains[0]?.id);
+        setSelectionSource(me.terrains[0] ? "terrain" : "carte");
+      }
+    } catch (err) {
+      setTerrainError(err instanceof AuthApiError ? err.message : "Impossible de supprimer ce terrain.");
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   return (
     <AppShell>
@@ -209,107 +367,195 @@ function Page() {
         <div>
           <h1 className="font-display text-3xl md:text-4xl font-semibold leading-none">Conseiller Agricole</h1>
           <p className="text-muted-foreground mt-1">
-            {selectedTerrain ? `${selectedTerrain.nom ?? "Terrain"} — ${selectedTerrain.superficie_ha.toLocaleString("fr-FR", { maximumFractionDigits: 2 })} ha` : "Sélectionnez ou analysez une parcelle"}
+            Cliquez une parcelle sur la carte, enregistrez-la, puis lancez l'analyse.
           </p>
         </div>
       </div>
 
-      <div className="card-soft p-6 mt-6">
-        <Tabs value={sourceMode} onValueChange={(v) => setSourceMode(v as SourceMode)}>
-          <TabsList>
-            <TabsTrigger value="terrain" disabled={terrains.length === 0}>
-              <MapPin className="h-4 w-4 mr-1.5" /> Mon terrain
-            </TabsTrigger>
-            <TabsTrigger value="carte">
-              <MapIcon className="h-4 w-4 mr-1.5" /> Explorer sur la carte
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-
-        {sourceMode === "terrain" && (
-          <div className="mt-5">
-            {terrains.length === 0 ? (
-              <AlertBanner tone="warning" title="Aucun terrain déclaré">
-                Ajoutez une parcelle depuis votre profil, ou utilisez l'onglet « Explorer sur la carte ».
-              </AlertBanner>
-            ) : (
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                {terrains.length > 1 && (
-                  <Select value={selectedTerrainId} onValueChange={setSelectedTerrainId}>
-                    <SelectTrigger className="sm:w-64">
-                      <SelectValue placeholder="Choisir un terrain" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {terrains.map((t) => (
-                        <SelectItem key={t.id} value={t.id}>
-                          {t.nom ?? "Terrain"} ({t.superficie_ha.toLocaleString("fr-FR", { maximumFractionDigits: 2 })} ha)
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+      <div className="card-soft p-5 md:p-6 mt-6 space-y-4">
+        <div className="flex flex-col lg:flex-row lg:items-center gap-3 justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-1 min-w-0">
+            <Select value={selectValue} onValueChange={handleSelectTerrain}>
+              <SelectTrigger className="sm:w-72 rounded-xl h-11">
+                <SelectValue placeholder="Choisir un terrain" />
+              </SelectTrigger>
+              <SelectContent className="z-[1100]" position="popper">
+                {terrains.map((t) => (
+                  <SelectItem key={t.id} value={t.id}>
+                    {t.nom ?? "Terrain"} ({t.superficie_ha.toLocaleString("fr-FR", { maximumFractionDigits: 2 })} ha)
+                  </SelectItem>
+                ))}
+                <SelectItem value={EXPLORE_VALUE}>Explorer sur la carte</SelectItem>
+              </SelectContent>
+            </Select>
+            {selectionSource === "terrain" && selectedTerrain && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="rounded-xl text-muted-foreground hover:text-destructive"
+                disabled={deletingId === selectedTerrain.id}
+                onClick={() => void handleDeleteTerrain(selectedTerrain.id)}
+              >
+                {deletingId === selectedTerrain.id ? (
+                  <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+                ) : (
+                  <Trash2 className="h-4 w-4 mr-1.5" />
                 )}
-                <Button
-                  className="rounded-xl h-11"
-                  disabled={!selectedTerrain || analyzeMutation.isPending}
-                  onClick={handleAnalyzeTerrain}
-                >
-                  {analyzeMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sprout className="h-4 w-4 mr-2" />}
-                  Analyser {selectedTerrain?.nom ?? "ce terrain"}
-                </Button>
-              </div>
+                Supprimer
+              </Button>
             )}
           </div>
+          <div className="lg:text-right max-w-sm">
+            <div className="text-sm font-semibold">
+              {selectionSource === "terrain" && selectedTerrain
+                ? `Terrain « ${selectedTerrain.nom ?? "Terrain"} »`
+                : "Cliquez sur votre parcelle"}
+            </div>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {selectionSource === "terrain" && selectedTerrain
+                ? "Cliquez ailleurs pour explorer une autre parcelle."
+                : "Cliquez sur une parcelle pour afficher son contour et ses voisins."}
+            </p>
+          </div>
+        </div>
+
+        {terrainError && (
+          <AlertBanner tone="danger" title="Terrains">
+            {terrainError}
+          </AlertBanner>
         )}
 
-        {sourceMode === "carte" && (
-          <div className="mt-5 space-y-4">
-            <MapPicker
-              mode="point"
-              onPoint={setClickedPoint}
-              markerPosition={clickedPoint}
-              overlayGeometry={overlayGeometry}
-              neighborGeometries={neighborGeometries}
-              height={420}
-              hint="Cliquez sur une parcelle pour la résoudre (cadastre / RPG), puis lancez l'analyse."
-            />
-            {clickedPoint && (
-              <div className="space-y-4">
-                {previewQuery.isPending && (
-                  <div className="rounded-2xl border border-border bg-secondary/40 p-4">
-                    <Skeleton className="h-5 w-2/3" />
-                  </div>
-                )}
-                {previewQuery.isError && (
-                  <div className="rounded-2xl border border-border bg-secondary/40 p-4">
-                    <p className="text-sm text-destructive">Impossible de résoudre la parcelle à ce point.</p>
-                  </div>
-                )}
-                {previewQuery.data && (
-                  <>
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <ParcelInfoCard parcel={previewQuery.data} />
-                      {neighborsQuery.isPending ? (
-                        <div className="card-soft p-5 space-y-3">
-                          <Skeleton className="h-4 w-1/2" />
-                          <Skeleton className="h-16 w-full" />
-                        </div>
-                      ) : neighborsQuery.data ? (
-                        <NeighborsPreviewCard neighbors={neighborsQuery.data} radiusM={NEIGHBORS_RADIUS_M} />
-                      ) : null}
+        <MapPicker
+          mode="point"
+          onPoint={handleMapPoint}
+          markerPosition={selectionSource === "carte" ? clickedPoint : terrainCentroid}
+          overlayGeometry={overlayGeometry}
+          neighborGeometries={neighborGeometries}
+          center={mapCenter}
+          zoom={mapZoom}
+          height={440}
+          showHint={false}
+        />
+
+        {activePoint && (
+          <div className="space-y-4">
+            {previewQuery.isPending && (
+              <div className="rounded-2xl border border-border bg-secondary/40 p-4">
+                <Skeleton className="h-5 w-2/3" />
+              </div>
+            )}
+            {previewQuery.isError && (
+              <div className="rounded-2xl border border-border bg-secondary/40 p-4">
+                <p className="text-sm text-destructive">Impossible de résoudre la parcelle à ce point.</p>
+              </div>
+            )}
+            {(previewQuery.data || (selectionSource === "terrain" && selectedTerrain)) && (
+              <>
+                <div className="grid gap-4 lg:grid-cols-2">
+                  {previewQuery.data ? (
+                    <ParcelInfoCard
+                      parcel={previewQuery.data}
+                      overrideAreaHa={
+                        selectionSource === "terrain" ? selectedTerrain?.superficie_ha ?? null : null
+                      }
+                      overrideLabel={
+                        selectionSource === "terrain" ? selectedTerrain?.nom ?? null : null
+                      }
+                    />
+                  ) : (
+                    <div className="card-soft p-5 space-y-3">
+                      <Skeleton className="h-4 w-1/2" />
+                      <Skeleton className="h-16 w-full" />
                     </div>
-                    <div className="flex justify-end">
+                  )}
+                  {neighborsQuery.isPending ? (
+                    <div className="card-soft p-5 space-y-3">
+                      <Skeleton className="h-4 w-1/2" />
+                      <Skeleton className="h-16 w-full" />
+                    </div>
+                  ) : neighborsQuery.data ? (
+                    <NeighborsPreviewCard neighbors={neighborsQuery.data} radiusM={NEIGHBORS_RADIUS_M} />
+                  ) : null}
+                </div>
+
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-end">
+                  {canSaveExplored && !showSaveForm && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="rounded-xl"
+                      onClick={() => {
+                        setShowSaveForm(true);
+                        setSaveName(
+                          previewQuery.data?.crop_declared
+                            ? `Parcelle ${previewQuery.data.crop_declared}`
+                            : previewQuery.data?.parcel_id
+                              ? `Réf. ${previewQuery.data.parcel_id}`
+                              : "",
+                        );
+                      }}
+                    >
+                      <BookmarkPlus className="h-4 w-4 mr-2" />
+                      Enregistrer comme mon terrain
+                    </Button>
+                  )}
+                  <Button
+                    className="rounded-xl"
+                    disabled={analyzeMutation.isPending}
+                    onClick={handleAnalyze}
+                  >
+                    {analyzeMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Sprout className="h-4 w-4 mr-2" />
+                    )}
+                    {selectionSource === "terrain" && selectedTerrain
+                      ? `Analyser ${selectedTerrain.nom ?? "ce terrain"}`
+                      : "Analyser cette parcelle"}
+                  </Button>
+                </div>
+
+                {showSaveForm && canSaveExplored && (
+                  <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 flex flex-col sm:flex-row gap-3 sm:items-end">
+                    <div className="flex-1 min-w-0">
+                      <label htmlFor="save-terrain-nom" className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                        Nom du terrain
+                      </label>
+                      <Input
+                        id="save-terrain-nom"
+                        value={saveName}
+                        onChange={(e) => setSaveName(e.target.value)}
+                        placeholder="ex. Parcelle Nord"
+                        className="mt-1.5 h-11 rounded-xl"
+                        autoFocus
+                      />
+                    </div>
+                    <div className="flex gap-2 shrink-0">
                       <Button
-                        className="rounded-xl shrink-0"
-                        disabled={analyzeMutation.isPending}
-                        onClick={handleAnalyzePoint}
+                        type="button"
+                        variant="ghost"
+                        className="rounded-xl"
+                        onClick={() => {
+                          setShowSaveForm(false);
+                          setSaveName("");
+                        }}
                       >
-                        {analyzeMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sprout className="h-4 w-4 mr-2" />}
-                        Analyser cette parcelle
+                        Annuler
+                      </Button>
+                      <Button
+                        type="button"
+                        className="rounded-xl"
+                        disabled={savingTerrain}
+                        onClick={() => void handleSaveTerrain()}
+                      >
+                        {savingTerrain ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <BookmarkPlus className="h-4 w-4 mr-2" />}
+                        Enregistrer
                       </Button>
                     </div>
-                  </>
+                  </div>
                 )}
-              </div>
+              </>
             )}
           </div>
         )}
@@ -349,7 +595,11 @@ function Page() {
             </div>
           )}
 
-          <div className="mt-8 grid gap-5 md:grid-cols-3">
+          <div className="mt-8">
+            <WeatherCard weather={analysis.weather} />
+          </div>
+
+          <div className="mt-6 grid gap-5 md:grid-cols-3">
             <SoilCard soil={analysis.soil} />
             <NdviCard vegetation={analysis.vegetation} />
             <SummaryCard analysis={analysis} />
@@ -370,15 +620,28 @@ function Page() {
                 <h2 className="font-display text-3xl font-semibold">Top {analysis.crop_recommendations.length} cultures recommandées</h2>
                 <p className="text-muted-foreground mt-1">Classées par compatibilité avec le sol et le climat local.</p>
               </div>
-              {analysis.terrain_id && (
-                <Button
-                  variant="outline"
-                  className="rounded-xl shrink-0"
-                  onClick={() => navigate({ to: "/business" })}
-                >
-                  <TrendingUp className="h-4 w-4 mr-2" /> Utiliser dans Conseiller Business
-                </Button>
-              )}
+              <div className="flex flex-wrap gap-2 shrink-0">
+                {analysis.report && (
+                  <Button
+                    variant="outline"
+                    className="rounded-xl"
+                    onClick={() => setShowReport((v) => !v)}
+                  >
+                    {showReport ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
+                    {showReport ? "Masquer le rapport" : "Afficher le rapport"}
+                    {showReport ? <ChevronUp className="h-4 w-4 ml-1" /> : <ChevronDown className="h-4 w-4 ml-1" />}
+                  </Button>
+                )}
+                {analysis.terrain_id && (
+                  <Button
+                    variant="outline"
+                    className="rounded-xl"
+                    onClick={() => navigate({ to: "/business" })}
+                  >
+                    <TrendingUp className="h-4 w-4 mr-2" /> Utiliser dans Conseiller Business
+                  </Button>
+                )}
+              </div>
             </div>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {analysis.crop_recommendations.map((c) => (
@@ -387,8 +650,8 @@ function Page() {
             </div>
           </div>
 
-          {analysis.report ? (
-            <div className="mt-10 card-soft p-6 md:p-8">
+          {showReport && analysis.report && (
+            <div className="mt-8 card-soft p-6 md:p-8">
               <div className="flex items-center gap-3 mb-6">
                 <div className="h-11 w-11 rounded-2xl bg-primary/15 text-primary flex items-center justify-center shrink-0">
                   <FileText className="h-5 w-5" />
@@ -416,14 +679,6 @@ function Page() {
                 </div>
               )}
             </div>
-          ) : (
-            <div className="mt-10">
-              <AlertBanner tone="info" title="Rapport IA non disponible">
-                Le rapport agronomique détaillé (RAG + Mistral) n'a pas pu être généré pour cette analyse — vérifiez
-                que <code>MISTRAL_API_KEY</code> est configurée et que le corpus documentaire a été indexé (voir{" "}
-                <code>backend/agent_agriculture/README.md</code>). Les données ci-dessus (sol, satellite, cultures) restent valides.
-              </AlertBanner>
-            </div>
           )}
         </>
       )}
@@ -444,6 +699,120 @@ function Page() {
         </DialogContent>
       </Dialog>
     </AppShell>
+  );
+}
+
+/** WMO weather interpretation codes → Lucide icon (Open-Meteo). */
+function weatherIcon(code: number | null | undefined) {
+  if (code === null || code === undefined) return Cloud;
+  if (code === 0) return Sun;
+  if (code <= 2) return CloudSun;
+  if (code <= 3) return Cloud;
+  if (code <= 48) return CloudFog;
+  if (code <= 67 || (code >= 80 && code <= 82)) return CloudRain;
+  if (code <= 77 || code === 85 || code === 86) return Snowflake;
+  if (code >= 95) return CloudLightning;
+  return Cloud;
+}
+
+function formatClock(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) {
+    // Open-Meteo sometimes returns "HH:MM" already, or date without Z
+    const m = iso.match(/T(\d{2}):(\d{2})/);
+    if (m) return `${m[1]}h${m[2]}`;
+    return iso;
+  }
+  return `${String(d.getHours()).padStart(2, "0")}h${String(d.getMinutes()).padStart(2, "0")}`;
+}
+
+function WeatherCard({ weather }: { weather: WeatherData }) {
+  if (weather.source === "unavailable") {
+    return (
+      <div className="card-soft p-6">
+        <p className="text-sm text-muted-foreground">{weather.warning ?? "Météo indisponible pour cette parcelle."}</p>
+      </div>
+    );
+  }
+
+  const Icon = weatherIcon(weather.weather_code);
+  const now = new Date();
+  const dateLabel = now.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+  const timeLabel = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+  const updatedLabel = weather.observed_at
+    ? `Prévision actualisée à ${formatClock(weather.observed_at).replace("h", "h")}`
+    : "Prévision Open-Meteo";
+
+  const temp =
+    weather.current_temp_c !== null && weather.current_temp_c !== undefined
+      ? Math.round(weather.current_temp_c)
+      : weather.daily_temp_mean_c?.[0] != null
+        ? Math.round(weather.daily_temp_mean_c[0])
+        : null;
+
+  const precip =
+    weather.current_precip_mm ??
+    (weather.daily_precip_mm?.[0] != null ? weather.daily_precip_mm[0] : null);
+
+  const metrics: { icon: typeof Droplets; value: string }[] = [
+    {
+      icon: CloudRain,
+      value: precip !== null && precip !== undefined ? `${Math.round(precip)}mm` : "—",
+    },
+    {
+      icon: Wind,
+      value:
+        weather.current_wind_kmh !== null && weather.current_wind_kmh !== undefined
+          ? `${Math.round(weather.current_wind_kmh)}km/h`
+          : "—",
+    },
+    {
+      icon: Droplet,
+      value:
+        weather.current_humidity_pct !== null && weather.current_humidity_pct !== undefined
+          ? `${Math.round(weather.current_humidity_pct)}%`
+          : "—",
+    },
+    { icon: Sunrise, value: formatClock(weather.sunrise) },
+    { icon: Sunset, value: formatClock(weather.sunset) },
+    {
+      icon: Thermometer,
+      value:
+        weather.today_temp_min_c != null && weather.today_temp_max_c != null
+          ? `${Math.round(weather.today_temp_min_c)}°c/${Math.round(weather.today_temp_max_c)}°c`
+          : "—",
+    },
+  ];
+
+  return (
+    <div className="card-soft p-6 md:p-8">
+      <div className="text-sm text-muted-foreground">
+        {dateLabel} <span className="font-semibold text-foreground">{timeLabel}</span>
+      </div>
+
+      <div className="mt-5 flex items-center gap-6 flex-wrap">
+        <div
+          className="h-20 w-20 md:h-24 md:w-24 rounded-2xl flex items-center justify-center shrink-0"
+          style={{ background: "oklch(0.93 0.04 210)", color: "oklch(0.48 0.1 210)" }}
+        >
+          <Icon className="h-12 w-12 md:h-14 md:w-14" strokeWidth={1.5} />
+        </div>
+        <div className="font-display text-6xl md:text-7xl font-semibold tracking-tight leading-none">
+          {temp !== null ? `${temp}°c` : "—"}
+        </div>
+        <div className="text-sm text-muted-foreground md:ml-auto">{updatedLabel}</div>
+      </div>
+
+      <div className="mt-8 grid grid-cols-3 sm:grid-cols-6 gap-4">
+        {metrics.map((m, i) => (
+          <div key={i} className="flex flex-col items-center gap-2 text-center">
+            <m.icon className="h-6 w-6 text-foreground/80" strokeWidth={1.5} />
+            <span className="text-sm font-semibold">{m.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -550,8 +919,17 @@ function NdviCard({ vegetation }: { vegetation: VegetationData }) {
   );
 }
 
-function ParcelInfoCard({ parcel }: { parcel: ParcelResolution }) {
-  if (!parcel.resolved) {
+function ParcelInfoCard({
+  parcel,
+  overrideAreaHa = null,
+  overrideLabel = null,
+}: {
+  parcel: ParcelResolution;
+  /** Surface du terrain déclaré (prioritaire sur la surface cadastrale au centroïde). */
+  overrideAreaHa?: number | null;
+  overrideLabel?: string | null;
+}) {
+  if (!parcel.resolved && overrideAreaHa === null) {
     return (
       <div className="card-soft p-5">
         <div className="flex items-center gap-2 text-xs font-semibold tracking-widest text-muted-foreground uppercase mb-3">
@@ -565,8 +943,14 @@ function ParcelInfoCard({ parcel }: { parcel: ParcelResolution }) {
   }
 
   const ref = parcel.parcel_id ?? parcel.rpg_id_parcel;
-  const sourceLabel =
-    parcel.source === "cadastre" ? "Cadastre (IGN)" : parcel.source === "rpg" ? "RPG" : "Tracé manuel";
+  const sourceLabel = overrideLabel
+    ? `Mon terrain — ${overrideLabel}`
+    : parcel.source === "cadastre"
+      ? "Cadastre (IGN)"
+      : parcel.source === "rpg"
+        ? "RPG"
+        : "Tracé manuel";
+  const areaHa = overrideAreaHa ?? parcel.area_ha;
 
   return (
     <div className="card-soft p-5">
@@ -596,7 +980,7 @@ function ParcelInfoCard({ parcel }: { parcel: ParcelResolution }) {
         <InfoRow
           icon={Ruler}
           label="Surface"
-          value={parcel.area_ha !== null ? `${parcel.area_ha.toFixed(2)} ha` : "Inconnue"}
+          value={areaHa !== null && areaHa !== undefined ? `${areaHa.toFixed(2)} ha` : "Inconnue"}
         />
       </div>
       {parcel.agricultural_note && parcel.is_agricultural === false && (

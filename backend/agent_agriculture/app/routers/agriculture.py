@@ -8,6 +8,7 @@ service module.
 """
 import asyncio
 
+import psycopg2
 from fastapi import APIRouter, HTTPException
 
 from app.models.schemas import (
@@ -95,7 +96,16 @@ async def analyze(req: AnalyzeRequest):
     #    point clicked on the map (resolved live against cadastre/RPG).
     terrain_row = None
     if req.terrain_id:
-        terrain_row = persistence_service.get_terrain(req.terrain_id)
+        try:
+            terrain_row = persistence_service.get_terrain(req.terrain_id)
+        except psycopg2.OperationalError as e:
+            raise HTTPException(
+                status_code=503,
+                detail=(
+                    "Base Postgres inaccessible. En local, lancez `docker compose up -d db` "
+                    f"(port 5434) et vérifiez DATABASE_URL. Détail : {e}"
+                ),
+            ) from e
         if not terrain_row:
             raise HTTPException(status_code=404, detail="Terrain introuvable.")
         centroid = Coordinate(lat=terrain_row["centroid_lat"], lon=terrain_row["centroid_lon"])

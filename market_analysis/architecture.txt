@@ -1,0 +1,46 @@
+                     USER
+                      │
+                      │ "Tomato"
+                      ▼
+             Crop Normalization
+                      │
+                      ▼
+          ┌───────────────────────┐
+          │   DATA RETRIEVAL      │
+          └───────────────────────┘
+                      │
+       ┌──────────────┼───────────────┐
+       ▼              ▼               ▼
+      RNM           Agreste       FranceAgriMer
+       │              │               │
+       │              │               │
+   Price Data     XLS + PDF       Reports/PDF
+       │              │               │
+       └──────────────┼───────────────┘
+                      ▼
+              Evidence Layer
+                      │
+             ┌────────┴────────┐
+             │                 │
+             ▼                 ▼
+       Structured Data        RAG
+       Calculations        Documents
+             │                 │
+             └────────┬────────┘
+                      ▼
+                 Mistral AI
+                      │
+                      ▼
+              Market Analysis
+                      │
+       ┌──────────────┼──────────────┐
+       ▼              ▼              ▼
+    Price          Demand        Competition
+    Trend                          │
+                                   ▼
+                         Market Opportunity
+                      │
+                      ▼
+                  Sources
+
+                  

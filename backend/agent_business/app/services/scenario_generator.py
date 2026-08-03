@@ -159,6 +159,16 @@ def _construire_detail_calcul(
             "Étude de risque (coût de mitigation) — app/data/mock_risks.py",
         ],
     )
+    if etude_marche.indice_pct_change is not None:
+        profit_estime_detail.valeurs["indice_agreste_pct_6m"] = etude_marche.indice_pct_change
+    if etude_marche.justification_marche:
+        profit_estime_detail.valeurs["justification_marche"] = etude_marche.justification_marche
+    if etude_marche.demande:
+        profit_estime_detail.valeurs["demande"] = etude_marche.demande
+    if etude_marche.concurrence:
+        profit_estime_detail.valeurs["concurrence"] = etude_marche.concurrence
+    if etude_marche.market_score is not None:
+        profit_estime_detail.valeurs["market_score_rag"] = etude_marche.market_score
 
     return DetailCalculScenario(
         score_matching=score_matching,

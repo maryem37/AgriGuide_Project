@@ -1,20 +1,19 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { AlertBanner } from "@/components/AlertBanner";
 import { EquipementPicker } from "@/components/EquipementPicker";
-import { TerrainListEditor, type DraftTerrain } from "@/components/TerrainListEditor";
 import { Button } from "@/components/ui/button";
-import { Loader2, Save, User } from "lucide-react";
+import { Loader2, MapPin, Ruler, Save, Sprout, Trash2, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import {
-  addTerrain,
   deleteTerrain,
   fetchMe,
   updateEquipements,
   AuthApiError,
   type EquipementType,
 } from "@/lib/authApi";
+import { areaHectares } from "@/lib/terrain";
 
 export const Route = createFileRoute("/profil")({
   head: () => ({
@@ -63,10 +62,11 @@ function ProfileContent() {
       <div className="mt-10">
         <h2 className="font-display text-2xl font-semibold mb-2">Mes terrains</h2>
         <p className="text-muted-foreground text-sm mb-5">
-          Ajoutez, renommez ou supprimez vos parcelles. Ces informations alimentent vos conseillers.
+          Pour ajouter un terrain, cliquez une parcelle sur la carte dans Agriculture. Vous pouvez
+          supprimer vos parcelles ici.
         </p>
         <TerrainsSection
-          key={user.terrains.length}
+          key={user.terrains.map((t) => t.id).join(",")}
           token={token}
           terrains={user.terrains}
           onSaved={setUser}
@@ -147,54 +147,81 @@ function TerrainsSection({
   onSaved,
 }: {
   token: string;
-  terrains: { id: string; nom: string | null; points: [number, number][] }[];
+  terrains: { id: string; nom: string | null; points: [number, number][]; superficie_ha: number }[];
   onSaved: (user: Awaited<ReturnType<typeof fetchMe>>) => void;
 }) {
-  const initial: DraftTerrain[] = useMemo(
-    () => terrains.map((t) => ({ id: t.id, nom: t.nom ?? "Terrain", points: t.points })),
-    [terrains],
-  );
-  const [pending, setPending] = useState(false);
+  const [pendingId, setPendingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const existingIds = useMemo(() => new Set(initial.map((t) => t.id)), [initial]);
 
-  async function handleChange(next: DraftTerrain[]) {
+  async function remove(terrainId: string) {
     setError(null);
-    const removed = initial.filter((t) => !next.some((n) => n.id === t.id));
-    const added = next.filter((t) => !existingIds.has(t.id));
-
-    setPending(true);
+    setPendingId(terrainId);
     try {
-      for (const terrain of removed) {
-        await deleteTerrain(token, terrain.id);
-      }
-      for (const terrain of added) {
-        await addTerrain(token, { nom: terrain.nom, points: terrain.points });
-      }
+      await deleteTerrain(token, terrainId);
       onSaved(await fetchMe(token));
     } catch (err) {
       setError(err instanceof AuthApiError ? err.message : "Une erreur inattendue est survenue.");
     } finally {
-      setPending(false);
+      setPendingId(null);
     }
   }
 
   return (
-    <div>
+    <div className="space-y-4">
       {error && (
-        <div className="mb-4">
-          <AlertBanner tone="danger" title="Impossible de mettre à jour vos terrains">
-            {error}
-          </AlertBanner>
-        </div>
+        <AlertBanner tone="danger" title="Impossible de mettre à jour vos terrains">
+          {error}
+        </AlertBanner>
       )}
-      <fieldset disabled={pending} className="space-y-4">
-        <TerrainListEditor terrains={initial} onChange={(next) => void handleChange(next)} />
-      </fieldset>
-      {pending && (
-        <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> Mise à jour...
+
+      {terrains.length === 0 ? (
+        <div className="card-soft p-6 text-center space-y-3">
+          <p className="text-sm text-muted-foreground">Aucun terrain enregistré pour le moment.</p>
+          <Button asChild className="rounded-xl">
+            <Link to="/agriculture">
+              <Sprout className="h-4 w-4 mr-2" /> Ajouter depuis Agriculture
+            </Link>
+          </Button>
         </div>
+      ) : (
+        terrains.map((t) => (
+          <div key={t.id} className="card-soft p-4 flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <div className="font-semibold flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-primary shrink-0" /> {t.nom ?? "Terrain"}
+              </div>
+              <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                <Ruler className="h-3 w-3" />{" "}
+                {(t.superficie_ha || areaHectares(t.points)).toLocaleString("fr-FR", {
+                  maximumFractionDigits: 2,
+                })}{" "}
+                ha
+              </div>
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="shrink-0 text-muted-foreground hover:text-destructive"
+              disabled={pendingId === t.id}
+              onClick={() => void remove(t.id)}
+            >
+              {pendingId === t.id ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
+        ))
+      )}
+
+      {terrains.length > 0 && (
+        <Button asChild variant="outline" className="rounded-xl w-full h-11">
+          <Link to="/agriculture">
+            <Sprout className="h-4 w-4 mr-2" /> Ajouter un terrain sur la carte
+          </Link>
+        </Button>
       )}
     </div>
   );

@@ -72,6 +72,17 @@ class WeatherData(BaseModel):
     daily_precip_mm: Optional[list[Optional[float]]] = None
     daily_et0_mm: Optional[list[Optional[float]]] = None  # reference evapotranspiration, for irrigation estimate
     daily_dates: Optional[list[str]] = None
+    # Snapshot « aujourd'hui » pour le widget météo UI (Open-Meteo current + daily[0])
+    current_temp_c: Optional[float] = None
+    current_humidity_pct: Optional[float] = None
+    current_wind_kmh: Optional[float] = None
+    current_precip_mm: Optional[float] = None
+    weather_code: Optional[int] = None  # WMO weather interpretation code
+    sunrise: Optional[str] = None  # ISO local, e.g. 2026-08-03T06:35
+    sunset: Optional[str] = None
+    today_temp_min_c: Optional[float] = None
+    today_temp_max_c: Optional[float] = None
+    observed_at: Optional[str] = None  # heure de l'observation current
     warning: Optional[str] = None
 
 

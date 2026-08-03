@@ -10,10 +10,39 @@ prototype's COPERNICUS_*; both refer to the same OAuth client created
 at dataspace.copernicus.eu, Sentinel Hub being the API surface exposed
 by the Copernicus Data Space Ecosystem).
 """
-from pydantic_settings import BaseSettings, SettingsConfigDict
+import socket
 from pathlib import Path
+from urllib.parse import urlparse, urlunparse
+
+from pydantic import field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _APP_DIR = Path(__file__).resolve().parent.parent  # backend/agent_agriculture/
+
+
+def _rewrite_docker_db_host_for_local(url: str) -> str:
+    """
+    Root `.env` / docker-compose use hostname `db` on port 5432 (Compose
+    internal network). Local `uvicorn` outside Docker cannot resolve `db`,
+    and the published host port is 5434 (see docker-compose.yml). Rewrite
+    only when `db` does not resolve — leave the URL untouched inside Compose.
+    """
+    parsed = urlparse(url)
+    if parsed.hostname != "db":
+        return url
+    try:
+        socket.getaddrinfo("db", None)
+        return url
+    except OSError:
+        port = parsed.port or 5432
+        hostport = f"localhost:{5434 if port == 5432 else port}"
+        netloc = hostport
+        if parsed.username:
+            user = parsed.username
+            if parsed.password is not None:
+                user = f"{user}:{parsed.password}"
+            netloc = f"{user}@{hostport}"
+        return urlunparse(parsed._replace(netloc=netloc))
 
 
 class Settings(BaseSettings):
@@ -52,6 +81,11 @@ class Settings(BaseSettings):
 
     # --- Database (Postgres/PostGIS, shared with the other agents — see database/schema.sql) ---
     database_url: str = "postgresql://agriadvisor:changeme@localhost:5434/agriadvisor"
+
+    @field_validator("database_url", mode="after")
+    @classmethod
+    def _local_docker_db_url(cls, value: str) -> str:
+        return _rewrite_docker_db_host_for_local(value)
 
     # Reads the repo-root `.env` (shared secrets, e.g. MISTRAL_API_KEY /
     # SENTINEL_HUB_*) first, then an optional `backend/agent_agriculture/.env`
