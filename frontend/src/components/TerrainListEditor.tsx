@@ -15,7 +15,7 @@ export type DraftTerrain = {
 
 /**
  * Gère une liste de terrains (nom de zone + contour tracé sur la carte).
- * Réutilisé à l'inscription (farmer) et depuis la page Profil.
+ * Réutilisé depuis la page Agriculture et la page Profil.
  */
 export function TerrainListEditor({
   terrains,

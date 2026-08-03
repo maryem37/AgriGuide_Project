@@ -16,6 +16,8 @@ export function MapPicker(props: {
   center?: [number, number];
   zoom?: number;
   hint?: string;
+  /** Affiche l'encart d'aide en haut à gauche de la carte (défaut: true). */
+  showHint?: boolean;
 }) {
   return (
     <Suspense

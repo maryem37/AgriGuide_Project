@@ -64,6 +64,16 @@ export type WeatherData = {
   daily_precip_mm: (number | null)[] | null;
   daily_et0_mm: (number | null)[] | null;
   daily_dates: string[] | null;
+  current_temp_c?: number | null;
+  current_humidity_pct?: number | null;
+  current_wind_kmh?: number | null;
+  current_precip_mm?: number | null;
+  weather_code?: number | null;
+  sunrise?: string | null;
+  sunset?: string | null;
+  today_temp_min_c?: number | null;
+  today_temp_max_c?: number | null;
+  observed_at?: string | null;
   warning: string | null;
 };
 

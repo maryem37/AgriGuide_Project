@@ -47,6 +47,12 @@ services:
   agent_business:
     build: ./backend/agent_business
     env_file: .env
+    environment:
+      MARKET_DATA_DIR: /data/market
+      AGRESTE_DATA_DIR: /data/market
+    volumes:
+      - ./data:/data/market:ro
+      - business_market_store:/app/app/market_intelligence/rag/vector_store
     depends_on: [db]
 
   agent_regulation:
@@ -74,3 +80,4 @@ volumes:
   db_data:
   agri_chroma_store:
   agri_dl_checkpoints:
+  business_market_store:

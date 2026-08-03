@@ -12,15 +12,8 @@ const AUTH_API_BASE_URL: string =
 
 export type Role = "farmer" | "acheteur";
 
-export type EquipementType =
-  | "tracteur"
-  | "cultivateur"
-  | "fraise_rotative"
-  | "planteuse"
-  | "moissonneuse_batteuse"
-  | "remorque_agricole"
-  | "pulverisateur"
-  | "tunnel_plastique";
+/** Preset connu ou clé libre (« Autres ») en snake_case, max 50 car. */
+export type EquipementType = string;
 
 export type LatLng = [number, number];
 

@@ -45,7 +45,7 @@ def signup(request: SignUpRequest) -> AuthResponse:
     )
 
     if request.role.value == "farmer":
-        user_service.set_farmer_equipements(user_id, [e.value for e in request.equipements])
+        user_service.set_farmer_equipements(user_id, list(request.equipements))
         for terrain in request.terrains:
             user_service.create_terrain(
                 user_id, terrain.nom, terrain.points, terrain.superficie_ha, terrain.region
@@ -84,7 +84,7 @@ def update_equipements(
         raise HTTPException(status_code=404, detail="Utilisateur introuvable.")
     _require_farmer(user)
 
-    user_service.set_farmer_equipements(user_id, [e.value for e in payload.equipements])
+    user_service.set_farmer_equipements(user_id, list(payload.equipements))
     return UserOut(**user_service.build_user_out(user_id))
 
 

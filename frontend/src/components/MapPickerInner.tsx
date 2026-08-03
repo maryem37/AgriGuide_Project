@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, useMapEvents, Polygon, Marker } from "react-leaflet";
+import { MapContainer, TileLayer, useMap, useMapEvents, Polygon, Marker } from "react-leaflet";
 import L from "leaflet";
 
 // Fix default icons
@@ -23,6 +23,34 @@ function Clicker({ onAdd }: { onAdd: (p: [number, number]) => void }) {
   return null;
 }
 
+/** Recenters / fits the map when the parent updates center, zoom or overlays (MapContainer only uses initial center/zoom). */
+function ViewSync({
+  center,
+  zoom,
+  fitKey,
+  fitRings,
+}: {
+  center?: [number, number];
+  zoom?: number;
+  fitKey: string;
+  fitRings: [number, number][][];
+}) {
+  const map = useMap();
+  useEffect(() => {
+    if (fitRings.length > 0) {
+      const bounds = L.latLngBounds(fitRings.flat().map(([lat, lng]) => [lat, lng] as [number, number]));
+      if (bounds.isValid()) {
+        map.fitBounds(bounds, { padding: [28, 28], maxZoom: 16 });
+        return;
+      }
+    }
+    if (center) map.setView(center, zoom ?? map.getZoom());
+    // fitKey is a stable fingerprint of the rings; avoid depending on a new array each render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [center?.[0], center?.[1], zoom, fitKey, map]);
+  return null;
+}
+
 export default function MapPickerInner({
   mode = "polygon",
   onPolygon,
@@ -34,6 +62,7 @@ export default function MapPickerInner({
   center = [46.7, 2.5],
   zoom = 6,
   hint,
+  showHint = true,
 }: {
   /** "polygon" (défaut) : trace un contour libre, comme à l'onboarding.
    *  "point" : un seul clic déplace un marqueur unique — utilisé pour résoudre une parcelle cadastrale précise. */
@@ -50,6 +79,7 @@ export default function MapPickerInner({
   center?: [number, number];
   zoom?: number;
   hint?: string;
+  showHint?: boolean;
 }) {
   const [points, setPoints] = useState<[number, number][]>([]);
   const [point, setPoint] = useState<[number, number] | null>(markerPosition ?? null);
@@ -74,14 +104,22 @@ export default function MapPickerInner({
 
   const overlayPositions = overlayToLatLngRings(overlayGeometry);
   const neighborPositions = (neighborGeometries ?? []).flatMap((g) => overlayToLatLngRings(g));
+  // Prefer fitting on the selected parcel alone so neighbors loading later don't keep yanking the view.
+  const fitRings = overlayPositions.length > 0 ? overlayPositions : neighborPositions;
 
   return (
-    <div className="relative">
-      <div style={{ height }} className="overflow-hidden rounded-2xl border border-border shadow-soft">
-        <MapContainer center={center} zoom={zoom} style={{ height: "100%", width: "100%" }}>
+    <div className="relative z-0 isolate">
+      <div style={{ height }} className="relative z-0 overflow-hidden rounded-2xl border border-border shadow-soft">
+        <MapContainer center={center} zoom={zoom} style={{ height: "100%", width: "100%", zIndex: 0 }}>
           <TileLayer
             attribution='&copy; OpenStreetMap'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          <ViewSync
+            center={center}
+            zoom={zoom}
+            fitKey={fitRings.map((r) => `${r.length}:${r[0]?.join(",") ?? ""}`).join("|")}
+            fitRings={fitRings}
           />
           <Clicker onAdd={handleAdd} />
           {mode === "polygon" &&
@@ -108,15 +146,17 @@ export default function MapPickerInner({
             ))}
         </MapContainer>
       </div>
-      <div className="absolute top-3 left-3 right-3 md:right-auto md:max-w-sm rounded-2xl bg-card/95 backdrop-blur p-3 shadow-soft border border-border pointer-events-none">
-        <div className="text-sm font-semibold">{mode === "point" ? "Cliquez sur votre parcelle" : "Tracez votre terrain"}</div>
-        <p className="text-xs text-muted-foreground mt-1">
-          {hint ??
-            (mode === "point"
-              ? "Un clic résout la parcelle cadastrale/RPG à cet endroit."
-              : "Touchez la carte pour ajouter des points. Un contour se dessine automatiquement dès 3 points.")}
-        </p>
-      </div>
+      {showHint && (
+        <div className="absolute top-3 left-3 right-3 md:right-auto md:max-w-sm rounded-2xl bg-card/95 backdrop-blur p-3 shadow-soft border border-border pointer-events-none">
+          <div className="text-sm font-semibold">{mode === "point" ? "Cliquez sur votre parcelle" : "Tracez votre terrain"}</div>
+          <p className="text-xs text-muted-foreground mt-1">
+            {hint ??
+              (mode === "point"
+                ? "Un clic résout la parcelle cadastrale/RPG à cet endroit."
+                : "Touchez la carte pour ajouter des points. Un contour se dessine automatiquement dès 3 points.")}
+          </p>
+        </div>
+      )}
       {mode === "polygon" && points.length > 0 && (
         <button
           onClick={() => setPoints([])}

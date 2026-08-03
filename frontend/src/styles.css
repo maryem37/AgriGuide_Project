@@ -190,4 +190,4 @@
 @utility bg-gradient-sky  { background-image: var(--gradient-sky); }
 
 /* Leaflet fixes */
-.leaflet-container { font-family: var(--font-sans); border-radius: var(--radius-2xl); }
+.leaflet-container { font-family: var(--font-sans); border-radius: var(--radius-2xl); z-index: 0 !important; }
