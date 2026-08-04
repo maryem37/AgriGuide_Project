@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { useAuth, roleLabel } from "@/lib/auth-context";
 import type { Role } from "@/lib/authApi";
 import { AgriLogo } from "@/components/AgriLogo";
+import { ScrollMoreHint } from "@/components/motion/ScrollMoreHint";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -124,6 +125,9 @@ export function AppShell({
       {/* `key` sur le pathname : chaque navigation rejoue l'animation d'entrée. */}
       <main key={pathname} className="page-enter mx-auto max-w-6xl px-4 py-6 md:px-10 md:py-10">
         {children}
+        {pathname !== "/regulation" && !pathname.startsWith("/regulation/") && (
+          <ScrollMoreHint />
+        )}
       </main>
 
       {/* Bottom nav (mobile) */}

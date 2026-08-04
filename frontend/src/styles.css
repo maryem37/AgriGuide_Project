@@ -581,6 +581,30 @@
   50% { opacity: 0.7; }
 }
 
+/* Flèche « scroll pour la suite » */
+@keyframes scroll-hint-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(4px); }
+}
+@keyframes scroll-hint-float {
+  0%, 100% { transform: translate(-50%, 0); }
+  50% { transform: translate(-50%, -6px); }
+}
+.scroll-hint-arrow {
+  animation: scroll-hint-bounce 1.35s ease-in-out infinite;
+}
+.scroll-hint-float {
+  animation: scroll-hint-float 2.4s ease-in-out infinite;
+}
+.app-motion .scroll-hint-arrow,
+body > button .scroll-hint-arrow {
+  animation: scroll-hint-bounce 1.35s ease-in-out infinite;
+}
+.app-motion .scroll-hint-float,
+body > button.scroll-hint-float {
+  animation: scroll-hint-float 2.4s ease-in-out infinite;
+}
+
 /* --- Staggered children ----------------------------------------------- */
 /* `stagger` + `landing-rise`/`page-enter` on children = sequenced entrance. */
 .stagger > * { animation-delay: calc(var(--stagger-step, 70ms) * var(--i, 0)); }
@@ -633,6 +657,13 @@
   }
   .app-motion .weather-meter-fill {
     animation: weather-meter-grow 1.1s cubic-bezier(0.22, 1, 0.36, 1) both !important;
+  }
+  .app-motion .scroll-hint-arrow {
+    animation: scroll-hint-bounce 1.35s ease-in-out infinite !important;
+  }
+  .app-motion .scroll-hint-float,
+  body > button.scroll-hint-float {
+    animation: scroll-hint-float 2.4s ease-in-out infinite !important;
   }
   .landing-page .landing-rise,
   .app-motion .landing-rise,
