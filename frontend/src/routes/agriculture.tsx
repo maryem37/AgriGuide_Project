@@ -53,9 +53,10 @@ import {
   ChevronUp,
   Eye,
   EyeOff,
+  Box,
 } from "lucide-react";
 import { getCropVisual, scoreTone } from "@/lib/cropVisual";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   Dialog,
   DialogContent,
@@ -86,6 +87,10 @@ import {
   type ParcelResolution,
 } from "@/lib/agricultureApi";
 import { saveRealCropRecommendations, cultureLabel } from "@/lib/cropRecommendations";
+
+const Terrain3DDialog = lazy(() =>
+  import("@/components/Terrain3DDialog").then((module) => ({ default: module.Terrain3DDialog })),
+);
 
 type GeoPolygon =
   | { type: "Polygon"; coordinates: number[][][] }
@@ -212,6 +217,7 @@ function Page() {
   const [showSaveForm, setShowSaveForm] = useState(false);
   const [terrainError, setTerrainError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [showRelief3d, setShowRelief3d] = useState(false);
 
   useEffect(() => {
     if (!selectedTerrainId && terrains[0]) {
@@ -477,6 +483,12 @@ function Page() {
                 </div>
 
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-end">
+                  {overlayGeometry && (
+                    <Button type="button" variant="outline" className="rounded-xl" onClick={() => setShowRelief3d(true)}>
+                      <Box className="h-4 w-4 mr-2" />
+                      Vue 3D
+                    </Button>
+                  )}
                   {canSaveExplored && !showSaveForm && (
                     <Button
                       type="button"
@@ -695,6 +707,14 @@ function Page() {
           )}
         </DialogContent>
       </Dialog>
+      <Suspense fallback={null}>
+        <Terrain3DDialog
+          open={showRelief3d}
+          onOpenChange={setShowRelief3d}
+          geometry={overlayGeometry as Record<string, unknown> | null}
+          label={selectedTerrain?.nom ?? previewQuery.data?.parcel_id}
+        />
+      </Suspense>
     </AppShell>
   );
 }

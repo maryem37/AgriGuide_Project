@@ -261,8 +261,6 @@ export function getReliefGrid(geometry: Record<string, unknown>): Promise<Relief
 }
 
 /** Orthophoto IGN optionnelle, chargée seulement si l'utilisateur la sélectionne. */
-export function getReliefOrthophoto(
-  geometry: Record<string, unknown>,
-): Promise<{ image_base64: string }> {
+export function getReliefOrthophoto(geometry: Record<string, unknown>): Promise<{ image_base64: string }> {
   return postJson<{ image_base64: string }>("/agriculture/relief/orthophoto", geometry);
 }

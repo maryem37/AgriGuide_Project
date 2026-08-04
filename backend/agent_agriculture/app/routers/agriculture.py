@@ -35,9 +35,32 @@ from app.services import (
     synthesis_service,
     dl_service,
     persistence_service,
+    relief3d_service,
 )
 
 router = APIRouter(prefix="/agriculture", tags=["agriculture"])
+
+
+@router.post("/relief/grid")
+async def get_relief_grid(geometry: dict):
+    """Return the terrain mesh data and satellite indices for the 3D viewer."""
+    if not geometry or "type" not in geometry or "coordinates" not in geometry:
+        raise HTTPException(status_code=400, detail="Géométrie GeoJSON de parcelle manquante ou invalide.")
+    try:
+        return await relief3d_service.build_relief_grid(geometry)
+    except Exception as exc:  # noqa: BLE001 - external data sources may fail independently
+        raise HTTPException(status_code=502, detail=f"Relief 3D indisponible : {exc}") from exc
+
+
+@router.post("/relief/orthophoto")
+async def get_relief_orthophoto(geometry: dict):
+    """Return an IGN orthophoto data URL for the selected 3D texture."""
+    if not geometry or "type" not in geometry or "coordinates" not in geometry:
+        raise HTTPException(status_code=400, detail="Géométrie GeoJSON de parcelle manquante ou invalide.")
+    try:
+        return {"image_base64": await asyncio.to_thread(relief3d_service.build_orthophoto_data_url, geometry)}
+    except Exception as exc:  # noqa: BLE001 - IGN availability is exposed to the UI
+        raise HTTPException(status_code=502, detail=f"Orthophoto IGN indisponible : {exc}") from exc
 
 
 @router.post("/parcel/resolve", response_model=ParcelResolution)
