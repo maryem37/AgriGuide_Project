@@ -32,19 +32,18 @@ export function AlertBanner({
     <div
       role={tone === "danger" || tone === "warning" ? "alert" : "status"}
       className={cn(
-        "page-enter group flex items-start gap-3 rounded-2xl border p-4 transition-shadow duration-300 hover:shadow-soft",
+        "page-enter group flex items-start gap-3 rounded-xl border p-4 backdrop-blur-sm transition-shadow duration-300 hover:shadow-soft",
         styles,
       )}
     >
-      {/* L'icône se pose avec un léger rebond, puis réagit au survol. */}
       <Icon
         className={cn(
-          "mt-0.5 h-6 w-6 shrink-0 transition-transform duration-500 group-hover:scale-110",
+          "mt-0.5 h-5 w-5 shrink-0 transition-transform duration-500 group-hover:scale-110",
           (tone === "danger" || tone === "warning") && "group-hover:rotate-6",
         )}
       />
       <div className="flex-1">
-        <div className="font-semibold">{title}</div>
+        <div className="font-display text-base font-bold tracking-tight">{title}</div>
         {children && <div className="mt-1 text-sm opacity-90">{children}</div>}
       </div>
       {action}

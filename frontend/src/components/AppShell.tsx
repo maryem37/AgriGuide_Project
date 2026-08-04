@@ -37,11 +37,13 @@ const nav = [
 
 function FullPageLoader() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-background">
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-background bg-mesh">
       <span className="relative flex h-12 w-12 items-center justify-center rounded-full text-primary pulse-ring">
         <Loader2 className="h-7 w-7 animate-spin" />
       </span>
-      <span className="text-sm text-muted-foreground">Chargement…</span>
+      <span className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
+        Chargement
+      </span>
     </div>
   );
 }
@@ -75,32 +77,43 @@ export function AppShell({
   const visibleNav = nav.filter((n) => !user || n.roles.includes(user.role));
 
   return (
-    <div className="app-motion min-h-screen bg-background pb-24 md:pb-0 md:pl-72">
-      {/* Sidebar (desktop) */}
-      <aside className="hidden md:flex fixed left-0 top-0 h-screen w-72 flex-col border-r border-border bg-card px-6 py-8 gap-2">
-        <Link to="/dashboard" className="mb-8 inline-flex press">
-          <AgriLogo withWordmark size={44} tagline="Votre allié au quotidien" />
+    <div className="app-motion app-canvas min-h-screen bg-background pb-24 md:pb-0 md:pl-[4.75rem] lg:pl-64">
+      {/* Sidebar — ink rail that expands on large screens */}
+      <aside className="hidden md:flex fixed left-0 top-0 z-30 h-screen w-[4.75rem] lg:w-64 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground px-3 lg:px-5 py-6 gap-1">
+        <Link
+          to="/dashboard"
+          className="mb-6 inline-flex press items-center justify-center lg:justify-start lg:px-1"
+        >
+          <AgriLogo size={40} withWordmark={false} variant="onDark" className="lg:hidden" />
+          <AgriLogo
+            size={40}
+            withWordmark
+            tagline={null}
+            variant="onDark"
+            className="hidden lg:inline-flex"
+          />
         </Link>
-        <nav className="flex flex-col gap-1">
+
+        <nav className="flex flex-1 flex-col gap-0.5">
           {visibleNav.map(({ to, label, icon: Icon }, i) => {
             const active = pathname === to || pathname.startsWith(to + "/");
             return (
               <Link
                 key={to}
                 to={to}
+                title={label}
                 style={{ ["--i" as string]: i }}
                 className={cn(
-                  "group page-enter relative flex items-center gap-3 overflow-hidden rounded-xl px-4 py-3 text-base font-medium",
-                  "transition-all duration-300 [animation-delay:calc(60ms*var(--i))]",
+                  "group page-enter relative flex items-center gap-3 overflow-hidden rounded-xl px-3 py-2.5 text-sm font-semibold",
+                  "transition-all duration-300 [animation-delay:calc(50ms*var(--i))]",
                   active
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-foreground hover:bg-secondary hover:translate-x-1",
+                    ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground",
                 )}
               >
-                {/* Liseré animé sur l'entrée active. */}
                 <span
                   className={cn(
-                    "absolute left-0 top-1/2 h-7 w-1 -translate-y-1/2 rounded-r-full bg-[#fa520f]",
+                    "absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-signal",
                     "origin-center transition-transform duration-300",
                     active ? "scale-y-100" : "scale-y-0",
                   )}
@@ -108,30 +121,30 @@ export function AppShell({
                 />
                 <Icon
                   className={cn(
-                    "h-5 w-5 transition-transform duration-300",
-                    active ? "scale-110" : "group-hover:scale-110",
+                    "h-[1.15rem] w-[1.15rem] shrink-0 transition-transform duration-300",
+                    active ? "scale-105" : "group-hover:scale-105",
                   )}
                 />
-                {label}
+                <span className="hidden lg:inline truncate">{label}</span>
               </Link>
             );
           })}
         </nav>
-        <div className="mt-auto">
+
+        <div className="mt-auto pt-4 border-t border-sidebar-border">
           <UserMenu />
         </div>
       </aside>
 
-      {/* `key` sur le pathname : chaque navigation rejoue l'animation d'entrée. */}
-      <main key={pathname} className="page-enter mx-auto max-w-6xl px-4 py-6 md:px-10 md:py-10">
+      <main key={pathname} className="page-enter mx-auto max-w-6xl px-4 py-6 md:px-8 md:py-9">
         {children}
         {pathname !== "/regulation" && !pathname.startsWith("/regulation/") && (
           <ScrollMoreHint />
         )}
       </main>
 
-      {/* Bottom nav (mobile) */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-card/95 backdrop-blur border-t border-border">
+      {/* Bottom nav (mobile) — floating dock */}
+      <nav className="md:hidden fixed bottom-3 inset-x-3 z-40 rounded-2xl border border-border/70 bg-card/90 backdrop-blur-xl shadow-[0_12px_40px_-20px_rgba(20,40,32,0.45)]">
         <div
           className="grid"
           style={{ gridTemplateColumns: `repeat(${visibleNav.length + 1}, minmax(0, 1fr))` }}
@@ -143,20 +156,20 @@ export function AppShell({
                 key={to}
                 to={to}
                 className={cn(
-                  "press relative flex flex-col items-center gap-1 py-2.5 text-[11px] font-medium transition-colors duration-300",
-                  active ? "text-primary" : "text-muted-foreground",
+                  "press relative flex flex-col items-center gap-0.5 py-2.5 text-[10px] font-semibold transition-colors duration-300",
+                  active ? "text-foreground" : "text-muted-foreground",
                 )}
               >
                 <span
                   className={cn(
-                    "absolute top-0 h-0.5 w-8 rounded-full bg-primary transition-transform duration-300",
-                    active ? "scale-x-100" : "scale-x-0",
+                    "absolute top-1.5 h-1 w-1 rounded-full bg-signal transition-transform duration-300",
+                    active ? "scale-100" : "scale-0",
                   )}
                   aria-hidden
                 />
                 <Icon
                   className={cn(
-                    "h-5 w-5 transition-transform duration-300",
+                    "mt-1 h-5 w-5 transition-transform duration-300",
                     active && "-translate-y-0.5 scale-110",
                   )}
                 />
@@ -192,8 +205,8 @@ function UserMenu({ compact = false }: { compact?: boolean }) {
   if (compact) {
     return (
       <DropdownMenu>
-        <DropdownMenuTrigger className="flex flex-col items-center gap-1 py-2.5 text-[11px] font-medium text-muted-foreground">
-          <Avatar className="h-5 w-5">
+        <DropdownMenuTrigger className="flex flex-col items-center gap-0.5 py-2.5 text-[10px] font-semibold text-muted-foreground">
+          <Avatar className="mt-1 h-5 w-5">
             <AvatarFallback className="text-[9px]">{initiales}</AvatarFallback>
           </Avatar>
           Profil
@@ -218,15 +231,15 @@ function UserMenu({ compact = false }: { compact?: boolean }) {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-left hover:bg-secondary transition-colors w-full">
-        <Avatar className="h-9 w-9">
-          <AvatarFallback className="bg-primary/10 text-primary font-semibold text-sm">
+      <DropdownMenuTrigger className="flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition-colors hover:bg-sidebar-accent lg:px-3">
+        <Avatar className="h-9 w-9 ring-1 ring-white/15">
+          <AvatarFallback className="bg-signal/20 text-signal font-semibold text-sm">
             {initiales}
           </AvatarFallback>
         </Avatar>
-        <div className="min-w-0 flex-1">
-          <div className="text-sm font-semibold truncate">{user.nom}</div>
-          <div className="text-xs text-muted-foreground">{roleLabel(user.role)}</div>
+        <div className="min-w-0 flex-1 hidden lg:block">
+          <div className="text-sm font-semibold truncate text-sidebar-foreground">{user.nom}</div>
+          <div className="text-[11px] text-sidebar-foreground/55">{roleLabel(user.role)}</div>
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" side="top" className="w-56">

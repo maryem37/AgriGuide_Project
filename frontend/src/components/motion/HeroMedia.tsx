@@ -56,20 +56,18 @@ export function HeroMedia({
     };
   }, [videoSrc]);
 
-  const showPoster = Boolean(poster) && !videoSrc;
-
   return (
     <div
       className={cn("pointer-events-none absolute inset-0 z-0 overflow-hidden", className)}
       aria-hidden={!alt}
     >
-      {showPoster && (
+      {poster && (
         <img
           src={poster}
           alt={alt}
           className={cn(
             "absolute inset-0 z-0 h-full w-full object-cover",
-            allowKenBurns && "ken-burns",
+            allowKenBurns && !videoSrc && "ken-burns",
           )}
           style={{ objectPosition }}
           fetchPriority="high"
@@ -85,6 +83,7 @@ export function HeroMedia({
           )}
           style={{ objectPosition }}
           src={videoSrc}
+          poster={poster}
           autoPlay
           muted
           loop
