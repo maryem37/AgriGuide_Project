@@ -7,5 +7,20 @@ node_modules/
 data/
 test.py
 .claude
+
+# Virtual environments
+agri_env/
+**/agri_env/
+venv/
+**/venv/
+
+# VS Code
+.vscode/
+
+# Chroma / Vector stores
 **/chroma_db/
 **/vector_store/
+**/chroma_store/
+
+# Terrain generated data
+backend/agent_agriculture/app/terrain_data/

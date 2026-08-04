@@ -166,6 +166,43 @@ export type AnalyzeResponse = {
 
 export type ParcelRequest = { point: Coordinate; manual_geojson?: Record<string, unknown> | null };
 
+export type ReliefGrid = {
+  grille_ndvi: number[][];
+  grille_ndwi: number[][];
+  grille_ndmi: number[][];
+  grille_elevation: number[][];
+  grille_pente_pct: number[][];
+  grille_validite: boolean[][];
+  grille_validite_satellite: boolean[][];
+  hauteur: number;
+  largeur: number;
+  largeur_m: number;
+  hauteur_m: number;
+  resolution_relief_m: number;
+  resolution_satellite_m: number;
+  resolution_ndmi_m: number;
+  source_relief: string;
+  date_relief: string | null;
+  stats_ndvi: {
+    moyen: number | null;
+    min: number | null;
+    max: number | null;
+      ndwi_moyen: number | null;
+      ndwi_min: number | null;
+      ndwi_max: number | null;
+      ndmi_moyen: number | null;
+      ndmi_min: number | null;
+      ndmi_max: number | null;
+    couverture_pct: number;
+  };
+  stats_pente: { moyenne_pct: number; p95_pct: number; max_pct: number };
+  periode_recherche: string;
+  source_satellite: string;
+  satellite_available: boolean;
+  index_definitions: { ndvi: string; ndwi: string; ndmi: string };
+  warnings: string[];
+};
+
 export class AgricultureApiError extends Error {
   constructor(
     message: string,
@@ -216,4 +253,14 @@ export function getNeighbors(request: ParcelRequest, radiusM = 800): Promise<Nei
 /** POST /agriculture/analyze — pipeline complet (sol/météo/satellite/scoring/rapport), persisté si `terrain_id` est fourni. */
 export function analyzeParcel(request: AnalyzeRequest): Promise<AnalyzeResponse> {
   return postJson<AnalyzeResponse>("/agriculture/analyze", request);
+}
+
+/** Mesh LiDAR/IGN et indices Sentinel utilisés par la vue 3D de la parcelle. */
+export function getReliefGrid(geometry: Record<string, unknown>): Promise<ReliefGrid> {
+  return postJson<ReliefGrid>("/agriculture/relief/grid", geometry);
+}
+
+/** Orthophoto IGN optionnelle, chargée seulement si l'utilisateur la sélectionne. */
+export function getReliefOrthophoto(geometry: Record<string, unknown>): Promise<{ image_base64: string }> {
+  return postJson<{ image_base64: string }>("/agriculture/relief/orthophoto", geometry);
 }

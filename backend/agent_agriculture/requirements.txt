@@ -5,6 +5,10 @@ pydantic-settings==2.5.2
 httpx==0.27.2
 tenacity==9.0.0
 psycopg2-binary==2.9.9
+numpy==2.1.1
+requests==2.32.3
+pyproj==3.6.1
+tifffile==2024.9.20
 
 # Geospatial (parcel resolution, area computation)
 shapely==2.0.6
@@ -25,13 +29,18 @@ sentence-transformers==3.1.1
 mistralai==1.2.3
 unstructured[pdf]==0.15.13
 
-# unstructured==0.15.13 does not pin pdfminer.six, so an unconstrained
-# `pip install` resolves to whatever is newest on PyPI at install time. Newer
-# pdfminer.six releases removed `PSSyntaxError` from `pdfminer.pdfparser`,
-# which unstructured's PDF partitioner still imports, breaking with
-# `ImportError: cannot import name 'PSSyntaxError'`. Pin to a version
-# contemporaneous with unstructured 0.15.13's original release.
-pdfminer.six==20240706
+# unstructured==0.15.13 imports PSSyntaxError from pdfminer.pdfparser, which
+# newer pdfminer.six releases removed. We do NOT pin pdfminer.six to an old
+# version to work around this (that forces pip to backtrack pdfplumber down
+# to its ancient 0.5.x line, which depends on the abandoned `pycrypto`
+# package — pycrypto's C extension does not build on modern MSVC/Windows SDK
+# headers, even with Visual C++ Build Tools installed; its 2013-era C code is
+# incompatible with current <inttypes.h>). Instead, pdfminer.six and
+# pdfplumber are left unpinned so pip resolves pdfplumber's own required
+# modern pdfminer.six version, and app/_compat_shims.py re-adds the missing
+# PSSyntaxError symbol as an alias before unstructured is imported. See
+# app/main.py for the shim import (must be the first import in that file).
+pdfplumber==0.11.10
 
 # Optional Phase B — DL crop classifier (BreizhCrops-pretrained TempCNN).
 # Heavy dependencies: only needed for app/services/dl_service.py and
