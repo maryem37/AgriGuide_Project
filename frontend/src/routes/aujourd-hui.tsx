@@ -653,7 +653,7 @@ function Page() {
                 </span>
                 <div>
                   <h2 className="font-display text-xl font-semibold tracking-tight">
-                    Tâches du jour
+                    Plan du jour
                   </h2>
                   <p className="text-sm text-muted-foreground">
                     {doneCount}/{tasks.length} terminée{doneCount > 1 ? "s" : ""}

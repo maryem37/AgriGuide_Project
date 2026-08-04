@@ -67,24 +67,27 @@ export function AuthLayout({
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(200deg, rgba(28,43,28,0.15) 0%, rgba(28,43,28,0.55) 55%, rgba(28,43,28,0.88) 100%)",
+              "linear-gradient(200deg, rgba(15,28,24,0.2) 0%, rgba(15,28,24,0.55) 55%, rgba(15,28,24,0.92) 100%)",
           }}
           aria-hidden
         />
         <div className="relative flex h-full flex-col justify-end p-10 xl:p-14">
-          <p className="landing-rise font-display text-3xl font-semibold leading-tight text-white xl:text-4xl">
+          <p className="landing-rise font-mono text-[11px] uppercase tracking-[0.22em] text-signal">
+            AgriMent
+          </p>
+          <p className="landing-rise landing-rise-delay-1 mt-3 font-display text-3xl font-bold leading-tight text-white xl:text-4xl">
             Le conseil de terrain,
             <br />
-            au même endroit.
+            <span className="text-signal">au même endroit.</span>
           </p>
           <ul className="mt-8 space-y-3">
             {HIGHLIGHTS.map((item, i) => (
               <li
                 key={item}
-                className="landing-rise flex items-center gap-3 text-white/85"
+                className="landing-rise flex items-center gap-3 text-sm text-white/80"
                 style={{ animationDelay: `${0.15 + i * 0.12}s` }}
               >
-                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-white/70" aria-hidden />
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-signal" aria-hidden />
                 {item}
               </li>
             ))}

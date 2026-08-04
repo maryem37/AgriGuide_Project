@@ -107,17 +107,17 @@ export function AgriLogo({
         <span className="leading-none">
           <span
             className={cn(
-              "font-display text-xl font-semibold tracking-tight",
+              "font-display text-xl font-bold tracking-tight",
               onDark ? "text-white" : "text-foreground",
             )}
           >
-            AgriMent
+            Agri<span className={onDark ? "text-signal" : "text-primary"}>Ment</span>
           </span>
           {tagline && (
             <span
               className={cn(
-                "mt-1 block text-[11px] font-medium tracking-wide",
-                onDark ? "text-white/70" : "text-muted-foreground",
+                "mt-1 block font-mono text-[10px] font-medium uppercase tracking-[0.16em]",
+                onDark ? "text-white/55" : "text-muted-foreground",
               )}
             >
               {tagline}

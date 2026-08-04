@@ -45,13 +45,13 @@ export function WeatherPanel({ className }: { className?: string }) {
 
       <div className="relative z-10 flex h-full flex-col p-5 md:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/12 px-3 py-1.5 text-xs font-semibold backdrop-blur-md ring-1 ring-white/20">
-            <MapPin className="h-3.5 w-3.5 text-[#E8C04A]" />
+          <div className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-1.5 text-xs font-semibold backdrop-blur-md ring-1 ring-white/15">
+            <MapPin className="h-3.5 w-3.5 text-signal" />
             Chartres · Eure-et-Loir
             <span className="weather-live-dot ml-1" />
-            <span className="text-white/70 font-medium">Live</span>
+            <span className="font-mono text-[10px] uppercase tracking-wider text-white/65">Live</span>
           </div>
-          <div className="inline-flex items-center gap-2 rounded-full bg-[#1C2B1C]/25 px-3 py-1.5 text-xs font-medium backdrop-blur-md ring-1 ring-white/15">
+          <div className="inline-flex items-center gap-2 rounded-lg bg-black/20 px-3 py-1.5 text-xs font-medium backdrop-blur-md ring-1 ring-white/10">
             <CloudSun className="h-3.5 w-3.5" />
             Éclaircies · vent modéré
           </div>
@@ -59,13 +59,13 @@ export function WeatherPanel({ className }: { className?: string }) {
 
         <div className="mt-5 flex flex-1 flex-col gap-6 md:mt-6 md:flex-row md:items-center md:justify-between">
           <div className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/55">
+            <p className="font-mono text-[11px] font-medium uppercase tracking-[0.22em] text-white/50">
               Aujourd’hui sur la parcelle
             </p>
             <div className="mt-1 flex items-end gap-3">
               <span
                 ref={tempRef}
-                className="font-display text-[4.5rem] leading-none font-semibold tracking-tight drop-shadow-sm md:text-[5.25rem]"
+                className="font-display text-[4.5rem] leading-none font-bold tracking-tight drop-shadow-sm md:text-[5.25rem]"
               >
                 {temp}°
               </span>
@@ -76,17 +76,17 @@ export function WeatherPanel({ className }: { className?: string }) {
                     {feels}°
                   </span>
                 </p>
-                <p className="inline-flex items-center gap-1.5 text-xs text-[#E8C04A]">
+                <p className="inline-flex items-center gap-1.5 text-xs text-signal">
                   <Thermometer className="h-3.5 w-3.5" />
                   Max 16° · Min 3°
                 </p>
               </div>
             </div>
 
-            <div className="mt-4 inline-flex max-w-md items-start gap-2.5 rounded-2xl bg-[#1C2B1C]/30 px-3.5 py-2.5 text-sm backdrop-blur-md ring-1 ring-[#E8C04A]/35">
-              <Snowflake className="mt-0.5 h-4 w-4 shrink-0 text-[#E8C04A]" />
+            <div className="mt-4 inline-flex max-w-md items-start gap-2.5 rounded-xl bg-black/25 px-3.5 py-2.5 text-sm backdrop-blur-md ring-1 ring-signal/35">
+              <Snowflake className="mt-0.5 h-4 w-4 shrink-0 text-signal" />
               <p className="leading-snug text-white/90">
-                <span className="font-semibold text-[#E8C04A]">Gel prévu cette nuit</span>
+                <span className="font-semibold text-signal">Gel prévu cette nuit</span>
                 {" - "}jusqu’à −2°C entre 3h et 6h. Surveillez les jeunes plants.
               </p>
             </div>
@@ -116,15 +116,15 @@ export function WeatherPanel({ className }: { className?: string }) {
               />
               <defs>
                 <linearGradient id="weatherOrbGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#E8C04A" />
+                  <stop offset="0%" stopColor="#C8F542" />
                   <stop offset="100%" stopColor="#7EC8A3" />
                 </linearGradient>
               </defs>
             </svg>
             <div className="relative text-center">
-              <Gauge className="mx-auto h-5 w-5 text-[#E8C04A]" />
-              <p className="mt-1 font-display text-2xl font-semibold leading-none">Bon</p>
-              <p className="mt-1 text-[10px] uppercase tracking-wider text-white/60">
+              <Gauge className="mx-auto h-5 w-5 text-signal" />
+              <p className="mt-1 font-display text-2xl font-bold leading-none">Bon</p>
+              <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-white/55">
                 Indice parcelle
               </p>
             </div>
@@ -137,19 +137,19 @@ export function WeatherPanel({ className }: { className?: string }) {
             return (
               <div
                 key={m.label}
-                className="group rounded-2xl bg-white/10 px-3 py-3 backdrop-blur-md ring-1 ring-white/15 transition duration-300 hover:-translate-y-0.5 hover:bg-white/16"
+                className="group rounded-xl bg-white/10 px-3 py-3 backdrop-blur-md ring-1 ring-white/12 transition duration-300 hover:-translate-y-0.5 hover:bg-white/16"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <Icon className="h-4 w-4 text-[#E8C04A] transition-transform duration-400 group-hover:scale-110" />
-                  <span className="text-[10px] font-medium uppercase tracking-wide text-white/50">
+                  <Icon className="h-4 w-4 text-signal transition-transform duration-400 group-hover:scale-110" />
+                  <span className="font-mono text-[10px] font-medium uppercase tracking-wide text-white/50">
                     {m.label}
                   </span>
                 </div>
-                <p className="mt-1.5 font-display text-lg font-semibold leading-none">{m.value}</p>
+                <p className="mt-1.5 font-display text-lg font-bold leading-none">{m.value}</p>
                 <p className="mt-1 text-[11px] text-white/60">{m.hint}</p>
                 <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/15">
                   <div
-                    className="weather-meter-fill h-full rounded-full bg-gradient-to-r from-[#E8C04A] to-[#7EC8A3]"
+                    className="weather-meter-fill h-full rounded-full bg-gradient-to-r from-signal to-[#7EC8A3]"
                     style={{ width: `${m.fill}%` }}
                   />
                 </div>
