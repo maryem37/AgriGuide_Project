@@ -63,18 +63,14 @@ services:
   agent_monitoring:
     build: ./backend/agent_monitoring
     env_file: .env
-    depends_on: [db, redis]
+    ports:
+      - "8003:8000"
+    depends_on: [db]
 
   marketplace:
     build: ./backend/marketplace
     env_file: .env
     depends_on: [db]
-
-  celery_beat:
-    build: ./backend/agent_monitoring
-    command: celery -A app beat --loglevel=info
-    env_file: .env
-    depends_on: [redis, db]
 
 volumes:
   db_data:

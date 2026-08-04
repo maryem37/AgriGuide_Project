@@ -37,6 +37,7 @@ import {
   type FarmerDecisionResponse,
 } from "@/lib/businessApi";
 import { MOCK_CROP_RECOMMENDATIONS, loadRealCropRecommendations, cultureLabel } from "@/lib/cropRecommendations";
+import { saveFarmerDecision } from "@/lib/farmerDecision";
 import { useAuth } from "@/lib/auth-context";
 
 export const Route = createFileRoute("/business")({
@@ -124,6 +125,7 @@ function Page() {
     mutationFn: confirmFarmerDecision,
     onSuccess: (data, variables) => {
       setDecision(data);
+      saveFarmerDecision(data);
       const chosen = report?.scenarios.find(
         (s) => s.culture === variables.allocations[0]?.culture,
       );

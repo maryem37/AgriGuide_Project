@@ -1,26 +1,52 @@
 # Agent Monitoring (Suivi quotidien)
 
-**Rôle** : accompagner le farmer une fois la décision confirmée — alertes,
-carnet de bord, suivi financier, et déclenchement des suggestions marketplace.
+**Rôle** : briefing opérationnel une fois la décision de culture confirmée —
+météo du jour, conseils d'irrigation, alertes et tâches.
 
-## Fonctionnement
-Tâches Celery Beat (cron), pas des réponses à une question directe :
-- Vérification météo quotidienne par culture active → recommandations
-  irrigation → `alerts`
-- Croisement des bulletins phytosanitaires régionaux (BSV) avec les cultures
-  actives → `alerts` (niveau_urgence selon gravité)
-- Rappels d'échéances administratives (lié à `dossiers_administratifs`)
-- Détection de la fenêtre de récolte via
-  `decision_allocations.date_maturite_prevue` → déclenche une suggestion
-  d'annonce marketplace (voir `backend/marketplace/README.md`)
+## Lancer en local
 
-## Sortie
-- `monitoring_logs` (carnet de bord)
-- `alerts`
-- `cost_tracking` (comparaison budget réel vs. estimé)
-- Notifications envoyées via le canal choisi (`notification_preferences`)
+```bash
+cd backend/agent_monitoring
+python -m venv .venv
+# Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+# MISTRAL_API_KEY doit être dans le .env racine ou exporté
+uvicorn app.main:app --reload --port 8003
+```
 
-## Ne PAS faire ici
-Pas de nouvel agent conversationnel — ce module est piloté par des jobs
-planifiés, pas par des requêtes utilisateur en direct (celles-ci passent par
-l'orchestrateur vers les autres agents).
+URL frontend : `VITE_AGENT_MONITORING_URL=http://localhost:8003`
+
+## API
+
+### `GET /health`
+
+### `POST /monitoring/analyze`
+
+Corps (contexte réel — plus de `mock_db`) :
+
+```json
+{
+  "farmer_name": "Alice Dupont",
+  "terrain_id": "uuid-optionnel",
+  "location": { "latitude": 46.8, "longitude": 2.3, "label": "Berry" },
+  "crops": [
+    { "crop_name": "tomate", "hectares": 4.5, "water_sensitivity": "high" }
+  ],
+  "hardware_inventory": ["tracteur", "pulverisateur"]
+}
+```
+
+Réponse : `weather_summary` + `analysis` (`has_alert`, `daily_advice`,
+`water_saving_technique`, `tasks`, `crop_alerts`).
+
+## Pipeline LangGraph
+
+1. `fetch_weather` — Open-Meteo (lat/lon du terrain)
+2. `mistral_reasoning` — conseils structurés JSON
+
+## Hors scope (plus tard)
+
+- Fenêtre de récolte → suggestion marketplace
+- Jobs Celery Beat / persistance `alerts` / BSV phytosanitaire
+- Lecture directe PostgreSQL des `farmer_decisions` (en attendant, le
+  frontend envoie le contexte depuis Auth + décision confirmée)
