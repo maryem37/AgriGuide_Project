@@ -209,7 +209,7 @@ export function resolveParcel(request: ParcelRequest): Promise<ParcelResolution>
 }
 
 /** POST /agriculture/parcel/neighbors — répartition des cultures déclarées dans un rayon donné, sans persistance. */
-export function getNeighbors(request: ParcelRequest, radiusM = 800): Promise<NeighborCropContext> {
+export function getNeighbors(request: ParcelRequest, radiusM = 15_000): Promise<NeighborCropContext> {
   return postJson<NeighborCropContext>(`/agriculture/parcel/neighbors?radius_m=${radiusM}`, request);
 }
 

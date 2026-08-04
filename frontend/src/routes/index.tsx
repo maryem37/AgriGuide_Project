@@ -60,7 +60,7 @@ const HERO_VIDEO = "/video/LandingPage.mp4";
 const STATS = [
   { value: 3, suffix: "", label: "conseillers IA", sub: "Agricole, business, réglementaire" },
   { value: 5, suffix: "", label: "cultures classées", sub: "Par parcelle analysée" },
-  { value: 800, suffix: " m", label: "rayon voisinage", sub: "Contexte cultural réel" },
+  { value: 15, suffix: " km", label: "rayon voisinage", sub: "Contexte cultural réel" },
   {
     value: 100,
     suffix: " %",
@@ -137,16 +137,16 @@ function Welcome() {
 
         <div className="relative z-10 flex min-h-[calc(100svh-5.5rem)] flex-col justify-end px-5 pb-16 pt-24 md:px-10 md:pb-20">
           <div className="max-w-3xl">
-            <h1 className="landing-rise font-display text-[clamp(3rem,9vw,6.5rem)] font-extrabold leading-[0.92] tracking-tight text-white">
-              Agri<span className="text-signal">Ment</span>
+            <h1 className="landing-rise font-display text-[clamp(2.4rem,6.5vw,4.5rem)] font-extrabold leading-[1.02] tracking-tight text-white">
+              Cultiver un monde{" "}
+              <span className="text-signal">plus prévisible</span>,{" "}
+              <span className="text-signal">plus rentable</span>.
             </h1>
-            <p className="landing-rise landing-rise-delay-1 mt-4 max-w-lg font-display text-xl md:text-2xl font-semibold leading-snug text-white/90">
-              Le terrain, décidé.
+            <p className="landing-rise landing-rise-delay-1 mt-5 max-w-xl text-base md:text-lg text-white/75 leading-relaxed">
+              AgriMent relie analyse de parcelle, scénarios budgétaires et aides réglementaires —
+              trois conseillers IA pour décider clairement, du sol au bilan.
             </p>
-            <p className="landing-rise landing-rise-delay-2 mt-3 max-w-md text-base text-white/70 leading-relaxed">
-              Analyse parcelle, scénarios budgétaires, aides — trois IA, une décision claire.
-            </p>
-            <div className="landing-rise landing-rise-delay-3 mt-8 flex flex-col sm:flex-row gap-3">
+            <div className="landing-rise landing-rise-delay-2 mt-8 flex flex-col sm:flex-row gap-3">
               <Button
                 asChild
                 size="lg"

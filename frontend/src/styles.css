@@ -121,13 +121,14 @@
   --chart-4: oklch(0.52 0.08 55);
   --chart-5: oklch(0.78 0.14 80);
 
-  --sidebar: oklch(0.22 0.035 155);
-  --sidebar-foreground: oklch(0.94 0.02 150);
+  /* Soft ink — darker than mist, lighter than deep forest */
+  --sidebar: oklch(0.36 0.04 155);
+  --sidebar-foreground: oklch(0.96 0.015 150);
   --sidebar-primary: oklch(0.88 0.18 125);
   --sidebar-primary-foreground: oklch(0.22 0.05 150);
-  --sidebar-accent: oklch(0.3 0.04 155);
-  --sidebar-accent-foreground: oklch(0.94 0.02 150);
-  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-accent: oklch(0.42 0.04 155);
+  --sidebar-accent-foreground: oklch(0.96 0.015 150);
+  --sidebar-border: oklch(1 0 0 / 12%);
   --sidebar-ring: oklch(0.88 0.18 125);
 
   --signal: oklch(0.88 0.18 125);
@@ -401,6 +402,50 @@
   50% { transform: translateY(-8px); }
 }
 .float-soft { animation: float-soft 6s ease-in-out infinite; }
+
+/* --- Chat mascot / typewriter ----------------------------------------- */
+@keyframes chat-mascot-bob {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-5px) rotate(2deg); }
+}
+@keyframes chat-mascot-blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  96% { transform: scaleY(0.12); }
+}
+@keyframes chat-mascot-antenna {
+  0%, 100% { transform: rotate(-6deg); }
+  50% { transform: rotate(8deg); }
+}
+@keyframes chat-dot-bounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.45; }
+  40% { transform: translateY(-4px); opacity: 1; }
+}
+@keyframes chat-caret {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.chat-caret {
+  animation: chat-caret 0.9s step-end infinite;
+}
+.chat-mascot {
+  animation: chat-mascot-bob 1.6s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+.chat-mascot-soft {
+  animation: chat-mascot-bob 2.2s ease-in-out infinite;
+}
+.chat-mascot-blink {
+  transform-origin: center;
+  animation: chat-mascot-blink 3.2s step-end infinite;
+}
+.chat-mascot-antenna {
+  transform-origin: 26px 12px;
+  animation: chat-mascot-antenna 1.4s ease-in-out infinite;
+}
+.chat-mascot-antenna-r {
+  transform-origin: 38px 12px;
+  animation: chat-mascot-antenna 1.4s ease-in-out infinite reverse;
+}
 
 @keyframes sheen {
   from { transform: translateX(-120%) skewX(-18deg); }
@@ -694,6 +739,11 @@ body > button.scroll-hint-float {
   .app-motion .weather-cloud-b,
   .app-motion .weather-cloud-c {
     animation-duration: 36s !important;
+    animation-iteration-count: infinite !important;
+  }
+  .app-motion .chat-caret {
+    animation: chat-caret 0.9s step-end infinite !important;
+    animation-duration: 0.9s !important;
     animation-iteration-count: infinite !important;
   }
   .app-motion .weather-live-dot {

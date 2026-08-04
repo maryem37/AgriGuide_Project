@@ -10,7 +10,7 @@ import {
   User,
   Loader2,
 } from "lucide-react";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth, roleLabel } from "@/lib/auth-context";
 import type { Role } from "@/lib/authApi";
@@ -27,12 +27,12 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const nav = [
-  { to: "/dashboard", label: "Accueil", icon: Home, roles: ["farmer"] as Role[] },
-  { to: "/agriculture", label: "Cultures", icon: Sprout, roles: ["farmer"] as Role[] },
-  { to: "/regulation", label: "Règles", icon: ScrollText, roles: ["farmer"] as Role[] },
-  { to: "/business", label: "Budget", icon: LineChart, roles: ["farmer"] as Role[] },
-  { to: "/aujourd-hui", label: "Aujourd'hui", icon: CalendarDays, roles: ["farmer"] as Role[] },
-  { to: "/marketplace", label: "Marché", icon: Store, roles: ["farmer", "acheteur"] as Role[] },
+  { to: "/dashboard", label: "Accueil", shortLabel: "Accueil", icon: Home, roles: ["farmer"] as Role[] },
+  { to: "/agriculture", label: "Conseiller Agricole", shortLabel: "Agricole", icon: Sprout, roles: ["farmer"] as Role[] },
+  { to: "/regulation", label: "Conseiller Réglementaire", shortLabel: "Règles", icon: ScrollText, roles: ["farmer"] as Role[] },
+  { to: "/business", label: "Conseiller Financier", shortLabel: "Financier", icon: LineChart, roles: ["farmer"] as Role[] },
+  { to: "/aujourd-hui", label: "Aujourd'hui", shortLabel: "Aujourd'hui", icon: CalendarDays, roles: ["farmer"] as Role[] },
+  { to: "/marketplace", label: "Marché", shortLabel: "Marché", icon: Store, roles: ["farmer", "acheteur"] as Role[] },
 ] as const;
 
 function FullPageLoader() {
@@ -56,8 +56,10 @@ export function AppShell({
   allowRoles?: Role[];
 }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { status, user, signOut } = useAuth();
+  const { status, user } = useAuth();
   const navigate = useNavigate();
+  const [expanded, setExpanded] = useState(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const roleMismatch =
     status === "authenticated" && user !== null && !allowRoles.includes(user.role);
@@ -70,6 +72,22 @@ export function AppShell({
     }
   }, [status, roleMismatch, user, navigate]);
 
+  useEffect(() => {
+    return () => {
+      if (closeTimer.current) clearTimeout(closeTimer.current);
+    };
+  }, []);
+
+  function openSidebar() {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    setExpanded(true);
+  }
+
+  function scheduleCloseSidebar() {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    closeTimer.current = setTimeout(() => setExpanded(false), 160);
+  }
+
   if (status === "loading" || status === "anonymous" || roleMismatch) {
     return <FullPageLoader />;
   }
@@ -77,20 +95,43 @@ export function AppShell({
   const visibleNav = nav.filter((n) => !user || n.roles.includes(user.role));
 
   return (
-    <div className="app-motion app-canvas min-h-screen bg-background pb-24 md:pb-0 md:pl-[4.75rem] lg:pl-64">
-      {/* Sidebar — ink rail that expands on large screens */}
-      <aside className="hidden md:flex fixed left-0 top-0 z-30 h-screen w-[4.75rem] lg:w-64 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground px-3 lg:px-5 py-6 gap-1">
+    <div className="app-motion app-canvas min-h-screen bg-background pb-24 md:pb-0 md:pl-[4.75rem]">
+      {/* Sidebar — collapsed by default, expands smoothly on hover */}
+      <aside
+        onMouseEnter={openSidebar}
+        onMouseLeave={scheduleCloseSidebar}
+        onFocusCapture={openSidebar}
+        onBlurCapture={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+            scheduleCloseSidebar();
+          }
+        }}
+        className={cn(
+          "group/sidebar hidden md:flex fixed left-0 top-0 z-30 h-screen flex-col",
+          "border-r border-sidebar-border bg-sidebar text-sidebar-foreground",
+          "overflow-hidden px-3 py-6 gap-1",
+          "transition-[width,box-shadow] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+          expanded
+            ? "w-[17.5rem] shadow-[12px_0_40px_-24px_rgba(20,40,32,0.45)]"
+            : "w-[4.75rem]",
+        )}
+      >
         <Link
           to="/dashboard"
-          className="mb-6 inline-flex press items-center justify-center lg:justify-start lg:px-1"
+          className={cn(
+            "mb-6 inline-flex press items-center",
+            expanded ? "justify-start px-1" : "justify-center",
+          )}
         >
-          <AgriLogo size={40} withWordmark={false} variant="onDark" className="lg:hidden" />
           <AgriLogo
             size={40}
-            withWordmark
+            withWordmark={expanded}
             tagline={null}
             variant="onDark"
-            className="hidden lg:inline-flex"
+            className={cn(
+              "transition-opacity duration-300",
+              expanded ? "opacity-100" : "opacity-100",
+            )}
           />
         </Link>
 
@@ -104,8 +145,9 @@ export function AppShell({
                 title={label}
                 style={{ ["--i" as string]: i }}
                 className={cn(
-                  "group page-enter relative flex items-center gap-3 overflow-hidden rounded-xl px-3 py-2.5 text-sm font-semibold",
+                  "group page-enter relative flex items-center overflow-hidden rounded-xl py-2.5 text-sm font-semibold",
                   "transition-all duration-300 [animation-delay:calc(50ms*var(--i))]",
+                  expanded ? "gap-3 px-3" : "justify-center px-0",
                   active
                     ? "bg-sidebar-primary text-sidebar-primary-foreground"
                     : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground",
@@ -125,18 +167,39 @@ export function AppShell({
                     active ? "scale-105" : "group-hover:scale-105",
                   )}
                 />
-                <span className="hidden lg:inline truncate">{label}</span>
+                <span
+                  className={cn(
+                    "truncate whitespace-nowrap transition-all duration-300",
+                    expanded
+                      ? "max-w-[13rem] opacity-100 translate-x-0"
+                      : "max-w-0 opacity-0 -translate-x-1",
+                  )}
+                >
+                  {label}
+                </span>
               </Link>
             );
           })}
         </nav>
 
         <div className="mt-auto pt-4 border-t border-sidebar-border">
-          <UserMenu />
+          <UserMenu
+            expanded={expanded}
+            onMenuEnter={openSidebar}
+            onMenuLeave={scheduleCloseSidebar}
+          />
         </div>
       </aside>
 
-      <main key={pathname} className="page-enter mx-auto max-w-6xl px-4 py-6 md:px-8 md:py-9">
+      <main
+        key={pathname}
+        className={cn(
+          "page-enter mx-auto w-full max-w-[1680px] px-5 sm:px-6 md:px-5 lg:px-12",
+          pathname === "/regulation" || pathname.startsWith("/regulation/")
+            ? "py-3 md:py-4 pb-20 md:pb-4"
+            : "py-7 md:py-6",
+        )}
+      >
         {children}
         {pathname !== "/regulation" && !pathname.startsWith("/regulation/") && (
           <ScrollMoreHint />
@@ -149,12 +212,13 @@ export function AppShell({
           className="grid"
           style={{ gridTemplateColumns: `repeat(${visibleNav.length + 1}, minmax(0, 1fr))` }}
         >
-          {visibleNav.map(({ to, label, icon: Icon }) => {
+          {visibleNav.map(({ to, label, shortLabel, icon: Icon }) => {
             const active = pathname === to || pathname.startsWith(to + "/");
             return (
               <Link
                 key={to}
                 to={to}
+                title={label}
                 className={cn(
                   "press relative flex flex-col items-center gap-0.5 py-2.5 text-[10px] font-semibold transition-colors duration-300",
                   active ? "text-foreground" : "text-muted-foreground",
@@ -173,7 +237,7 @@ export function AppShell({
                     active && "-translate-y-0.5 scale-110",
                   )}
                 />
-                {label}
+                {shortLabel}
               </Link>
             );
           })}
@@ -184,7 +248,17 @@ export function AppShell({
   );
 }
 
-function UserMenu({ compact = false }: { compact?: boolean }) {
+function UserMenu({
+  compact = false,
+  expanded = true,
+  onMenuEnter,
+  onMenuLeave,
+}: {
+  compact?: boolean;
+  expanded?: boolean;
+  onMenuEnter?: () => void;
+  onMenuLeave?: () => void;
+}) {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -231,18 +305,38 @@ function UserMenu({ compact = false }: { compact?: boolean }) {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition-colors hover:bg-sidebar-accent lg:px-3">
-        <Avatar className="h-9 w-9 ring-1 ring-white/15">
+      <DropdownMenuTrigger
+        className={cn(
+          "flex w-full items-center rounded-xl py-2 text-left transition-colors hover:bg-sidebar-accent",
+          expanded ? "gap-3 px-2.5" : "justify-center px-0",
+        )}
+      >
+        <Avatar className="h-9 w-9 shrink-0 ring-1 ring-white/15">
           <AvatarFallback className="bg-signal/20 text-signal font-semibold text-sm">
             {initiales}
           </AvatarFallback>
         </Avatar>
-        <div className="min-w-0 flex-1 hidden lg:block">
-          <div className="text-sm font-semibold truncate text-sidebar-foreground">{user.nom}</div>
-          <div className="text-[11px] text-sidebar-foreground/55">{roleLabel(user.role)}</div>
+        <div
+          className={cn(
+            "min-w-0 flex-1 overflow-hidden transition-all duration-300",
+            expanded ? "max-w-[13rem] opacity-100" : "max-w-0 opacity-0",
+          )}
+        >
+          <div className="text-sm font-semibold truncate text-sidebar-foreground whitespace-nowrap">
+            {user.nom}
+          </div>
+          <div className="text-[11px] text-sidebar-foreground/55 whitespace-nowrap">
+            {roleLabel(user.role)}
+          </div>
         </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" side="top" className="w-56">
+      <DropdownMenuContent
+        align="start"
+        side="top"
+        className="w-56"
+        onMouseEnter={onMenuEnter}
+        onMouseLeave={onMenuLeave}
+      >
         <DropdownMenuLabel className="truncate">{user.email}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {user.role === "farmer" && (

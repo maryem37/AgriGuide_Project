@@ -34,19 +34,19 @@ export const Route = createFileRoute("/dashboard")({
 const ACTIONS = [
   {
     to: "/agriculture" as const,
-    label: "Cultures",
+    label: "Conseiller Agricole",
     hint: "Analyser une parcelle",
     icon: Sprout,
   },
   {
     to: "/business" as const,
-    label: "Budget",
+    label: "Conseiller Financier",
     hint: "Comparer 3 scénarios",
     icon: LineChart,
   },
   {
     to: "/regulation" as const,
-    label: "Règles",
+    label: "Conseiller Réglementaire",
     hint: "Aides & cadre légal",
     icon: ScrollText,
   },

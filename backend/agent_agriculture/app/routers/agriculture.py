@@ -46,7 +46,7 @@ async def resolve_parcel_only(req: ParcelRequest):
 
 
 @router.post("/parcel/neighbors", response_model=NeighborCropContext)
-async def get_neighbors(req: ParcelRequest, radius_m: float = 800):
+async def get_neighbors(req: ParcelRequest, radius_m: float = 15_000):
     parcel = await parcel_service.resolve_parcel(req)
     centroid = parcel.centroid or req.point
     return await parcel_service.get_neighboring_crop_context(
@@ -145,7 +145,7 @@ async def analyze(req: AnalyzeRequest):
         weather_service.get_weather_data(parcel.centroid),
         satellite_service.get_ndvi(parcel.geometry) if parcel.geometry else asyncio.sleep(0, result=None),
         dl_service.predict_crop(parcel.geometry) if parcel.geometry else asyncio.sleep(0, result=None),
-        parcel_service.get_neighboring_crop_context(parcel.centroid, radius_m=800, exclude_parcel_id=parcel.rpg_id_parcel),
+        parcel_service.get_neighboring_crop_context(parcel.centroid, radius_m=15_000, exclude_parcel_id=parcel.rpg_id_parcel),
         return_exceptions=True,
     )
     soil, weather, vegetation, dl_observation, neighbors = results

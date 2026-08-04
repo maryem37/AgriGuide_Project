@@ -191,7 +191,7 @@ function topNeighborCrops(neighbors: NeighborCropContext, limit = 3): string {
 }
 
 /** Doit rester en phase avec le défaut `radius_m` de `POST /agriculture/parcel/neighbors` côté backend. */
-const NEIGHBORS_RADIUS_M = 800;
+const NEIGHBORS_RADIUS_M = 15_000;
 const EXPLORE_VALUE = "__explore__";
 
 function Page() {
@@ -1005,7 +1005,7 @@ function NeighborsPreviewCard({ neighbors, radiusM }: { neighbors: NeighborCropC
     <div className="card-soft p-5">
       <div className="flex items-center gap-2 text-xs font-semibold tracking-widest text-muted-foreground uppercase mb-4">
         <Users className="h-4 w-4" />
-        Cultures voisines - {neighbors.neighbor_count} parcelle{neighbors.neighbor_count > 1 ? "s" : ""} ({radiusM} m)
+        Cultures voisines - {neighbors.neighbor_count} parcelle{neighbors.neighbor_count > 1 ? "s" : ""} ({radiusM >= 1000 ? `${radiusM / 1000} km` : `${radiusM} m`})
       </div>
       {entries.length === 0 ? (
         <p className="text-sm text-muted-foreground">{neighbors.note}</p>
