@@ -10,7 +10,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-/** Sous-ensemble minimal de GeoJSON (Polygon/MultiPolygon) — évite une dépendance sur les types globaux `@types/geojson`. */
+/** Sous-ensemble minimal de GeoJSON (Polygon/MultiPolygon) - évite une dépendance sur les types globaux `@types/geojson`. */
 type PolygonGeometry = { type: "Polygon"; coordinates: number[][][] };
 type MultiPolygonGeometry = { type: "MultiPolygon"; coordinates: number[][][][] };
 
@@ -65,7 +65,7 @@ export default function MapPickerInner({
   showHint = true,
 }: {
   /** "polygon" (défaut) : trace un contour libre, comme à l'onboarding.
-   *  "point" : un seul clic déplace un marqueur unique — utilisé pour résoudre une parcelle cadastrale précise. */
+   *  "point" : un seul clic déplace un marqueur unique - utilisé pour résoudre une parcelle cadastrale précise. */
   mode?: "polygon" | "point";
   onPolygon?: (points: [number, number][]) => void;
   onPoint?: (point: [number, number]) => void;

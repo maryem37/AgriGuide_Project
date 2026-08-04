@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { AppShell } from "@/components/AppShell";
 import { AlertBanner } from "@/components/AlertBanner";
+import { PageHeader } from "@/components/PageHeader";
+import { Reveal } from "@/components/motion/Reveal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
@@ -13,9 +15,9 @@ import { MarkdownLite } from "@/lib/markdownLite";
 export const Route = createFileRoute("/regulation")({
   head: () => ({
     meta: [
-      { title: "Conseiller Réglementaire — AgriMent" },
+      { title: "Conseiller Réglementaire - AgriMent" },
       { name: "description", content: "Chat, aides, PAC et certifications : toutes les règles agricoles expliquées et un dossier généré pour vous." },
-      { property: "og:title", content: "Conseiller Réglementaire — AgriMent" },
+      { property: "og:title", content: "Conseiller Réglementaire - AgriMent" },
       { property: "og:description", content: "Toutes les règles agricoles, expliquées." },
     ],
   }),
@@ -107,129 +109,147 @@ function Page() {
 
   return (
     <AppShell>
-      <div className="flex items-center gap-3 mb-8">
-        <div className="h-11 w-11 rounded-2xl bg-sky/25 text-sky-foreground flex items-center justify-center">
-          <ScrollText className="h-6 w-6" />
-        </div>
-        <div>
-          <h1 className="font-display text-3xl md:text-4xl font-semibold leading-none">Conseiller Réglementaire</h1>
-          <p className="text-muted-foreground mt-1">Posez vos questions en langage naturel.</p>
-        </div>
-      </div>
+      <PageHeader
+        icon={ScrollText}
+        tone="sky"
+        title="Conseiller Réglementaire"
+        subtitle="Posez vos questions en langage naturel."
+        className="mb-8"
+      />
 
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
         {/* Chat */}
-        <div className="card-soft flex flex-col overflow-hidden h-140">
-          <div className="flex-1 overflow-y-auto p-6 space-y-4">
-            {messages.map((m, i) => (
-              <div
-                key={i}
-                className={
-                  m.role === "user"
-                    ? "ml-auto max-w-[80%] rounded-2xl rounded-tr-sm bg-primary text-primary-foreground px-4 py-3"
-                    : "max-w-[85%] rounded-2xl rounded-tl-sm bg-secondary text-secondary-foreground px-4 py-3"
-                }
-              >
-                {m.role === "bot" ? <MarkdownLite text={m.text} /> : m.text}
+        <Reveal from="left">
+          <div className="card-soft flex flex-col overflow-hidden h-140">
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              {messages.map((m, i) => (
+                <div
+                  key={i}
+                  className={
+                    m.role === "user"
+                      ? "page-enter ml-auto max-w-[80%] rounded-2xl rounded-tr-sm bg-primary text-primary-foreground px-4 py-3 shadow-sm"
+                      : "page-enter max-w-[85%] rounded-2xl rounded-tl-sm bg-secondary text-secondary-foreground px-4 py-3"
+                  }
+                >
+                  {m.role === "bot" ? <MarkdownLite text={m.text} /> : m.text}
+                </div>
+              ))}
+              {chatMutation.isPending && (
+                <div className="page-enter max-w-[85%] rounded-2xl rounded-tl-sm bg-secondary text-secondary-foreground px-4 py-3 flex items-center gap-2.5">
+                  {/* Trois points qui rebondissent - indique la frappe en cours. */}
+                  <span className="flex gap-1" aria-hidden>
+                    {[0, 1, 2].map((d) => (
+                      <span
+                        key={d}
+                        className="h-2 w-2 rounded-full bg-current opacity-60 float-soft"
+                        style={{ animationDelay: `${d * 0.16}s`, animationDuration: "1.1s" }}
+                      />
+                    ))}
+                  </span>
+                  Recherche en cours...
+                </div>
+              )}
+              {errorMessage && (
+                <AlertBanner tone="danger" title="Agent réglementaire indisponible">
+                  {errorMessage}
+                </AlertBanner>
+              )}
+              <div ref={scrollAnchorRef} />
+            </div>
+            <div className="border-t border-border p-4">
+              {!messages.some((m) => m.role === "user") && (
+                <div className="flex gap-2 flex-wrap mb-3">
+                  {suggestions.map((s, i) => (
+                    <button
+                      key={s}
+                      onClick={() => send(s)}
+                      disabled={chatMutation.isPending}
+                      style={{ animationDelay: `${0.1 + i * 0.07}s` }}
+                      className="page-enter press text-xs rounded-full border border-border bg-background px-3 py-1.5 hover:bg-secondary hover:border-primary/40 text-muted-foreground hover:text-foreground transition-all duration-300 disabled:opacity-50 disabled:pointer-events-none"
+                    >
+                      <Sparkles className="inline h-3 w-3 mr-1" />
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <div className="flex gap-2">
+                <Input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Écrivez votre question..."
+                  className="h-12 rounded-xl text-base transition-shadow focus-visible:shadow-[0_0_0_4px_var(--color-secondary)]"
+                  disabled={chatMutation.isPending}
+                  onKeyDown={(e) => e.key === "Enter" && send(input)}
+                />
+                <Button
+                  size="lg"
+                  className="press h-12 rounded-xl transition-transform hover:-translate-y-0.5"
+                  onClick={() => send(input)}
+                  disabled={chatMutation.isPending}
+                >
+                  <Send className="h-5 w-5" />
+                </Button>
               </div>
-            ))}
-            {chatMutation.isPending && (
-              <div className="max-w-[85%] rounded-2xl rounded-tl-sm bg-secondary text-secondary-foreground px-4 py-3 flex items-center gap-2">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Recherche en cours...
-              </div>
-            )}
-            {errorMessage && (
-              <AlertBanner tone="danger" title="Agent réglementaire indisponible">
-                {errorMessage}
-              </AlertBanner>
-            )}
-            <div ref={scrollAnchorRef} />
-          </div>
-          <div className="border-t border-border p-4">
-            {!messages.some((m) => m.role === "user") && (
-              <div className="flex gap-2 flex-wrap mb-3">
-                {suggestions.map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => send(s)}
-                    disabled={chatMutation.isPending}
-                    className="text-xs rounded-full border border-border bg-background px-3 py-1.5 hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50 disabled:pointer-events-none"
-                  >
-                    <Sparkles className="inline h-3 w-3 mr-1" />
-                    {s}
-                  </button>
-                ))}
-              </div>
-            )}
-            <div className="flex gap-2">
-              <Input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Écrivez votre question..."
-                className="h-12 rounded-xl text-base"
-                disabled={chatMutation.isPending}
-                onKeyDown={(e) => e.key === "Enter" && send(input)}
-              />
-              <Button size="lg" className="h-12 rounded-xl" onClick={() => send(input)} disabled={chatMutation.isPending}>
-                <Send className="h-5 w-5" />
-              </Button>
             </div>
           </div>
-        </div>
+        </Reveal>
 
         {/* Aides financières & dossier */}
-        <div className="flex flex-col gap-5">
-          <div className="card-soft p-5 h-140 overflow-y-auto">
-            <div className="font-display text-lg font-semibold">Aides financières</div>
-            <div className="mt-3 space-y-2">
-              {docs.map((d) => (
-                <a
-                  key={d.title}
-                  href={d.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-start gap-3 rounded-xl p-3 hover:bg-secondary transition-colors"
-                >
-                  <div className="h-9 w-9 rounded-lg bg-sky/20 text-sky-foreground flex items-center justify-center shrink-0">
-                    <FileText className="h-4 w-4" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium">{d.title}</div>
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                      {d.description}
-                    </p>
-                    <div className="text-xs text-muted-foreground/80 mt-1.5 font-medium">
-                      {d.tag}
+        <Reveal from="right" delay={120}>
+          <div className="flex flex-col gap-5">
+            <div className="card-soft p-5 h-140 overflow-y-auto">
+              <div className="font-display text-lg font-semibold">Aides financières</div>
+              <div className="mt-3 space-y-2">
+                {docs.map((d, i) => (
+                  <a
+                    key={d.title}
+                    href={d.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ animationDelay: `${0.12 + i * 0.08}s` }}
+                    className="page-enter group flex items-start gap-3 rounded-xl p-3 transition-colors hover:bg-secondary"
+                  >
+                    <div className="h-9 w-9 rounded-lg bg-sky/20 text-sky-foreground flex items-center justify-center shrink-0 transition-transform duration-400 group-hover:scale-110 group-hover:rotate-3">
+                      <FileText className="h-4 w-4" />
                     </div>
-                  </div>
-                  <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
-                </a>
-              ))}
-            </div>
-          </div>
-
-          {/* Générer mon dossier — désactivé pour le moment (pas encore d'endpoint backend).
-          <div className="card-soft p-5 bg-gradient-warm">
-            <div className="font-display text-lg font-semibold">Générer mon dossier</div>
-            <p className="text-sm text-muted-foreground mt-1">
-              Nous préparons un dossier PAC pré-rempli avec vos parcelles et aides éligibles.
-            </p>
-            {progress > 0 && (
-              <div className="mt-4">
-                <Progress value={progress} className="h-2" />
-                <div className="text-xs text-muted-foreground mt-1">
-                  {progress < 100 ? `Préparation… ${progress}%` : "Dossier prêt !"}
-                </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium">{d.title}</div>
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                        {d.description}
+                      </p>
+                      <div className="text-xs text-muted-foreground/80 mt-1.5 font-medium">
+                        {d.tag}
+                      </div>
+                    </div>
+                    <ExternalLink className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground" />
+                  </a>
+                ))}
               </div>
-            )}
-            <Button className="mt-4 w-full rounded-xl h-12" onClick={generate}>
-              {progress >= 100 ? "Télécharger" : "Générer mon dossier"}
-              <ArrowUpRight className="h-4 w-4 ml-1" />
-            </Button>
+            </div>
+
+            {/* Générer mon dossier - désactivé pour le moment (pas encore d'endpoint backend).
+            <div className="card-soft p-5 bg-gradient-warm">
+              <div className="font-display text-lg font-semibold">Générer mon dossier</div>
+              <p className="text-sm text-muted-foreground mt-1">
+                Nous préparons un dossier PAC pré-rempli avec vos parcelles et aides éligibles.
+              </p>
+              {progress > 0 && (
+                <div className="mt-4">
+                  <Progress value={progress} className="h-2" />
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {progress < 100 ? `Préparation… ${progress}%` : "Dossier prêt !"}
+                  </div>
+                </div>
+              )}
+              <Button className="mt-4 w-full rounded-xl h-12" onClick={generate}>
+                {progress >= 100 ? "Télécharger" : "Générer mon dossier"}
+                <ArrowUpRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
+            */}
           </div>
-          */}
-        </div>
+        </Reveal>
       </div>
     </AppShell>
   );

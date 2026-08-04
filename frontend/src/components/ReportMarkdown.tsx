@@ -20,9 +20,9 @@ import { getCropVisual, scoreTone } from "@/lib/cropVisual";
  * `backend/agent_agriculture/app/services/synthesis_service.py`).
  *
  * The synthesis prompt is deliberately constrained to an EXACT, predictable
- * structure — `## <section>` headings in a fixed order, with `### N. <crop>`
+ * structure - `## <section>` headings in a fixed order, with `### N. <crop>`
  * sub-headings inside "Cultures recommandées" each starting with
- * `**Score : NN%**` — so instead of dumping a long scrolling wall of
+ * `**Score : NN%**` - so instead of dumping a long scrolling wall of
  * markdown text (which reads like a newsletter), each top-level section
  * becomes its own icon-labeled card, and crop entries become compact score
  * cards. Unknown/renamed headings still render (generic icon + text), so a

@@ -43,7 +43,7 @@ export function AgriLogo({
           xmlns="http://www.w3.org/2000/svg"
           className="agrilogo-mark"
         >
-          {/* Leaf — full, readable silhouette */}
+          {/* Leaf - full, readable silhouette */}
           <path
             d="M18 46c0-14 8-26 20-34 2 10 4 20 2 32-8 4-16 5-22 2z"
             fill="#3D8B40"
@@ -71,7 +71,7 @@ export function AgriLogo({
             opacity="0.7"
           />
 
-          {/* Ladybug — larger, classic red, clear spots */}
+          {/* Ladybug - larger, classic red, clear spots */}
           <g className="agrilogo-bug">
             {/* Soft contact shadow on leaf */}
             <ellipse cx="42" cy="44" rx="14" ry="4" fill="#1A2E14" opacity="0.12" />

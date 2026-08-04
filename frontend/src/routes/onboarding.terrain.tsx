@@ -8,9 +8,9 @@ import { saveTerrain } from "@/lib/terrain";
 export const Route = createFileRoute("/onboarding/terrain")({
   head: () => ({
     meta: [
-      { title: "Choisir mon terrain — AgriMent" },
+      { title: "Choisir mon terrain - AgriMent" },
       { name: "description", content: "Tracez votre parcelle sur la carte pour recevoir des conseils personnalisés." },
-      { property: "og:title", content: "Choisir mon terrain — AgriMent" },
+      { property: "og:title", content: "Choisir mon terrain - AgriMent" },
       { property: "og:description", content: "Sélectionnez votre parcelle en quelques touches." },
     ],
   }),
@@ -40,7 +40,7 @@ function Page() {
             {points.length === 0
               ? "Aucun point"
               : points.length < 3
-              ? `${points.length} point${points.length > 1 ? "s" : ""} — placez ${3 - points.length} de plus`
+              ? `${points.length} point${points.length > 1 ? "s" : ""} - placez ${3 - points.length} de plus`
               : `Parcelle définie (${points.length} points)`}
           </div>
         </div>

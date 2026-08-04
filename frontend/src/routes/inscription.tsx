@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/inscription")({
   head: () => ({
     meta: [
-      { title: "Créer un compte — AgriMent" },
+      { title: "Créer un compte - AgriMent" },
       { name: "description", content: "Créez votre compte agriculteur ou acheteur sur AgriMent." },
     ],
   }),

@@ -12,7 +12,7 @@ import { AuthApiError } from "@/lib/authApi";
 export const Route = createFileRoute("/connexion")({
   head: () => ({
     meta: [
-      { title: "Se connecter — AgriMent" },
+      { title: "Se connecter - AgriMent" },
       { name: "description", content: "Connectez-vous à votre compte AgriMent." },
     ],
   }),
