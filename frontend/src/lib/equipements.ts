@@ -1,7 +1,7 @@
 /**
  * Matériel agricole proposé au sign up (case à cocher par type de matériel
- * détenu). Icônes génériques en attendant les vraies images — voir
- * `backend/auth/README.md`.
+ * détenu). Chaque option porte une vraie photo (`public/img/tools/<value>.*`)
+ * et une icône de repli — voir `backend/auth/README.md`.
  */
 
 import {
@@ -17,20 +17,64 @@ import {
 } from "lucide-react";
 import type { EquipementType } from "@/lib/authApi";
 
-export const EQUIPEMENT_OPTIONS: { value: EquipementType; label: string; icon: LucideIcon }[] = [
-  { value: "tracteur", label: "Tracteur", icon: Tractor },
-  { value: "cultivateur", label: "Cultivateur", icon: Wrench },
-  { value: "fraise_rotative", label: "Fraise rotative", icon: CircleDot },
-  { value: "planteuse", label: "Planteuse", icon: Sprout },
-  { value: "moissonneuse_batteuse", label: "Moissonneuse-batteuse", icon: Wheat },
-  { value: "remorque_agricole", label: "Remorques agricoles", icon: Truck },
-  { value: "pulverisateur", label: "Pulvérisateur", icon: SprayCan },
-  { value: "tunnel_plastique", label: "Tunnels plastiques", icon: Warehouse },
+export const EQUIPEMENT_OPTIONS: {
+  value: EquipementType;
+  label: string;
+  icon: LucideIcon;
+  image: string;
+}[] = [
+  { value: "tracteur", label: "Tracteur", icon: Tractor, image: "/img/tools/tracteur.webp" },
+  {
+    value: "cultivateur",
+    label: "Cultivateur",
+    icon: Wrench,
+    image: "/img/tools/cultivateur.webp",
+  },
+  {
+    value: "fraise_rotative",
+    label: "Fraise rotative",
+    icon: CircleDot,
+    image: "/img/tools/fraise_rotative.jpg",
+  },
+  { value: "planteuse", label: "Planteuse", icon: Sprout, image: "/img/tools/planteuse.webp" },
+  {
+    value: "moissonneuse_batteuse",
+    label: "Moissonneuse-batteuse",
+    icon: Wheat,
+    image: "/img/tools/moissonneuse_batteuse.webp",
+  },
+  {
+    value: "remorque_agricole",
+    label: "Remorques agricoles",
+    icon: Truck,
+    image: "/img/tools/remorque_agricole.jpg",
+  },
+  {
+    value: "pulverisateur",
+    label: "Pulvérisateur",
+    icon: SprayCan,
+    image: "/img/tools/pulverisateur.jpg",
+  },
+  {
+    value: "tunnel_plastique",
+    label: "Tunnels plastiques",
+    icon: Warehouse,
+    image: "/img/tools/tunnel_plastique.webp",
+  },
 ];
 
 const EQUIPEMENT_LABELS: Record<string, string> = Object.fromEntries(
   EQUIPEMENT_OPTIONS.map((o) => [o.value, o.label]),
 );
+
+const EQUIPEMENT_IMAGES: Record<string, string> = Object.fromEntries(
+  EQUIPEMENT_OPTIONS.map((o) => [o.value, o.image]),
+);
+
+/** Photo du matériel, ou `null` pour un type libre saisi par l'utilisateur. */
+export function equipementImage(type: EquipementType): string | null {
+  return EQUIPEMENT_IMAGES[type] ?? null;
+}
 
 /** Normalise un libellé libre vers une clé stockable (aligné backend auth). */
 export function slugifyEquipement(label: string): EquipementType | null {

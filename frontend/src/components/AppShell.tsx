@@ -36,8 +36,11 @@ const nav = [
 
 function FullPageLoader() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-background">
+      <span className="relative flex h-12 w-12 items-center justify-center rounded-full text-primary pulse-ring">
+        <Loader2 className="h-7 w-7 animate-spin" />
+      </span>
+      <span className="text-sm text-muted-foreground">Chargement…</span>
     </div>
   );
 }
@@ -71,27 +74,43 @@ export function AppShell({
   const visibleNav = nav.filter((n) => !user || n.roles.includes(user.role));
 
   return (
-    <div className="min-h-screen bg-background pb-24 md:pb-0 md:pl-72">
+    <div className="app-motion min-h-screen bg-background pb-24 md:pb-0 md:pl-72">
       {/* Sidebar (desktop) */}
       <aside className="hidden md:flex fixed left-0 top-0 h-screen w-72 flex-col border-r border-border bg-card px-6 py-8 gap-2">
-        <Link to="/dashboard" className="mb-8 inline-flex">
+        <Link to="/dashboard" className="mb-8 inline-flex press">
           <AgriLogo withWordmark size={44} tagline="Votre allié au quotidien" />
         </Link>
         <nav className="flex flex-col gap-1">
-          {visibleNav.map(({ to, label, icon: Icon }) => {
+          {visibleNav.map(({ to, label, icon: Icon }, i) => {
             const active = pathname === to || pathname.startsWith(to + "/");
             return (
               <Link
                 key={to}
                 to={to}
+                style={{ ["--i" as string]: i }}
                 className={cn(
-                  "flex items-center gap-3 rounded-xl px-4 py-3 text-base font-medium transition-colors",
+                  "group page-enter relative flex items-center gap-3 overflow-hidden rounded-xl px-4 py-3 text-base font-medium",
+                  "transition-all duration-300 [animation-delay:calc(60ms*var(--i))]",
                   active
                     ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-foreground hover:bg-secondary",
+                    : "text-foreground hover:bg-secondary hover:translate-x-1",
                 )}
               >
-                <Icon className="h-5 w-5" />
+                {/* Liseré animé sur l'entrée active. */}
+                <span
+                  className={cn(
+                    "absolute left-0 top-1/2 h-7 w-1 -translate-y-1/2 rounded-r-full bg-[#fa520f]",
+                    "origin-center transition-transform duration-300",
+                    active ? "scale-y-100" : "scale-y-0",
+                  )}
+                  aria-hidden
+                />
+                <Icon
+                  className={cn(
+                    "h-5 w-5 transition-transform duration-300",
+                    active ? "scale-110" : "group-hover:scale-110",
+                  )}
+                />
                 {label}
               </Link>
             );
@@ -102,7 +121,10 @@ export function AppShell({
         </div>
       </aside>
 
-      <main className="mx-auto max-w-6xl px-4 py-6 md:px-10 md:py-10">{children}</main>
+      {/* `key` sur le pathname : chaque navigation rejoue l'animation d'entrée. */}
+      <main key={pathname} className="page-enter mx-auto max-w-6xl px-4 py-6 md:px-10 md:py-10">
+        {children}
+      </main>
 
       {/* Bottom nav (mobile) */}
       <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-card/95 backdrop-blur border-t border-border">
@@ -117,11 +139,23 @@ export function AppShell({
                 key={to}
                 to={to}
                 className={cn(
-                  "flex flex-col items-center gap-1 py-2.5 text-[11px] font-medium",
+                  "press relative flex flex-col items-center gap-1 py-2.5 text-[11px] font-medium transition-colors duration-300",
                   active ? "text-primary" : "text-muted-foreground",
                 )}
               >
-                <Icon className="h-5 w-5" />
+                <span
+                  className={cn(
+                    "absolute top-0 h-0.5 w-8 rounded-full bg-primary transition-transform duration-300",
+                    active ? "scale-x-100" : "scale-x-0",
+                  )}
+                  aria-hidden
+                />
+                <Icon
+                  className={cn(
+                    "h-5 w-5 transition-transform duration-300",
+                    active && "-translate-y-0.5 scale-110",
+                  )}
+                />
                 {label}
               </Link>
             );

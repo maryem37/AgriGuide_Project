@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { AppShell } from "@/components/AppShell";
 import { AlertBanner } from "@/components/AlertBanner";
+import { PageHeader } from "@/components/PageHeader";
+import { Reveal } from "@/components/motion/Reveal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -40,13 +42,13 @@ import { useAuth } from "@/lib/auth-context";
 export const Route = createFileRoute("/business")({
   head: () => ({
     meta: [
-      { title: "Conseiller Business — AgriMent" },
+      { title: "Conseiller Business - AgriMent" },
       {
         name: "description",
         content:
           "Simulez votre budget et comparez trois scénarios de cultures adaptés à votre exploitation.",
       },
-      { property: "og:title", content: "Conseiller Business — AgriMent" },
+      { property: "og:title", content: "Conseiller Business - AgriMent" },
       {
         property: "og:description",
         content: "Comparez trois scénarios pour tirer le meilleur de votre budget.",
@@ -107,7 +109,7 @@ function Page() {
   const superficieDisponibleHa = ha >= 0.1 ? Math.round(ha * 100) / 100 : FALLBACK_SUPERFICIE_HA;
   const terrainId = terrains[0]?.id ?? "fallback-sans-terrain";
 
-  // Liaison réelle avec backend/agent_business — POST /business/scenarios.
+  // Liaison réelle avec backend/agent_business - POST /business/scenarios.
   // `crop_recommendations` vient de la dernière analyse réelle de l'agent
   // Agriculture pour ce terrain (voir routes/agriculture.tsx), mise en cache
   // via lib/cropRecommendations.ts ; tant qu'aucune analyse n'a été faite
@@ -241,20 +243,16 @@ function Page() {
 
   return (
     <AppShell>
-      <div className="flex items-center gap-3 mb-8">
-        <div className="h-11 w-11 rounded-2xl bg-earth/15 text-earth flex items-center justify-center">
-          <LineChart className="h-6 w-6" />
-        </div>
-        <div>
-          <h1 className="font-display text-3xl md:text-4xl font-semibold leading-none">
-            Conseiller Business
-          </h1>
-          <p className="text-muted-foreground mt-1">Simulez vos revenus selon votre budget.</p>
-        </div>
-      </div>
+      <PageHeader
+        icon={LineChart}
+        tone="earth"
+        title="Conseiller Business"
+        subtitle="Simulez vos revenus selon votre budget."
+        className="mb-8"
+      />
 
       <div className="grid gap-5 md:grid-cols-5">
-        <div className="card-soft p-6 md:p-8 md:col-span-3">
+        <Reveal from="up" delay={80} className="card-soft p-6 md:p-8 md:col-span-3">
           <div className="text-sm text-muted-foreground">Votre budget de départ</div>
           <div className="mt-4 flex flex-col sm:flex-row gap-3 sm:items-start">
             <div className="relative flex-1">
@@ -299,9 +297,9 @@ function Page() {
             Saisissez votre budget, puis lancez l’étude financière et les trois scénarios de
             cultures.
           </p>
-        </div>
+        </Reveal>
 
-        <div className="card-soft p-6 md:col-span-2 bg-gradient-sky text-sky-foreground">
+        <Reveal from="up" delay={160} className="card-soft p-6 md:col-span-2 bg-gradient-sky text-sky-foreground">
           <div className="flex items-center gap-2 text-sm font-medium">
             <MapPin className="h-4 w-4" /> Vos terrains
           </div>
@@ -335,12 +333,12 @@ function Page() {
               parcelles depuis votre profil pour un calcul basé sur votre superficie réelle.
             </p>
           )}
-        </div>
+        </Reveal>
       </div>
 
-      <h2 className="font-display text-2xl font-semibold mt-10 mb-4">
+      <Reveal as="h2" className="font-display text-2xl font-semibold mt-10 mb-4">
         Rapport financier et scénarios
-      </h2>
+      </Reveal>
 
       {scenariosMutation.isError && (
         <AlertBanner tone="danger" title="Agent Business injoignable">
@@ -404,7 +402,7 @@ function Page() {
               <div className="rounded-xl bg-secondary/60 p-3">
                 <div className="text-xs text-muted-foreground">Culture recommandée</div>
                 <div className="font-display text-xl font-semibold">
-                  {cultureLabel(report.scenarios[0]?.culture ?? "—")}
+                  {cultureLabel(report.scenarios[0]?.culture ?? "-")}
                 </div>
               </div>
             </div>
@@ -418,7 +416,7 @@ function Page() {
               decisionMutation.isPending &&
               decisionMutation.variables?.allocations[0]?.culture === s.culture;
             return (
-              <div key={s.culture} className="card-soft p-6 flex flex-col">
+              <Reveal key={s.culture} from="up" delay={i * 120} className="card-soft p-6 flex flex-col">
                 <div className="flex items-center justify-between">
                   <div className="font-display text-xl font-semibold">
                     {cultureLabel(s.culture)}
@@ -477,7 +475,7 @@ function Page() {
                     <TrendingUp className="h-3 w-3" /> Recommandé pour vous
                   </div>
                 )}
-              </div>
+              </Reveal>
             );
           })}
         </div>
@@ -490,7 +488,7 @@ function Page() {
             <>
               <DialogHeader>
                 <DialogTitle className="font-display text-2xl">
-                  Comment ces chiffres ont été calculés — {cultureLabel(detailScenario.culture)}
+                  Comment ces chiffres ont été calculés - {cultureLabel(detailScenario.culture)}
                 </DialogTitle>
                 <DialogDescription>
                   Calcul déterministe fait par l'agent Business (formule explicite, pas une

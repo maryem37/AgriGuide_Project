@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { AlertBanner } from "@/components/AlertBanner";
+import { PageHeader } from "@/components/PageHeader";
 import { EquipementPicker } from "@/components/EquipementPicker";
 import { Button } from "@/components/ui/button";
 import { Loader2, MapPin, Ruler, Save, Sprout, Trash2, User } from "lucide-react";
@@ -18,7 +19,7 @@ import { areaHectares } from "@/lib/terrain";
 export const Route = createFileRoute("/profil")({
   head: () => ({
     meta: [
-      { title: "Mon profil — AgriMent" },
+      { title: "Mon profil - AgriMent" },
       {
         name: "description",
         content: "Modifiez votre matériel agricole et vos terrains déclarés.",
@@ -43,19 +44,12 @@ function ProfileContent() {
 
   return (
     <div className="max-w-3xl">
-      <div className="flex items-center gap-3 mb-8">
-        <div className="h-11 w-11 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
-          <User className="h-6 w-6" />
-        </div>
-        <div>
-          <h1 className="font-display text-3xl md:text-4xl font-semibold leading-none">
-            Mon profil
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            {user.nom} · {user.email}
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        icon={User}
+        title="Mon profil"
+        subtitle={`${user.nom} · ${user.email}`}
+        className="mb-8"
+      />
 
       <EquipementSection token={token} equipements={user.equipements} onSaved={setUser} />
 
@@ -113,9 +107,7 @@ function EquipementSection({
   return (
     <div>
       <h2 className="font-display text-2xl font-semibold mb-2">Mon matériel agricole</h2>
-      <p className="text-muted-foreground text-sm mb-5">
-        Cochez le matériel que vous possédez (les images seront ajoutées prochainement).
-      </p>
+      <p className="text-muted-foreground text-sm mb-5">Cochez le matériel que vous possédez.</p>
       <EquipementPicker selected={selected} onChange={setSelected} />
 
       {error && (

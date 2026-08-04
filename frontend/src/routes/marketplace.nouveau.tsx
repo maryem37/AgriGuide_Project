@@ -39,7 +39,7 @@ function NewListing() {
       setUtility((u) => u || "Peut servir de paillage, de litière animale, ou pour la méthanisation.");
     }
     setAiFilled(true);
-    toast.success("Suggestions ajoutées — ajustez à votre convenance.");
+    toast.success("Suggestions ajoutées - ajustez à votre convenance.");
   };
 
   const submit = (e: React.FormEvent) => {
@@ -79,7 +79,7 @@ function NewListing() {
           <div className="flex-1">
             <div className="font-semibold">Laissez l'IA préparer votre annonce</div>
             <p className="text-sm text-muted-foreground mt-1">
-              Nous pré-remplissons quantité, prix suggéré et description — vous n'avez plus qu'à ajuster.
+              Nous pré-remplissons quantité, prix suggéré et description - vous n'avez plus qu'à ajuster.
             </p>
           </div>
           <Button type="button" onClick={fillWithAI} className="rounded-xl shrink-0" variant="secondary">

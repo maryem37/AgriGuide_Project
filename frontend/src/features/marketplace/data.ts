@@ -9,6 +9,7 @@ export type Listing = {
   region: string;
   distance: string;
   emoji: string;
+  image: string;
   description: string;
   utility?: string;
   contact: { phone: string; email: string };
@@ -27,7 +28,9 @@ export const listings: Listing[] = [
     region: "Eure-et-Loir",
     distance: "12 km",
     emoji: "🌾",
-    description: "Récolte 2026, blé tendre bio certifié AB. Taux de protéines 11,8%. Livraison possible dans un rayon de 40 km.",
+    image: "/img/marketplace/ble.jpg",
+    description:
+      "Récolte 2026, blé tendre bio certifié AB. Taux de protéines 11,8%. Livraison possible dans un rayon de 40 km.",
     contact: { phone: "06 12 34 56 78", email: "jean.martin@fermedespres.fr" },
     status: "disponible",
     mine: true,
@@ -43,6 +46,7 @@ export const listings: Listing[] = [
     region: "Loiret",
     distance: "23 km",
     emoji: "🌿",
+    image: "/img/marketplace/paille.jpg",
     description: "Bottes rondes de paille de blé, bon état, stockées à l'abri.",
     utility: "Idéale pour la litière animale, le paillage de sol ou l'isolation naturelle.",
     contact: { phone: "07 88 22 44 11", email: "contact@fermedelabatie.fr" },
@@ -59,6 +63,7 @@ export const listings: Listing[] = [
     region: "Yvelines",
     distance: "34 km",
     emoji: "🌼",
+    image: "/img/marketplace/colza.jpg",
     description: "Colza HOLL, débouché huile alimentaire. Livraison assurée.",
     contact: { phone: "06 55 44 33 22", email: "amelie@grangehaut.fr" },
     status: "disponible",
@@ -74,6 +79,7 @@ export const listings: Listing[] = [
     region: "Loir-et-Cher",
     distance: "58 km",
     emoji: "🍇",
+    image: "/img/marketplace/raisin.jpg",
     description: "Marc de raisin issu des vendanges 2026, à récupérer sur place.",
     utility: "Compostage, méthanisation, ou distillation artisanale.",
     contact: { phone: "06 77 88 99 00", email: "domaine@coteauxsud.fr" },
@@ -89,6 +95,7 @@ export const listings: Listing[] = [
     region: "Indre-et-Loire",
     distance: "72 km",
     emoji: "🌻",
+    image: "/img/marketplace/tournesol.jpg",
     description: "Récolte propre, taux d'huile 43%. Prêt à charger.",
     contact: { phone: "06 11 22 33 44", email: "pierre.laurent@agri.fr" },
     status: "reserve",
@@ -104,6 +111,7 @@ export const listings: Listing[] = [
     region: "Eure-et-Loir",
     distance: "8 km",
     emoji: "🐄",
+    image: "/img/marketplace/fumier.jpg",
     description: "Fumier bien décomposé, prêt à épandre.",
     utility: "Amendement organique riche en azote, potassium et phosphore.",
     contact: { phone: "06 45 67 89 10", email: "elevage.dupre@gmail.com" },
