@@ -103,13 +103,16 @@ const CULTURE_LABELS: Record<string, string> = {
   tomate: "Tomate",
   pomme_de_terre: "Pomme de terre",
   ble: "Blé",
-  // Les 5 cultures notées par `backend/agent_agriculture/app/services/ml_service.py`
+  // Les 9 cultures notées par `backend/agent_agriculture/app/services/ml_service.py`
   // (voir `_CROP_PROFILES`) — clés distinctes des données factices ci-dessus.
   ble_tendre: "Blé tendre",
   colza: "Colza",
   orge: "Orge",
   mais: "Maïs",
   tournesol: "Tournesol",
+  betterave_sucriere: "Betterave sucrière",
+  soja: "Soja",
+  pois_proteagineux: "Pois protéagineux",
 };
 
 export function cultureLabel(culture: string): string {

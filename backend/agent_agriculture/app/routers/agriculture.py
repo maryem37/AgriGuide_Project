@@ -23,6 +23,8 @@ from app.models.schemas import (
     WeatherData,
     VegetationData,
     DLCropObservation,
+    YieldEstimate,
+    NdviHeatmapResponse,
 )
 from app.services import (
     parcel_service,
@@ -31,6 +33,7 @@ from app.services import (
     satellite_service,
     ml_service,
     agro_calc_service,
+    yield_service,
     rag_service,
     synthesis_service,
     dl_service,
@@ -69,12 +72,32 @@ async def resolve_parcel_only(req: ParcelRequest):
 
 
 @router.post("/parcel/neighbors", response_model=NeighborCropContext)
-async def get_neighbors(req: ParcelRequest, radius_m: float = 15_000):
+async def get_neighbors(req: ParcelRequest, radius_m: float = 800):
     parcel = await parcel_service.resolve_parcel(req)
     centroid = parcel.centroid or req.point
     return await parcel_service.get_neighboring_crop_context(
         centroid, radius_m=radius_m, exclude_parcel_id=parcel.rpg_id_parcel
     )
+
+
+@router.post("/parcel/ndvi_heatmap", response_model=NdviHeatmapResponse)
+async def ndvi_heatmap(req: ParcelRequest):
+    """
+    Backs the map frontend's "Afficher la carte NDVI" toggle. Ported
+    from the standalone prototype, where this exact button called this
+    exact route but nothing on the server handled it (every click
+    404'd) until it was added there first.
+    """
+    parcel = await parcel_service.resolve_parcel(req)
+    if not parcel.resolved or not parcel.geometry:
+        raise HTTPException(
+            status_code=422,
+            detail=parcel.warning or "Impossible de résoudre une limite de parcelle pour la carte NDVI.",
+        )
+    result = await satellite_service.get_ndvi_heatmap_png(parcel.geometry)
+    if result.get("warning") and not result.get("image_base64"):
+        raise HTTPException(status_code=502, detail=result["warning"])
+    return NdviHeatmapResponse(**result)
 
 
 def _besoins_for_crop(crop: str, soil: SoilData, weather: WeatherData, yield_objective_q_ha: float | None):
@@ -168,7 +191,7 @@ async def analyze(req: AnalyzeRequest):
         weather_service.get_weather_data(parcel.centroid),
         satellite_service.get_ndvi(parcel.geometry) if parcel.geometry else asyncio.sleep(0, result=None),
         dl_service.predict_crop(parcel.geometry) if parcel.geometry else asyncio.sleep(0, result=None),
-        parcel_service.get_neighboring_crop_context(parcel.centroid, radius_m=15_000, exclude_parcel_id=parcel.rpg_id_parcel),
+        parcel_service.get_neighboring_crop_context(parcel.centroid, radius_m=800, exclude_parcel_id=parcel.rpg_id_parcel),
         return_exceptions=True,
     )
     soil, weather, vegetation, dl_observation, neighbors = results
@@ -189,16 +212,22 @@ async def analyze(req: AnalyzeRequest):
         warnings.append(f"Contexte des parcelles voisines indisponible : {neighbors}")
         neighbors = None
 
-    # 3. Rule-based 5-crop scoring + real fertilizer/irrigation numbers for EVERY crop.
-    crop_recs = ml_service.recommend_crops(soil, weather)
+    # 3. Rule-based 9-crop scoring + real fertilizer/irrigation numbers for
+    #    the top 5. Full pool is scored in ml_service; only top 5 are displayed.
+    _MAX_DISPLAYED_CROPS = 5
+    crop_recs = ml_service.recommend_crops(soil, weather)[:_MAX_DISPLAYED_CROPS]
     crop_recommendations_out: list[CropRecommendationOut] = []
     top_crop_agro = None
+    top_crop_yield: YieldEstimate | None = None
     for rank, rec in enumerate(crop_recs, start=1):
+        rec_yield = yield_service.estimate_yield(rec)
+        yield_objective = req.yield_objective_q_ha or rec_yield.yield_estimate_q_ha
         estimate, besoins_irrigation, besoins_engrais, besoins_pesticides = _besoins_for_crop(
-            rec.crop, soil, weather, req.yield_objective_q_ha
+            rec.crop, soil, weather, yield_objective
         )
         if rank == 1:
             top_crop_agro = estimate
+            top_crop_yield = rec_yield
         crop_recommendations_out.append(
             CropRecommendationOut(
                 rang=rank,
@@ -231,7 +260,7 @@ async def analyze(req: AnalyzeRequest):
                 crop_filter=None,
             )
         synthesis = await synthesis_service.synthesize_stage1(
-            parcel, soil, weather, crop_recs, chunks, vegetation, dl_observation, top_crop_agro
+            parcel, soil, weather, crop_recs, chunks, vegetation, dl_observation, top_crop_agro, top_crop_yield
         )
         report = await synthesis_service.generate_report(synthesis, parcel)
     except Exception as e:  # noqa: BLE001 — genuinely want to degrade gracefully here (missing key, empty corpus, network issue, ...)
@@ -279,6 +308,7 @@ async def analyze(req: AnalyzeRequest):
         neighbors=neighbors,
         crop_recommendations=crop_recommendations_out,
         agro_calc_top_crop=top_crop_agro,
+        yield_estimate=top_crop_yield,
         report=report,
         warnings=warnings,
     )

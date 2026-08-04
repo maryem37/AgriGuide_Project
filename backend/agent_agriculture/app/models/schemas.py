@@ -130,9 +130,32 @@ class AgroCalcEstimate(BaseModel):
     warning: Optional[str] = None
 
 
+class YieldEstimate(BaseModel):
+    """
+    Deterministic yield estimate for the top-recommended crop â€”
+    base_yield_q_ha(crop) x adjustment_factor(suitability_score).
+    NOT a calibrated agronomic yield model (no historical yield-trial
+    data, soil-yield curves, or management/genotype info at this
+    project's scope) â€” an honest placeholder, same trust tier as
+    ml_service.py's scoring and agro_calc_service.py's formulas.
+    yield_range_low/high_q_ha is a fixed +-15% band representing THIS
+    METHOD's uncertainty, not a statistical confidence interval â€” see
+    method_note.
+    """
+    crop: str
+    yield_estimate_q_ha: Optional[float] = None
+    yield_range_low_q_ha: Optional[float] = None
+    yield_range_high_q_ha: Optional[float] = None
+    base_yield_q_ha: Optional[float] = None       # French national-average reference before adjustment
+    suitability_score: Optional[float] = None      # ml_service.py score this estimate was scaled from
+    adjustment_factor: Optional[float] = None
+    method_note: Optional[str] = None
+    warning: Optional[str] = None
+
+
 class SynthesisJSON(BaseModel):
     """Stage 1 output — every claim traceable to a source chunk."""
-    parcel_id: Optional[str]
+    parcel_id: Optional[str] = None
     location: Coordinate
     soil_summary: dict
     weather_summary: dict
@@ -141,13 +164,14 @@ class SynthesisJSON(BaseModel):
     dl_observation_summary: dict = Field(default_factory=dict)  # set directly from DLCropObservation.model_dump() in Python — Stage 1 never sees or touches this, avoiding the LLM-recomputation risk found with weather_summary
     dl_mismatch_note: Optional[str] = None  # pre-formatted French sentence, computed in Python — Stage 2 copies it verbatim rather than generating it
     agro_calc_summary: dict = Field(default_factory=dict)  # set directly from AgroCalcEstimate.model_dump() in Python — same treatment, never LLM-generated
+    yield_summary: dict = Field(default_factory=dict)  # set directly from YieldEstimate.model_dump() in Python — same treatment, never LLM-generated
     crop_recommendations: list[CropRecommendation]
     grounded_claims: list[dict]  # {"claim": str, "source_chunk_id": str}
     data_gaps: list[str]
 
 
 class AdvisorReport(BaseModel):
-    parcel_id: Optional[str]
+    parcel_id: Optional[str] = None
     report_markdown: str
     warnings: list[str] = Field(default_factory=list)
     unverified_figures: list[str] = Field(default_factory=list)  # numbers in the report not traceable to source data
@@ -158,6 +182,15 @@ class VegetationData(BaseModel):
     mean_ndvi: Optional[float] = None  # -1 to 1; roughly: <0.2 bare/sparse, 0.2-0.5 moderate, >0.5 dense healthy vegetation
     observation_window_days: Optional[int] = None
     valid_pixel_count: Optional[int] = None  # cloud-free samples used in the mean — low count = less reliable
+    warning: Optional[str] = None
+
+
+class NdviHeatmapResponse(BaseModel):
+    """Colored NDVI PNG for map overlay, rendered server-side via the
+    Sentinel Hub Process API (distinct from get_ndvi()'s Statistics API
+    call, which only returns a single mean value)."""
+    image_base64: Optional[str] = None
+    bounds: Optional[dict] = None  # {"south": float, "west": float, "north": float, "east": float} â€” WGS84, for L.imageOverlay
     warning: Optional[str] = None
 
 

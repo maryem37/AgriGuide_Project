@@ -8,9 +8,16 @@ import { cn } from "@/lib/utils";
  * Portail sur `document.body` : évite le piège du `transform` sur `<main class="page-enter">`
  * qui casse `position: fixed`.
  */
+function isModalOpen() {
+  return Boolean(
+    document.querySelector('[role="dialog"][data-state="open"], [data-radix-dialog-overlay][data-state="open"]'),
+  );
+}
+
 export function ScrollMoreHint({ className }: { className?: string }) {
   const endRef = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(true);
+  const [canScrollMore, setCanScrollMore] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -20,20 +27,34 @@ export function ScrollMoreHint({ className }: { className?: string }) {
   useEffect(() => {
     const end = endRef.current;
     if (!end || typeof IntersectionObserver === "undefined") {
-      setVisible(true);
+      setCanScrollMore(true);
       return;
     }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         // Flèche visible tant que le bas de page n’est pas encore à l’écran.
-        setVisible(!entry.isIntersecting);
+        setCanScrollMore(!entry.isIntersecting);
       },
       { root: null, threshold: 0, rootMargin: "0px 0px -40px 0px" },
     );
     observer.observe(end);
     return () => observer.disconnect();
   }, []);
+
+  useEffect(() => {
+    setModalOpen(isModalOpen());
+    const observer = new MutationObserver(() => setModalOpen(isModalOpen()));
+    observer.observe(document.body, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ["data-state"],
+    });
+    return () => observer.disconnect();
+  }, []);
+
+  const visible = canScrollMore && !modalOpen;
 
   const scrollAhead = () => {
     window.scrollBy({ top: Math.round(window.innerHeight * 0.6), behavior: "smooth" });

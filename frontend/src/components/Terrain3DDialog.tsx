@@ -509,14 +509,14 @@ export function Terrain3DDialog({
   const ModeIcon = MODE_ICON[mode];
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[92vh] max-w-5xl flex-col gap-0 overflow-hidden p-0">
-        {/* Header */}
-        <div className="flex shrink-0 items-center justify-between border-b px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+      <DialogContent className="flex max-h-[92vh] w-[min(96vw,64rem)] max-w-5xl flex-col gap-0 overflow-hidden p-0 sm:max-w-5xl">
+        {/* Header — stays fixed while the body scrolls */}
+        <div className="flex shrink-0 items-start justify-between gap-4 border-b px-6 py-4 pr-12">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
               <ModeIcon className="h-5 w-5 text-primary" />
             </div>
-            <div>
+            <div className="min-w-0">
               <DialogTitle className="text-lg font-semibold">
                 Analyse 3D — {label ?? "parcelle sélectionnée"}
               </DialogTitle>
@@ -527,101 +527,101 @@ export function Terrain3DDialog({
           </div>
         </div>
 
-        {/* Content */}
-        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-6">
-          {loading && (
-            <div className="flex h-[400px] flex-col items-center justify-center gap-4">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <div className="text-center">
-                <div className="font-medium">Génération du relief 3D…</div>
-                <div className="mt-1 text-sm text-muted-foreground">
-                  Chargement des données IGN et Sentinel-2
+        {/* Scrollable body: full-size 3D first, details below */}
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+          <div className="flex flex-col gap-4 p-6 pb-8">
+            {loading && (
+              <div className="flex h-[min(62vh,560px)] shrink-0 flex-col items-center justify-center gap-4 rounded-xl border bg-[#0a0f0d]">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <div className="text-center text-white">
+                  <div className="font-medium">Génération du relief 3D…</div>
+                  <div className="mt-1 text-sm text-white/70">
+                    Chargement des données IGN et Sentinel-2
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {error && (
-            <AlertBanner tone="danger" title="Analyse 3D">
-              {error}
-            </AlertBanner>
-          )}
+            {error && (
+              <AlertBanner tone="danger" title="Analyse 3D">
+                {error}
+              </AlertBanner>
+            )}
 
-          {data && (
-            <>
-              {!data.satellite_available && (
-                <AlertBanner tone="warning" title="Indices NDVI, NDWI et NDMI non calculés">
-                  Sentinel-2 exige `SENTINEL_HUB_CLIENT_ID` et `SENTINEL_HUB_CLIENT_SECRET` dans le
-                  fichier `.env` racine. La pente et le relief IGN restent réels, mais aucun indice
-                  satellite n'est affiché sans ces données.
-                </AlertBanner>
-              )}
-
-              {/* Mode switcher */}
-              <ModeSwitcher
-                mode={mode}
-                satelliteAvailable={data.satellite_available}
-                photoLoading={photoLoading}
-                onSelect={(next) => void selectMode(next)}
-              />
-
-              {/* 3D Canvas */}
-              <div className="relative h-[400px] overflow-hidden rounded-xl border bg-[#0a0f0d]">
-                <TerrainCanvas data={data} mode={mode} orthophoto={orthophoto} />
-
-                {/* Mode badge */}
-                <div className="absolute left-3 top-3">
-                  <span className="inline-flex items-center gap-1.5 rounded-md bg-black/60 px-2 py-1 text-xs font-medium text-white backdrop-blur-md">
-                    <ModeIcon className="h-3 w-3" />
-                    {MODE_TITLE[mode]}
-                  </span>
-                </div>
-
-                {mode !== "slope" && mode !== "photo" && (
-                  <div className="absolute right-3 top-3 rounded-md bg-black/60 px-2 py-1 text-[11px] font-medium text-white/85 backdrop-blur-md">
-                    Sentinel-2 · {mode === "ndmi" ? data.resolution_ndmi_m : data.resolution_satellite_m} m · {data.stats_ndvi.couverture_pct}% valide
-                  </div>
+            {data && (
+              <>
+                {!data.satellite_available && (
+                  <AlertBanner tone="warning" title="Indices NDVI, NDWI et NDMI non calculés">
+                    Sentinel-2 exige `SENTINEL_HUB_CLIENT_ID` et `SENTINEL_HUB_CLIENT_SECRET` dans le
+                    fichier `.env` racine. La pente et le relief IGN restent réels, mais aucun indice
+                    satellite n'est affiché sans ces données.
+                  </AlertBanner>
                 )}
 
-                <div className="absolute right-3 top-10 rounded-md bg-black/60 px-2 py-1 text-[11px] font-medium text-white/75 backdrop-blur-md">
-                  Relief ×{RELIEF_VISUAL_EXAGGERATION} pour la lecture
+                <div className="shrink-0">
+                  <ModeSwitcher
+                    mode={mode}
+                    satelliteAvailable={data.satellite_available}
+                    photoLoading={photoLoading}
+                    onSelect={(next) => void selectMode(next)}
+                  />
                 </div>
 
-                {/* Legend */}
-                <div className="absolute bottom-3 left-3">
-                  <ColorLegend mode={mode} />
+                {/* Fixed-height 3D stage — never compressed by the details below */}
+                <div className="relative h-[min(62vh,560px)] w-full shrink-0 overflow-hidden rounded-xl border bg-[#0a0f0d]">
+                  <TerrainCanvas data={data} mode={mode} orthophoto={orthophoto} />
+
+                  <div className="pointer-events-none absolute left-3 top-3">
+                    <span className="inline-flex items-center gap-1.5 rounded-md bg-black/60 px-2 py-1 text-xs font-medium text-white backdrop-blur-md">
+                      <ModeIcon className="h-3 w-3" />
+                      {MODE_TITLE[mode]}
+                    </span>
+                  </div>
+
+                  {mode !== "slope" && mode !== "photo" && (
+                    <div className="pointer-events-none absolute right-3 top-3 rounded-md bg-black/60 px-2 py-1 text-[11px] font-medium text-white/85 backdrop-blur-md">
+                      Sentinel-2 ·{" "}
+                      {mode === "ndmi" ? data.resolution_ndmi_m : data.resolution_satellite_m} m ·{" "}
+                      {data.stats_ndvi.couverture_pct}% valide
+                    </div>
+                  )}
+
+                  <div className="pointer-events-none absolute right-3 top-10 rounded-md bg-black/60 px-2 py-1 text-[11px] font-medium text-white/75 backdrop-blur-md">
+                    Relief ×{RELIEF_VISUAL_EXAGGERATION} pour la lecture
+                  </div>
+
+                  <div className="pointer-events-none absolute bottom-3 left-3">
+                    <ColorLegend mode={mode} />
+                  </div>
+
+                  <div className="pointer-events-none absolute bottom-3 right-3 flex items-center gap-1 rounded-md bg-black/60 px-2 py-1 text-white/60 backdrop-blur-md">
+                    <Rotate3d className="h-3 w-3" />
+                    <ZoomIn className="h-3 w-3" />
+                    <Move3d className="h-3 w-3" />
+                  </div>
                 </div>
 
-                {/* Interaction hints */}
-                <div className="absolute bottom-3 right-3 flex items-center gap-1 rounded-md bg-black/60 px-2 py-1 text-white/60 backdrop-blur-md">
-                  <Rotate3d className="h-3 w-3" />
-                  <ZoomIn className="h-3 w-3" />
-                  <Move3d className="h-3 w-3" />
-                </div>
-              </div>
+                <StatsPanel data={data} />
+                <SatelliteContext data={data} mode={mode} />
 
-              {/* Stats */}
-              <StatsPanel data={data} />
-              <SatelliteContext data={data} mode={mode} />
-
-              {/* Info */}
-              <div className="space-y-1.5 rounded-lg bg-muted/30 p-3">
-                <p className="text-xs text-muted-foreground">
-                  Zones grises : données Sentinel-2 masquées (nuages, ombres, neige ou hors données)
-                  — aucune valeur n'est inventée.
-                </p>
-                {data.warnings.map((warning) => (
-                  <p
-                    key={warning}
-                    className="flex items-start gap-1.5 text-xs text-amber-700 dark:text-amber-400"
-                  >
-                    <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />
-                    {warning}
+                <div className="space-y-1.5 rounded-lg bg-muted/30 p-3">
+                  <p className="text-xs text-muted-foreground">
+                    Zones grises : données Sentinel-2 masquées (nuages, ombres, neige ou hors données)
+                    — aucune valeur n'est inventée.
                   </p>
-                ))}
-              </div>
-            </>
-          )}
+                  {data.warnings.map((warning) => (
+                    <p
+                      key={warning}
+                      className="flex items-start gap-1.5 text-xs text-amber-700 dark:text-amber-400"
+                    >
+                      <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />
+                      {warning}
+                    </p>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>

@@ -117,6 +117,18 @@ export type AgroCalcEstimate = {
   warning: string | null;
 };
 
+export type YieldEstimate = {
+  crop: string;
+  yield_estimate_q_ha: number | null;
+  yield_range_low_q_ha: number | null;
+  yield_range_high_q_ha: number | null;
+  base_yield_q_ha: number | null;
+  suitability_score: number | null;
+  adjustment_factor: number | null;
+  method_note: string | null;
+  warning: string | null;
+};
+
 export type AdvisorReport = {
   parcel_id: string | null;
   report_markdown: string;
@@ -160,8 +172,15 @@ export type AnalyzeResponse = {
   neighbors: NeighborCropContext | null;
   crop_recommendations: CropRecommendationOut[];
   agro_calc_top_crop: AgroCalcEstimate;
+  yield_estimate: YieldEstimate | null;
   report: AdvisorReport | null;
   warnings: string[];
+};
+
+export type NdviHeatmapResponse = {
+  image_base64: string | null;
+  bounds: { south: number; west: number; north: number; east: number } | null;
+  warning: string | null;
 };
 
 export type ParcelRequest = { point: Coordinate; manual_geojson?: Record<string, unknown> | null };
@@ -246,8 +265,13 @@ export function resolveParcel(request: ParcelRequest): Promise<ParcelResolution>
 }
 
 /** POST /agriculture/parcel/neighbors — répartition des cultures déclarées dans un rayon donné, sans persistance. */
-export function getNeighbors(request: ParcelRequest, radiusM = 15_000): Promise<NeighborCropContext> {
+export function getNeighbors(request: ParcelRequest, radiusM = 800): Promise<NeighborCropContext> {
   return postJson<NeighborCropContext>(`/agriculture/parcel/neighbors?radius_m=${radiusM}`, request);
+}
+
+/** POST /agriculture/parcel/ndvi_heatmap — PNG NDVI coloré pour la bascule "Afficher la carte NDVI" du frontend. */
+export function getNdviHeatmap(request: ParcelRequest): Promise<NdviHeatmapResponse> {
+  return postJson<NdviHeatmapResponse>("/agriculture/parcel/ndvi_heatmap", request);
 }
 
 /** POST /agriculture/analyze — pipeline complet (sol/météo/satellite/scoring/rapport), persisté si `terrain_id` est fourni. */

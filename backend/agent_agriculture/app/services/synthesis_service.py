@@ -25,6 +25,7 @@ from app.config import settings
 from app.models.schemas import (
     ParcelResolution, SoilData, WeatherData, CropRecommendation,
     RetrievedChunk, SynthesisJSON, AdvisorReport, VegetationData, DLCropObservation, AgroCalcEstimate,
+    YieldEstimate,
 )
 
 _client = Mistral(api_key=settings.mistral_api_key) if settings.mistral_api_key else None
@@ -150,6 +151,11 @@ form:
 The percentage MUST be suitability_score multiplied by 100 — this is
 arithmetic on a real number already in your data, not an invented
 figure, so compute it precisely; do not write "0%" as a placeholder.
+
+## Rendement estimé
+If yield_summary.yield_estimate_q_ha is present, state it as:
+- **Rendement estimé** : {yield_estimate_q_ha} q/ha (fourchette {yield_range_low_q_ha} – {yield_range_high_q_ha} q/ha)
+Then copy method_note verbatim. If yield_summary is empty, omit this section.
 
 ## Fertilisation et irrigation
 Only include this section if agro_calc_summary.warning is null or if
@@ -278,6 +284,7 @@ def _collect_source_values(synthesis: SynthesisJSON, parcel: ParcelResolution) -
     searchable_text += json.dumps(synthesis.vegetation_summary, ensure_ascii=False)
     searchable_text += json.dumps(synthesis.dl_observation_summary, ensure_ascii=False)
     searchable_text += json.dumps(synthesis.agro_calc_summary, ensure_ascii=False)
+    searchable_text += json.dumps(synthesis.yield_summary, ensure_ascii=False)
     searchable_text += json.dumps(
         [c.model_dump() for c in synthesis.crop_recommendations], ensure_ascii=False
     )
@@ -337,14 +344,14 @@ async def synthesize_stage1(
     vegetation: VegetationData,
     dl_observation: DLCropObservation,
     agro_calc: AgroCalcEstimate,
+    yield_estimate: YieldEstimate | None = None,
 ) -> SynthesisJSON:
     _require_client()
 
-    # dl_observation is deliberately NOT included in the Stage 1 payload —
-    # it never reaches the LLM, so there's no path for Stage 1 to
-    # "helpfully" reformat, recompute, or misstate it (the exact failure
-    # mode found with weather_summary's temperature mean). It's merged
-    # straight into the returned SynthesisJSON below as pre-verified data.
+    # dl_observation / agro_calc / yield_estimate are deliberately NOT included
+    # in the Stage 1 payload — they never reach the LLM, so there's no path for
+    # Stage 1 to "helpfully" reformat or misstate them. They're merged straight
+    # into the returned SynthesisJSON below as pre-verified data.
     weather_stats = compute_weather_stats(weather)
 
     payload = {
@@ -401,6 +408,7 @@ async def synthesize_stage1(
         dl_observation_summary=dl_observation.model_dump(),
         dl_mismatch_note=dl_mismatch_note,
         agro_calc_summary=agro_calc.model_dump(),
+        yield_summary=yield_estimate.model_dump() if yield_estimate else {},
         crop_recommendations=crop_recs,
         grounded_claims=_validate_grounded_claims(raw.get("grounded_claims", []), valid_chunk_ids),
         data_gaps=_normalize_data_gaps(raw.get("data_gaps", [])),
