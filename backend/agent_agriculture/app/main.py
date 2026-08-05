@@ -1,3 +1,4 @@
+import app._compat_shims  # noqa: F401 — pdfminer shim before any rag/unstructured import
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 

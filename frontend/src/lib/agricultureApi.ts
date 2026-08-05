@@ -117,6 +117,18 @@ export type AgroCalcEstimate = {
   warning: string | null;
 };
 
+export type YieldEstimate = {
+  crop: string;
+  yield_estimate_q_ha: number | null;
+  yield_range_low_q_ha: number | null;
+  yield_range_high_q_ha: number | null;
+  base_yield_q_ha: number | null;
+  suitability_score: number | null;
+  adjustment_factor: number | null;
+  method_note: string | null;
+  warning: string | null;
+};
+
 export type AdvisorReport = {
   parcel_id: string | null;
   report_markdown: string;
@@ -160,11 +172,55 @@ export type AnalyzeResponse = {
   neighbors: NeighborCropContext | null;
   crop_recommendations: CropRecommendationOut[];
   agro_calc_top_crop: AgroCalcEstimate;
+  yield_estimate: YieldEstimate | null;
   report: AdvisorReport | null;
   warnings: string[];
 };
 
+export type NdviHeatmapResponse = {
+  image_base64: string | null;
+  bounds: { south: number; west: number; north: number; east: number } | null;
+  warning: string | null;
+};
+
 export type ParcelRequest = { point: Coordinate; manual_geojson?: Record<string, unknown> | null };
+
+export type ReliefGrid = {
+  grille_ndvi: number[][];
+  grille_ndwi: number[][];
+  grille_ndmi: number[][];
+  grille_elevation: number[][];
+  grille_pente_pct: number[][];
+  grille_validite: boolean[][];
+  grille_validite_satellite: boolean[][];
+  hauteur: number;
+  largeur: number;
+  largeur_m: number;
+  hauteur_m: number;
+  resolution_relief_m: number;
+  resolution_satellite_m: number;
+  resolution_ndmi_m: number;
+  source_relief: string;
+  date_relief: string | null;
+  stats_ndvi: {
+    moyen: number | null;
+    min: number | null;
+    max: number | null;
+      ndwi_moyen: number | null;
+      ndwi_min: number | null;
+      ndwi_max: number | null;
+      ndmi_moyen: number | null;
+      ndmi_min: number | null;
+      ndmi_max: number | null;
+    couverture_pct: number;
+  };
+  stats_pente: { moyenne_pct: number; p95_pct: number; max_pct: number };
+  periode_recherche: string;
+  source_satellite: string;
+  satellite_available: boolean;
+  index_definitions: { ndvi: string; ndwi: string; ndmi: string };
+  warnings: string[];
+};
 
 export class AgricultureApiError extends Error {
   constructor(
@@ -209,11 +265,26 @@ export function resolveParcel(request: ParcelRequest): Promise<ParcelResolution>
 }
 
 /** POST /agriculture/parcel/neighbors — répartition des cultures déclarées dans un rayon donné, sans persistance. */
-export function getNeighbors(request: ParcelRequest, radiusM = 15_000): Promise<NeighborCropContext> {
+export function getNeighbors(request: ParcelRequest, radiusM = 800): Promise<NeighborCropContext> {
   return postJson<NeighborCropContext>(`/agriculture/parcel/neighbors?radius_m=${radiusM}`, request);
+}
+
+/** POST /agriculture/parcel/ndvi_heatmap — PNG NDVI coloré pour la bascule "Afficher la carte NDVI" du frontend. */
+export function getNdviHeatmap(request: ParcelRequest): Promise<NdviHeatmapResponse> {
+  return postJson<NdviHeatmapResponse>("/agriculture/parcel/ndvi_heatmap", request);
 }
 
 /** POST /agriculture/analyze — pipeline complet (sol/météo/satellite/scoring/rapport), persisté si `terrain_id` est fourni. */
 export function analyzeParcel(request: AnalyzeRequest): Promise<AnalyzeResponse> {
   return postJson<AnalyzeResponse>("/agriculture/analyze", request);
+}
+
+/** Mesh LiDAR/IGN et indices Sentinel utilisés par la vue 3D de la parcelle. */
+export function getReliefGrid(geometry: Record<string, unknown>): Promise<ReliefGrid> {
+  return postJson<ReliefGrid>("/agriculture/relief/grid", geometry);
+}
+
+/** Orthophoto IGN optionnelle, chargée seulement si l'utilisateur la sélectionne. */
+export function getReliefOrthophoto(geometry: Record<string, unknown>): Promise<{ image_base64: string }> {
+  return postJson<{ image_base64: string }>("/agriculture/relief/orthophoto", geometry);
 }

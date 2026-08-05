@@ -19,6 +19,17 @@ agronomic methods, not the full versions:
   Yield objective defaults to a typical French average per crop
   (Agreste-ballpark) and can be overridden by the caller.
 
+  Exception — legumes (soja, pois protéagineux): this yield-scaling
+  formula does not apply to them at all. Both fix their own
+  atmospheric nitrogen via rhizobia and need little to no synthetic N;
+  running the normal besoins = yield_obj * b_n_kg_per_q formula on them
+  would be actively wrong (it would recommend real fertilizer N for a
+  crop that mostly doesn't need it, and can specifically be misleading
+  for pois, where synthetic N is banned in nitrate-vulnerable zones).
+  These two use `_LEGUME_STARTER_N_KG_HA` instead — a small flat
+  starter dose, independent of yield objective, with an explanatory
+  note.
+
 - Irrigation: FAO-56's crop water balance
   (need = ET0 x Kc - effective rainfall), using a single representative
   mid-season Kc per crop rather than a full growth-stage curve (we
@@ -30,20 +41,70 @@ illustration at this project's scope, not a calibrated agronomic
 threshold — same rigor level as ml_service.py's crop tolerance ranges.
 """
 from app.models.schemas import SoilData, WeatherData, AgroCalcEstimate
+from app.services.yield_service import BASE_YIELD_Q_HA
 
 # kg N needed per quintal (100kg) of harvested yield — COMIFER/Arvalis
-# reference order-of-magnitude values.
-# default_yield_q_ha — typical French average yield (Agreste ballpark),
-# used only when the caller doesn't supply a real yield objective.
+# reference order-of-magnitude values. The yield objective itself
+# (previously a "default_yield_q_ha" duplicated inline here) now comes
+# from yield_service.BASE_YIELD_Q_HA — same French-average reference
+# values, single source of truth — used only as a fallback when the
+# caller doesn't supply a real, parcel-specific yield objective (main.py
+# now always does, via yield_service.estimate_yield()).
+#
+# Potato and sugar beet coefficients are deliberately small relative to
+# their huge fresh-weight yield objective (~420 and ~850 q/ha) — total
+# N need per hectare is what's agronomically realistic (potato
+# ~150-180 kg N/ha, sugar beet ~100-140 kg N/ha), not what the raw
+# quintal count might suggest.
 _N_CONSTANTS = {
-    "ble_tendre": {"b_n_kg_per_q": 3.0, "default_yield_q_ha": 75},
-    "mais":       {"b_n_kg_per_q": 2.2, "default_yield_q_ha": 95},
-    "colza":      {"b_n_kg_per_q": 7.0, "default_yield_q_ha": 35},
-    "orge":       {"b_n_kg_per_q": 2.6, "default_yield_q_ha": 70},
-    "tournesol":  {"b_n_kg_per_q": 4.5, "default_yield_q_ha": 28},
+    "ble_tendre": {"b_n_kg_per_q": 3.0},
+    "mais":       {"b_n_kg_per_q": 2.2},
+    "colza":      {"b_n_kg_per_q": 7.0},
+    "orge":       {"b_n_kg_per_q": 2.6},
+    "tournesol":  {"b_n_kg_per_q": 4.5},
+    "pomme_de_terre": {"b_n_kg_per_q": 0.4},
+    "betterave_sucriere": {"b_n_kg_per_q": 0.14},
+}
+
+# Legumes: fix their own atmospheric N via rhizobia. Skip the yield-
+# scaling formula entirely and use a small flat starter dose instead.
+# Pois: typically no synthetic N at all in real French guidance (and
+# banned outright in nitrate-vulnerable zones) — 0 kg N/ha. Soja:
+# occasionally given a very light starter dose if inoculation/nodulation
+# is uncertain — kept small and clearly labeled as optional-in-practice.
+_LEGUME_STARTER_N_KG_HA = {
+    "soja": 20.0,
+    "pois_proteagineux": 0.0,
 }
 
 _CAU = 0.7  # apparent utilization coefficient — typical published value for mineral N fertilizer
+
+# Realistic regulatory-ballpark N dose ceilings, kg N/ha — French nitrate-
+# vulnerable-zone reference doses cap total N application regardless of
+# what a yield-based formula predicts. Added after yield_service.py made
+# yield_objective_q_ha parcel-specific (previously always the fixed
+# default): the linear besoins = yield_obj * b_n_kg_per_q formula, only
+# ever calibrated/verified at the default 75 q/ha wheat objective, was
+# found to produce 334 kg N/ha for a high-suitability parcel with a
+# ~105 q/ha objective — well past real ceilings. Capping here, not by
+# artificially shrinking yield_objective_q_ha, keeps the yield estimate
+# itself honest while keeping the fertilizer dose realistic.
+#
+# Sugar beet's ceiling is much lower than its huge yield objective would
+# suggest — real French guidance caps sugar beet N well below cereal
+# levels despite the much bigger harvest. Legume ceilings exist only as
+# a safety backstop (their starter dose never approaches them).
+_MAX_REALISTIC_DOSE_KG_HA = {
+    "ble_tendre": 220,
+    "mais": 220,
+    "colza": 220,
+    "orge": 180,
+    "tournesol": 120,
+    "pomme_de_terre": 220,
+    "betterave_sucriere": 160,
+    "soja": 50,
+    "pois_proteagineux": 30,
+}
 
 # FAO-56 mid-season crop coefficients (Kc) — approximate reference
 # values, not a full growth-stage curve.
@@ -53,6 +114,10 @@ _KC_MID = {
     "colza": 1.10,
     "orge": 1.10,
     "tournesol": 1.10,
+    "pomme_de_terre": 1.15,
+    "betterave_sucriere": 1.20,
+    "soja": 1.15,
+    "pois_proteagineux": 1.05,
 }
 
 _RAIN_EFFECTIVENESS = 0.8  # simple fixed factor — real methods (e.g. USDA SCS) are more complex, out of scope here
@@ -77,16 +142,58 @@ def _estimate_soil_n_supply(soil: SoilData) -> tuple[float, str]:
     return round(supply, 1), "Estimée à partir du carbone organique du sol (SoilGrids) — approximation, ne remplace pas une analyse de sol réelle (reliquat azoté)."
 
 
+def _estimate_legume_nitrogen(crop: str, starter_dose: float) -> dict:
+    """Legume branch — bypasses the yield-scaling COMIFER-style formula
+    entirely. Returns the same dict shape as estimate_nitrogen() so
+    callers don't need to special-case it."""
+    if starter_dose <= 0:
+        note = (
+            f"{crop.replace('_', ' ').capitalize()} est une légumineuse : elle fixe son propre "
+            f"azote atmosphérique via les rhizobiums et n'a normalement besoin d'aucun apport "
+            f"d'azote de synthèse. Aucune dose n'est recommandée ici (et l'azote de synthèse est "
+            f"interdit pour le pois protéagineux en zone vulnérable aux nitrates)."
+        )
+    else:
+        note = (
+            f"{crop.replace('_', ' ').capitalize()} est une légumineuse : elle fixe son propre "
+            f"azote atmosphérique via les rhizobiums et n'a besoin que d'une dose de démarrage "
+            f"limitée ({starter_dose} kg N/ha), utile surtout en cas d'incertitude sur la "
+            f"nodulation — pas un apport calculé sur objectif de rendement comme pour les "
+            f"cultures non-légumineuses."
+        )
+    return {
+        "n_dose_kg_ha": starter_dose,
+        "n_besoins_kg_ha": None,
+        "n_fournitures_kg_ha": None,
+        "yield_objective_q_ha": None,
+        "n_method_note": note,
+    }
+
+
 def estimate_nitrogen(crop: str, soil: SoilData, yield_objective_q_ha: float | None = None) -> dict:
     """Returns dose_kg_ha, besoins_kg_ha, fournitures_kg_ha, yield_objective_q_ha, note, warning."""
+    if crop in _LEGUME_STARTER_N_KG_HA:
+        return _estimate_legume_nitrogen(crop, _LEGUME_STARTER_N_KG_HA[crop])
+
     consts = _N_CONSTANTS.get(crop)
     if consts is None:
         return {"warning": f"Aucune constante azote disponible pour la culture '{crop}'."}
 
-    yield_obj = yield_objective_q_ha or consts["default_yield_q_ha"]
+    yield_obj = yield_objective_q_ha or BASE_YIELD_Q_HA.get(crop)
+    if yield_obj is None:
+        return {"warning": f"Aucun objectif de rendement disponible (ni fourni, ni référence) pour la culture '{crop}'."}
     besoins = round(yield_obj * consts["b_n_kg_per_q"], 1)
     fournitures, supply_note = _estimate_soil_n_supply(soil)
     dose = max(0.0, round((besoins - fournitures) / _CAU, 1))
+
+    ceiling = _MAX_REALISTIC_DOSE_KG_HA.get(crop)
+    cap_note = ""
+    if ceiling is not None and dose > ceiling:
+        dose = ceiling
+        cap_note = (
+            f" Dose plafonnée à {ceiling} kg N/ha (repère réglementaire zone vulnérable "
+            f"nitrates) — le calcul brut dépassait ce plafond pour l'objectif de rendement donné."
+        )
 
     yield_note = (
         f"Objectif de rendement par défaut ({yield_obj} q/ha, moyenne française indicative)."
@@ -99,7 +206,7 @@ def estimate_nitrogen(crop: str, soil: SoilData, yield_objective_q_ha: float | N
         "n_besoins_kg_ha": besoins,
         "n_fournitures_kg_ha": fournitures,
         "yield_objective_q_ha": yield_obj,
-        "n_method_note": f"{yield_note} {supply_note}",
+        "n_method_note": f"{yield_note} {supply_note}{cap_note}",
     }
 
 

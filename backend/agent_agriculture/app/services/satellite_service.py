@@ -25,6 +25,7 @@ Ported from the standalone `agri-advisor-parcelle` prototype — only the
 settings field names changed (copernicus_client_id/secret ->
 sentinel_hub_client_id/secret) to match this repo's `.env.example`.
 """
+import base64
 import time
 from datetime import datetime, timedelta, timezone
 import httpx
@@ -34,6 +35,7 @@ from app.models.schemas import VegetationData
 
 _TOKEN_URL = "https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/token"
 _STATISTICS_URL = "https://sh.dataspace.copernicus.eu/statistics/v1"
+_PROCESS_URL = "https://sh.dataspace.copernicus.eu/api/v1/process"
 
 # SCL (Scene Classification Layer) codes excluded from the NDVI mean:
 # 3=cloud shadow, 8/9=cloud medium/high probability, 10=thin cirrus, 11=snow
@@ -205,6 +207,163 @@ async def get_ndvi(geometry: dict, days_back: int = 30) -> VegetationData:
         )
     except (KeyError, IndexError, TypeError) as e:
         return VegetationData(source="unavailable", warning=f"Unexpected Sentinel Hub response shape: {e}")
+
+
+_NDVI_HEATMAP_EVALSCRIPT = """
+//VERSION=3
+function setup() {
+  return {
+    input: [{ bands: ["B04", "B08", "SCL", "dataMask"] }],
+    output: { bands: 4, sampleType: "UINT8" }
+  };
+}
+
+var ramp = [
+  [-0.2, [165, 0, 38]],
+  [0.0,  [215, 48, 39]],
+  [0.2,  [244, 109, 67]],
+  [0.35, [254, 224, 139]],
+  [0.5,  [217, 239, 139]],
+  [0.65, [102, 189, 99]],
+  [0.8,  [26, 152, 80]],
+  [1.0,  [0, 104, 55]]
+];
+
+function rampColor(ndvi) {
+  if (ndvi <= ramp[0][0]) return ramp[0][1];
+  for (var i = 1; i < ramp.length; i++) {
+    if (ndvi <= ramp[i][0]) {
+      var lo = ramp[i - 1], hi = ramp[i];
+      var t = (ndvi - lo[0]) / (hi[0] - lo[0]);
+      return [
+        Math.round(lo[1][0] + t * (hi[1][0] - lo[1][0])),
+        Math.round(lo[1][1] + t * (hi[1][1] - lo[1][1])),
+        Math.round(lo[1][2] + t * (hi[1][2] - lo[1][2]))
+      ];
+    }
+  }
+  return ramp[ramp.length - 1][1];
+}
+
+function evaluatePixel(samples) {
+  var bad = (samples.SCL == 3 || samples.SCL == 8 || samples.SCL == 9 || samples.SCL == 10 || samples.SCL == 11);
+  if (bad || samples.dataMask === 0) {
+    return [0, 0, 0, 0];
+  }
+  var ndvi = (samples.B08 - samples.B04) / (samples.B08 + samples.B04 + 1e-6);
+  var rgb = rampColor(ndvi);
+  return [rgb[0], rgb[1], rgb[2], 255];
+}
+"""
+
+# Process API's default plan caps output images (2500x2500px) and
+# billing scales with pixel count — capped well below that here since
+# a farm parcel doesn't need more than this to look good in a Leaflet
+# overlay, and it keeps requests fast.
+_HEATMAP_MAX_DIM_PX = 1024
+
+
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(min=1, max=6))
+async def get_ndvi_heatmap_png(geometry: dict, days_back: int = 30) -> dict:
+    """
+    Renders a colored NDVI PNG for the parcel via the Sentinel Hub
+    Process API (image output) — distinct from get_ndvi()'s Statistics
+    API call (single aggregate number only, no image). Powers the
+    "carte NDVI" heatmap toggle on the map frontend.
+
+    Returns dict with:
+      - "image_base64": str | None — base64-encoded PNG bytes, ready
+        for a `data:image/png;base64,...` URL / L.imageOverlay
+      - "bounds": {"south", "west", "north", "east"} | None — WGS84
+        bounding box of the geometry, for positioning the overlay
+      - "warning": str | None
+    """
+    from shapely.geometry import shape
+
+    poly = shape(geometry)
+    minx, miny, maxx, maxy = poly.bounds  # (west, south, east, north)
+    bounds = {"south": miny, "west": minx, "north": maxy, "east": maxx}
+
+    if not settings.sentinel_hub_client_id or not settings.sentinel_hub_client_secret:
+        return {
+            "image_base64": None,
+            "bounds": None,
+            "warning": (
+                "Sentinel Hub credentials not set. Create a free account at "
+                "dataspace.copernicus.eu and an OAuth client, then set "
+                "SENTINEL_HUB_CLIENT_ID / SENTINEL_HUB_CLIENT_SECRET in .env."
+            ),
+        }
+
+    try:
+        token = await _get_access_token()
+    except httpx.HTTPError as e:
+        return {"image_base64": None, "bounds": None, "warning": f"Copernicus auth failed: {e}"}
+
+    end = datetime.now(timezone.utc)
+    start = end - timedelta(days=days_back)
+
+    width_px, height_px = _pixel_dims_for_resolution(geometry, target_resolution_m=10)
+    width_px = max(32, min(width_px, _HEATMAP_MAX_DIM_PX))
+    height_px = max(32, min(height_px, _HEATMAP_MAX_DIM_PX))
+
+    payload = {
+        "input": {
+            "bounds": {
+                "geometry": geometry,
+                "properties": {"crs": "http://www.opengis.net/def/crs/OGC/1.3/CRS84"},
+            },
+            "data": [
+                {
+                    "type": "sentinel-2-l2a",
+                    "dataFilter": {
+                        "maxCloudCoverage": 60,
+                        "mosaickingOrder": "leastCC",
+                        "timeRange": {
+                            "from": start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                            "to": end.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        },
+                    },
+                }
+            ],
+        },
+        "output": {
+            "width": width_px,
+            "height": height_px,
+            "responses": [{"identifier": "default", "format": {"type": "image/png"}}],
+        },
+        "evalscript": _NDVI_HEATMAP_EVALSCRIPT,
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            resp = await client.post(
+                _PROCESS_URL,
+                json=payload,
+                headers={"Authorization": f"Bearer {token}"},
+            )
+            if resp.status_code >= 400:
+                # Process API returns a JSON error body even though a
+                # successful response is raw PNG bytes — surface the
+                # real reason (auth scope, bad geometry, etc.) rather
+                # than a bare status code.
+                return {
+                    "image_base64": None,
+                    "bounds": None,
+                    "warning": f"Sentinel Hub process request failed: {resp.status_code} — {resp.text[:1000]}",
+                }
+            png_bytes = resp.content
+    except httpx.HTTPError as e:
+        return {"image_base64": None, "bounds": None, "warning": f"Sentinel Hub process request failed: {e}"}
+
+    if not png_bytes:
+        return {"image_base64": None, "bounds": None, "warning": "Sentinel Hub returned an empty image."}
+
+    return {
+        "image_base64": base64.b64encode(png_bytes).decode("ascii"),
+        "bounds": bounds,
+        "warning": None,
+    }
 
 
 _L1C_TIMESERIES_URL = _STATISTICS_URL  # same Statistics API endpoint, different evalscript/data type

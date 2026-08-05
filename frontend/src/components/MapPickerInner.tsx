@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, useMap, useMapEvents, Polygon, Marker } from "react-leaflet";
+import { MapContainer, TileLayer, useMap, useMapEvents, Polygon, Marker, ImageOverlay } from "react-leaflet";
 import L from "leaflet";
 
 // Fix default icons
@@ -10,7 +10,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-/** Sous-ensemble minimal de GeoJSON (Polygon/MultiPolygon) - évite une dépendance sur les types globaux `@types/geojson`. */
+/** Sous-ensemble minimal de GeoJSON (Polygon/MultiPolygon) — évite une dépendance sur les types globaux `@types/geojson`. */
 type PolygonGeometry = { type: "Polygon"; coordinates: number[][][] };
 type MultiPolygonGeometry = { type: "MultiPolygon"; coordinates: number[][][][] };
 
@@ -58,6 +58,7 @@ export default function MapPickerInner({
   markerPosition,
   overlayGeometry,
   neighborGeometries,
+  ndviOverlay,
   height = 480,
   center = [46.7, 2.5],
   zoom = 6,
@@ -65,7 +66,7 @@ export default function MapPickerInner({
   showHint = true,
 }: {
   /** "polygon" (défaut) : trace un contour libre, comme à l'onboarding.
-   *  "point" : un seul clic déplace un marqueur unique - utilisé pour résoudre une parcelle cadastrale précise. */
+   *  "point" : un seul clic déplace un marqueur unique — utilisé pour résoudre une parcelle cadastrale précise. */
   mode?: "polygon" | "point";
   onPolygon?: (points: [number, number][]) => void;
   onPoint?: (point: [number, number]) => void;
@@ -75,6 +76,8 @@ export default function MapPickerInner({
   overlayGeometry?: PolygonGeometry | MultiPolygonGeometry | null;
   /** En mode "point" : parcelles voisines (contexte RPG) à afficher en surimpression, en pointillés orange. */
   neighborGeometries?: (PolygonGeometry | MultiPolygonGeometry)[];
+  /** En mode "point" : image NDVI colorée (PNG base64 + bounds WGS84) à superposer, ex. bascule "Afficher la carte NDVI". */
+  ndviOverlay?: { imageBase64: string; bounds: { south: number; west: number; north: number; east: number } } | null;
   height?: number | string;
   center?: [number, number];
   zoom?: number;
@@ -128,6 +131,16 @@ export default function MapPickerInner({
             <Polygon positions={points} pathOptions={{ color: "#3d8f5a", fillColor: "#7fbf95", fillOpacity: 0.35 }} />
           )}
           {mode === "point" && point && <Marker position={point} />}
+          {mode === "point" && ndviOverlay && (
+            <ImageOverlay
+              url={`data:image/png;base64,${ndviOverlay.imageBase64}`}
+              bounds={[
+                [ndviOverlay.bounds.south, ndviOverlay.bounds.west],
+                [ndviOverlay.bounds.north, ndviOverlay.bounds.east],
+              ]}
+              opacity={0.8}
+            />
+          )}
           {mode === "point" &&
             neighborPositions.map((ring, i) => (
               <Polygon

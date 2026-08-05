@@ -130,7 +130,7 @@ function KpiCard({
   delay: number;
   format?: "euro" | "ha" | "int";
 }) {
-  const [ref, displayed] = useCountUp(value, {
+  const [ref, displayed] = useCountUp<HTMLParagraphElement>(value, {
     duration: 1400,
     decimals: format === "ha" ? 1 : 0,
   });
