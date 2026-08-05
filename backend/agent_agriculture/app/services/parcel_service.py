@@ -207,7 +207,7 @@ async def resolve_parcel(req: ParcelRequest) -> ParcelResolution:
 
 
 async def get_neighboring_crop_context(
-    centroid: Coordinate, radius_m: float = 800, exclude_parcel_id: str | None = None
+    centroid: Coordinate, radius_m: float = 15_000, exclude_parcel_id: str | None = None
 ) -> NeighborCropContext:
     """
     Pulls declared crops for RPG parcels within radius_m of the given

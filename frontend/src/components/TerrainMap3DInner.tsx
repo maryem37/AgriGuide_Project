@@ -52,7 +52,7 @@ export default function TerrainMap3DInner({
     if (!containerRef.current) return;
     if (!MAPBOX_TOKEN) {
       console.error(
-        "VITE_MAPBOX_TOKEN is not set — add it to frontend/.env.local. " +
+        "VITE_MAPBOX_TOKEN is not set — add it to the repo root .env. " +
           "See MapPicker's Leaflet view for the 2D fallback in the meantime.",
       );
       return;
@@ -136,7 +136,7 @@ export default function TerrainMap3DInner({
         style={{ height }}
         className="rounded-2xl border border-border bg-secondary/30 flex items-center justify-center text-sm text-muted-foreground p-4 text-center"
       >
-        VITE_MAPBOX_TOKEN manquant — ajoutez-le dans frontend/.env.local pour activer la vue 3D.
+        VITE_MAPBOX_TOKEN manquant — ajoutez-le dans le .env à la racine du repo pour activer la vue 3D.
       </div>
     );
   }
