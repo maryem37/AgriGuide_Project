@@ -60,7 +60,7 @@ const HERO_VIDEO = "/video/LandingPage.mp4";
 const STATS = [
   { value: 3, suffix: "", label: "conseillers IA", sub: "Agricole, business, réglementaire" },
   { value: 5, suffix: "", label: "cultures classées", sub: "Par parcelle analysée" },
-  { value: 15, suffix: " km", label: "rayon voisinage", sub: "Contexte cultural réel" },
+  { value: 800, suffix: " m", label: "rayon voisinage", sub: "Contexte cultural réel" },
   {
     value: 100,
     suffix: " %",

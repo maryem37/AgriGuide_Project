@@ -199,7 +199,7 @@ function topNeighborCrops(neighbors: NeighborCropContext, limit = 3): string {
 }
 
 /** Doit rester en phase avec le défaut `radius_m` de `POST /agriculture/parcel/neighbors` côté backend. */
-const NEIGHBORS_RADIUS_M = 15_000;
+const NEIGHBORS_RADIUS_M = 800;
 const EXPLORE_VALUE = "__explore__";
 
 function Page() {
