@@ -27,6 +27,8 @@ from app.models.schemas import (
     RetrievedChunk, SynthesisJSON, AdvisorReport, VegetationData, DLCropObservation, AgroCalcEstimate,
     YieldEstimate,
 )
+from app.taxonomy import get_display_name
+from app.services.source_links import HAL_ID_RE, source_url_for_document
 
 _client = Mistral(api_key=settings.mistral_api_key) if settings.mistral_api_key else None
 
@@ -180,15 +182,27 @@ end of the section, in addition to (not instead of) the two method
 notes above.
 
 ## Conseils pratiques
-Bulleted advice grounded in grounded_claims, citing the source document
-per claim, e.g. "(Source: {source_document})".
+PRIMARY content = document RAG only (chroma_store).
+Output a bulleted list with EVERY item from synthesis.practical_tips,
+copied verbatim (you may fix punctuation only). Do NOT invent extra
+conseils from soil/weather/NDVI/crop scores — those belong elsewhere.
+If practical_tips is empty, write exactly:
+"- Aucun conseil documentaire retrouvé dans le corpus RAG."
+Then, IF synthesis.practical_tips_context is non-empty, add a blank
+line and the subheading "### Contexte parcelle" followed by EVERY
+item from practical_tips_context as bullets, copied verbatim, at the
+BOTTOM of this section only.
 
 ## Alertes
-Risks and things to watch, grounded in the data provided. If
-dl_mismatch_note is present (not null) in the JSON, include it as its
-own bullet point, copied verbatim — do not paraphrase, reword, or
-recompute any figure inside it; it was already written and verified
-outside this generation step.
+PRIMARY content = document RAG only (chroma_store).
+Output a bulleted list with EVERY item from synthesis.alerts, copied
+verbatim. Do NOT invent alerts from soil/weather/NDVI/RPG mismatch —
+those go only under context. If alerts is empty, write exactly:
+"- Aucune alerte documentaire retrouvée dans le corpus RAG."
+Then, IF synthesis.alerts_context is non-empty, add a blank line and
+the subheading "### Contexte parcelle" followed by EVERY item from
+alerts_context as bullets, copied verbatim, at the BOTTOM of this
+section only.
 
 ## Données manquantes
 Restate data_gaps as a bulleted list.
@@ -239,6 +253,189 @@ def _validate_grounded_claims(raw_claims: list, valid_chunk_ids: set[str]) -> li
         if chunk_id in valid_chunk_ids:
             validated.append(item)
     return validated
+
+
+_ALERT_KEYWORDS = (
+    "risque", "alerte", "perte", "lixiviation", "lessivage", "stress",
+    "maladie", "danger", "attention", "éviter", "évite", "toxicité",
+    "carence", "excès", "pollution", "nitrate", "lessiv",
+)
+
+
+def _build_rag_tips_and_alerts(
+    grounded_claims: list[dict],
+    chunks: list[RetrievedChunk],
+) -> tuple[list[str], list[str]]:
+    """Primary Conseils / Alertes content — chroma RAG grounded claims only."""
+    tips: list[str] = []
+    alerts: list[str] = []
+    chunk_meta = {
+        c.chunk_id: (c.source_document, c.source_url) for c in chunks
+    }
+    for claim in grounded_claims:
+        text = claim.get("claim", "").strip()
+        src_id = claim.get("source_chunk_id")
+        if not text:
+            continue
+        src_name, src_url = chunk_meta.get(src_id, ("document agronomique", None))
+        url = src_url or source_url_for_document(src_name)
+        hal_match = HAL_ID_RE.match(src_name)
+        link_label = hal_match.group("hal_id") if hal_match else (
+            src_name.replace(".pdf", "")[:48] if src_name.endswith(".pdf") else src_name
+        )
+        if url:
+            citation = f"(Source : [{link_label}]({url}))"
+        else:
+            citation = f"(Source : {src_name})"
+        bullet = f"{text} {citation}"
+        lower = text.lower()
+        if any(k in lower for k in _ALERT_KEYWORDS) and len(alerts) < 6:
+            alerts.append(bullet)
+        elif len(tips) < 6:
+            tips.append(bullet)
+    return tips, alerts
+
+
+def _build_parcel_context_tips_and_alerts(
+    parcel: ParcelResolution,
+    soil: SoilData,
+    weather_stats: dict,
+    vegetation: VegetationData,
+    crop_recs: list[CropRecommendation],
+    agro_calc: AgroCalcEstimate | None,
+    yield_estimate: YieldEstimate | None,
+    dl_mismatch_note: str | None,
+) -> tuple[list[str], list[str]]:
+    """Parcel-data bullets — shown only under ### Contexte parcelle at section bottom."""
+    tips: list[str] = []
+    alerts: list[str] = []
+
+    top = crop_recs[0] if crop_recs else None
+    if top:
+        crop_label = get_display_name(top.crop)
+        score_pct = round(top.suitability_score * 100)
+        tips.append(
+            f"Culture la plus compatible avec cette parcelle : {crop_label} "
+            f"(score {score_pct} %). Croisez ce résultat avec votre rotation "
+            f"et vos contrats avant de décider."
+        )
+        if score_pct < 55:
+            alerts.append(
+                f"Compatibilité modérée pour {crop_label} ({score_pct} %). "
+                f"Envisagez les autres cultures recommandées ou un diagnostic sol plus fin."
+            )
+
+    if parcel.crop_declared:
+        declared = get_display_name(parcel.crop_declared)
+        tips.append(
+            f"Culture déclarée au RPG pour cette parcelle : {declared}. "
+            f"Vérifiez qu'elle reste cohérente avec votre plan de rotation."
+        )
+
+    if soil.ph is not None:
+        if soil.ph < 6.0:
+            tips.append(
+                f"Sol plutôt acide (pH {soil.ph:.1f}). Un chaulage peut être utile "
+                f"selon la culture visée — à confirmer par analyse."
+            )
+        elif soil.ph > 7.8:
+            tips.append(
+                f"Sol plutôt basique (pH {soil.ph:.1f}). Certaines cultures "
+                f"(colza, betterave) s'y adaptent mieux que d'autres."
+            )
+
+    if agro_calc and agro_calc.n_dose_kg_ha is not None:
+        tips.append(
+            f"Dose d'azote estimée pour la culture principale : "
+            f"{agro_calc.n_dose_kg_ha:.1f} kg N/ha (estimation SoilGrids, "
+            f"à valider par analyse de sol)."
+        )
+
+    if agro_calc and agro_calc.irrigation_need_mm is not None and agro_calc.irrigation_window_days:
+        need = agro_calc.irrigation_need_mm
+        days = agro_calc.irrigation_window_days
+        tips.append(
+            f"Besoin d'irrigation estimé sur {days} jours : {need:.1f} mm. "
+            f"Planifiez l'irrigation en fonction de la météo réelle du jour."
+        )
+        if need >= 80:
+            alerts.append(
+                f"Besoin d'irrigation élevé ({need:.1f} mm sur {days} jours). "
+                f"Surveillez l'humidité et anticipez les apports d'eau."
+            )
+
+    if yield_estimate and yield_estimate.yield_estimate_q_ha is not None:
+        tips.append(
+            f"Rendement estimé pour la culture principale : "
+            f"{yield_estimate.yield_estimate_q_ha:.1f} q/ha "
+            f"(fourchette indicative, pas une garantie de récolte)."
+        )
+
+    total_precip = weather_stats.get("total_precip_mm")
+    rainy_days = weather_stats.get("rainy_days_count")
+    if total_precip is not None and rainy_days is not None:
+        if total_precip < 15 and rainy_days <= 2:
+            alerts.append(
+                f"Période récente plutôt sèche ({total_precip:.1f} mm sur "
+                f"{rainy_days} jour(s) de pluie). Surveillez le stress hydrique."
+            )
+        elif total_precip > 80:
+            alerts.append(
+                f"Précipitations cumulées élevées ({total_precip:.1f} mm). "
+                f"Évitez le travail du sol saturé et surveillez les maladies fongiques."
+            )
+
+    if vegetation.source == "sentinel-2" and vegetation.mean_ndvi is not None:
+        ndvi = vegetation.mean_ndvi
+        if ndvi < 0.2:
+            alerts.append(
+                f"NDVI faible ({ndvi:.2f}) : couvert végétal sparse ou sol nu. "
+                f"Utile comme contexte, pas comme diagnostic de rendement."
+            )
+        elif ndvi > 0.55:
+            tips.append(
+                f"Végétation active sur la parcelle (NDVI moyen {ndvi:.2f}). "
+                f"Contexte satellite utile pour le suivi, indépendamment du choix de culture."
+            )
+    elif vegetation.source == "unavailable":
+        alerts.append(
+            "Données satellite Sentinel-2 indisponibles pour cette parcelle "
+            "(nuages, credentials ou couverture). Le reste de l'analyse reste valide."
+        )
+
+    if dl_mismatch_note:
+        alerts.append(dl_mismatch_note)
+
+    return tips, alerts
+
+
+def _format_section_body(rag_bullets: list[str], context_bullets: list[str], empty_msg: str) -> str:
+    """RAG bullets first; parcel-context bullets under a bottom subheading."""
+    primary = "\n".join(f"- {b}" for b in rag_bullets) if rag_bullets else f"- {empty_msg}"
+    if not context_bullets:
+        return primary
+    ctx = "\n".join(f"- {b}" for b in context_bullets)
+    return f"{primary}\n\n### Contexte parcelle\n{ctx}"
+
+
+def _inject_section_bullets(
+    report_text: str,
+    section_title: str,
+    rag_bullets: list[str],
+    context_bullets: list[str],
+    empty_msg: str,
+) -> str:
+    """Replace ## section body with RAG primary + context at the bottom."""
+    block = _format_section_body(rag_bullets, context_bullets, empty_msg)
+    needle = f"## {section_title}"
+    idx = report_text.find(needle)
+    if idx == -1:
+        return report_text.rstrip() + f"\n\n{needle}\n{block}\n"
+    start = idx + len(needle)
+    next_idx = report_text.find("\n## ", start)
+    if next_idx == -1:
+        return report_text[:start] + "\n" + block + "\n"
+    return report_text[:start] + "\n" + block + "\n" + report_text[next_idx:]
 
 
 # Matches numbers with optional decimal (comma OR period), optional unit-ish suffix.
@@ -362,7 +559,12 @@ async def synthesize_stage1(
         "vegetation": vegetation.model_dump(),
         "crop_recommendations": [c.model_dump() for c in crop_recs],
         "retrieved_chunks": [
-            {"chunk_id": c.chunk_id, "text": c.text, "source_document": c.source_document}
+            {
+                "chunk_id": c.chunk_id,
+                "text": c.text,
+                "source_document": c.source_document,
+                "source_url": c.source_url,
+            }
             for c in chunks
         ],
     }
@@ -398,6 +600,28 @@ async def synthesize_stage1(
                 f"récent d'exploitant — à vérifier avant toute décision."
             )
 
+    validated_claims = _validate_grounded_claims(raw.get("grounded_claims", []), valid_chunk_ids)
+    data_gaps = _normalize_data_gaps(raw.get("data_gaps", []))
+    if not chunks and not any("rag" in g.lower() or "corpus" in g.lower() for g in data_gaps):
+        data_gaps.append(
+            "Corpus documentaire RAG vide ou non indexé — conseils documentaires limités."
+        )
+
+    practical_tips, alerts = _build_rag_tips_and_alerts(
+        grounded_claims=validated_claims,
+        chunks=chunks,
+    )
+    practical_tips_context, alerts_context = _build_parcel_context_tips_and_alerts(
+        parcel=parcel,
+        soil=soil,
+        weather_stats=weather_stats,
+        vegetation=vegetation,
+        crop_recs=crop_recs,
+        agro_calc=agro_calc,
+        yield_estimate=yield_estimate,
+        dl_mismatch_note=dl_mismatch_note,
+    )
+
     return SynthesisJSON(
         parcel_id=parcel.parcel_id,
         location=parcel.centroid,
@@ -410,8 +634,12 @@ async def synthesize_stage1(
         agro_calc_summary=agro_calc.model_dump(),
         yield_summary=yield_estimate.model_dump() if yield_estimate else {},
         crop_recommendations=crop_recs,
-        grounded_claims=_validate_grounded_claims(raw.get("grounded_claims", []), valid_chunk_ids),
-        data_gaps=_normalize_data_gaps(raw.get("data_gaps", [])),
+        grounded_claims=validated_claims,
+        data_gaps=data_gaps,
+        practical_tips=practical_tips,
+        alerts=alerts,
+        practical_tips_context=practical_tips_context,
+        alerts_context=alerts_context,
     )
 
 
@@ -437,6 +665,20 @@ async def generate_report(synthesis: SynthesisJSON, parcel: ParcelResolution) ->
         ],
     )
     report_text = resp.choices[0].message.content
+    report_text = _inject_section_bullets(
+        report_text,
+        "Conseils pratiques",
+        synthesis.practical_tips,
+        synthesis.practical_tips_context,
+        "Aucun conseil documentaire retrouvé dans le corpus RAG.",
+    )
+    report_text = _inject_section_bullets(
+        report_text,
+        "Alertes",
+        synthesis.alerts,
+        synthesis.alerts_context,
+        "Aucune alerte documentaire retrouvée dans le corpus RAG.",
+    )
 
     unverified = _audit_report_numbers(report_text, synthesis, parcel)
 

@@ -12,6 +12,8 @@ paths updated to the `app.*` package layout). Run from
 import argparse
 import mimetypes
 from pathlib import Path
+
+import app._compat_shims  # noqa: F401 — must run before unstructured/pdfminer imports
 from unstructured.partition.auto import partition
 from app.services.rag_service import chunk_document, index_chunks, _collection
 from app.taxonomy import normalize_crop
@@ -39,7 +41,20 @@ _EXTENSION_CONTENT_TYPES = {
 
 
 def extract_text(path: Path) -> str:
-    content_type = _EXTENSION_CONTENT_TYPES.get(path.suffix.lower()) or mimetypes.guess_type(str(path))[0]
+    suffix = path.suffix.lower()
+    if suffix == ".pdf":
+        import pdfplumber
+
+        parts: list[str] = []
+        with pdfplumber.open(str(path)) as pdf:
+            for page in pdf.pages:
+                text = page.extract_text()
+                if text and text.strip():
+                    parts.append(text.strip())
+        if parts:
+            return "\n\n".join(parts)
+
+    content_type = _EXTENSION_CONTENT_TYPES.get(suffix) or mimetypes.guess_type(str(path))[0]
     elements = partition(filename=str(path), content_type=content_type)
     return "\n\n".join(str(e) for e in elements)
 

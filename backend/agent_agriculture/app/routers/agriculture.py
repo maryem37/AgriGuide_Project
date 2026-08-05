@@ -248,17 +248,35 @@ async def analyze(req: AnalyzeRequest):
     #    calc) is still useful and returned regardless.
     report = None
     try:
-        chunks = await asyncio.to_thread(
+        crop_label = top_crop or "céréales"
+        # Dual retrieval: conseils (pratiques) + alertes (risques). No crop
+        # metadata filter — corpus was ingested with empty crop tags, so a
+        # crop_filter would always return nothing.
+        tip_chunks = await asyncio.to_thread(
             rag_service.retrieve,
-            query=f"bonnes pratiques agronomiques pour {top_crop}" if top_crop else "bonnes pratiques agronomiques",
-            crop_filter=top_crop,
+            query=(
+                f"conseils pratiques fertilisation irrigation travail du sol "
+                f"azote phosphore pour {crop_label}"
+            ),
+            crop_filter=None,
+            top_k=6,
         )
-        if not chunks and top_crop:
-            chunks = await asyncio.to_thread(
-                rag_service.retrieve,
-                query=f"bonnes pratiques agronomiques pour {top_crop}",
-                crop_filter=None,
-            )
+        alert_chunks = await asyncio.to_thread(
+            rag_service.retrieve,
+            query=(
+                f"risques alertes pertes nitrate lixiviation stress hydrique "
+                f"maladies rendement pour {crop_label}"
+            ),
+            crop_filter=None,
+            top_k=6,
+        )
+        seen: set[str] = set()
+        chunks = []
+        for c in tip_chunks + alert_chunks:
+            if c.chunk_id in seen:
+                continue
+            seen.add(c.chunk_id)
+            chunks.append(c)
         synthesis = await synthesis_service.synthesize_stage1(
             parcel, soil, weather, crop_recs, chunks, vegetation, dl_observation, top_crop_agro, top_crop_yield
         )

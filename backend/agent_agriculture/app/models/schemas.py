@@ -90,6 +90,7 @@ class RetrievedChunk(BaseModel):
     chunk_id: str
     text: str
     source_document: str
+    source_url: Optional[str] = None  # HAL landing page when derivable from filename
     crop: Optional[str] = None
     region: Optional[str] = None
     topic: Optional[str] = None
@@ -168,6 +169,13 @@ class SynthesisJSON(BaseModel):
     crop_recommendations: list[CropRecommendation]
     grounded_claims: list[dict]  # {"claim": str, "source_chunk_id": str}
     data_gaps: list[str]
+    # RAG-only bullets (chroma_store grounded claims) for ## Conseils / ## Alertes.
+    practical_tips: list[str] = Field(default_factory=list)
+    alerts: list[str] = Field(default_factory=list)
+    # Parcel-data bullets (sol/météo/NDVI/…) — shown only at the bottom of
+    # each section, after the RAG content; never mixed into the primary list.
+    practical_tips_context: list[str] = Field(default_factory=list)
+    alerts_context: list[str] = Field(default_factory=list)
 
 
 class AdvisorReport(BaseModel):
