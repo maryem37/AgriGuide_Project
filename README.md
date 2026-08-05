@@ -20,6 +20,7 @@ agriadvisor/
 │   ├── agent_agriculture/    # Analyse géo/sol/climat + RandomForest
 │   ├── agent_business/       # Scoring des scénarios + étude de marché
 │   ├── agent_monitoring/     # Suivi quotidien, alertes, déclenchement marketplace
+│   ├── waste_agents/         # Déchets & valorisation (KB + API port 8004)
 │   ├── marketplace/          # Module CRUD annonces (récolte + déchets)
 │   └── shared/               # Modèles de données, clients API externes communs
 ├── database/

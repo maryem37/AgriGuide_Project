@@ -90,6 +90,7 @@ import {
   type ParcelResolution,
 } from "@/lib/agricultureApi";
 import { saveRealCropRecommendations, cultureLabel } from "@/lib/cropRecommendations";
+import { CropWasteValorization } from "@/components/CropWasteValorization";
 
 const Terrain3DDialog = lazy(() =>
   import("@/components/Terrain3DDialog").then((module) => ({ default: module.Terrain3DDialog })),
@@ -732,6 +733,10 @@ function Page() {
                 <CropCard key={c.culture} crop={c} onDetails={() => setOpenCrop(c)} />
               ))}
             </div>
+
+            <CropWasteValorization
+              cultures={analysis.crop_recommendations.map((c) => c.culture)}
+            />
           </div>
 
           {showReport && analysis.report && (

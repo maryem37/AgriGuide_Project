@@ -35,6 +35,7 @@ import {
   Sprout,
   Wallet,
   Wind,
+  Recycle,
 } from "lucide-react";
 
 export const Route = createFileRoute("/aujourd-hui")({
@@ -469,6 +470,30 @@ function Page() {
           </div>
         </div>
       </Reveal>
+
+      {allocations[0] && (
+        <Reveal delay={160} className="mt-6">
+          <Link
+            to="/marketplace/nouveau"
+            search={{ kind: "dechet", culture: allocations[0].culture }}
+            className="group flex items-start gap-4 rounded-3xl border border-waste/30 bg-waste/10 p-5 transition hover:bg-waste/15"
+          >
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-card text-waste-foreground">
+              <Recycle className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="font-display text-lg font-semibold">
+                Valorisez les déchets de {cultureLabel(allocations[0].culture)}
+              </div>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Après la récolte (prévue le{" "}
+                {new Date(allocations[0].date_maturite_prevue).toLocaleDateString("fr-FR")}
+                ), déposez paille, balles et autres résidus sur la marketplace.
+              </p>
+            </div>
+          </Link>
+        </Reveal>
+      )}
 
       <Reveal delay={80} className="mt-6" threshold={0.05}>
         <div className="relative overflow-hidden rounded-3xl bg-[#E8F2E9] p-5 md:p-6 ring-1 ring-primary/10">

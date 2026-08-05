@@ -56,6 +56,17 @@ non des lignes dans les tables en amont.
 - Ajoute le module BSV (Bulletin de Santé du Végétal) pour les risques
   phytosanitaires régionaux, en amont — pas seulement mentionné en Business.
 - Écrit dans `land_profiles` et `crop_recommendations`.
+- Le frontend enrichit le top 5 cultures avec l'**agent Déchets**
+  (`waste_agents`, port 8004) : résidus produits et voies de valorisation.
+
+### Agent Déchets / Valorisation (waste_agents/)
+- Base de connaissances scientifique (crop → wastes → transformations →
+  applications), exposée en lecture seule via `POST /waste/for-crops` et
+  `GET /waste/marketplace-suggestions`.
+- Branché après les recommandations Agriculture et après confirmation
+  Business → préremplit les annonces `dechet` sur la marketplace.
+- La recherche autonome (web + papers) reste dans le Streamlit interne ;
+  le parcours farmer n'exige pas de clé LLM.
 
 ### Agent Business (agent_business/)
 - Le score de matching est une **formule explicite**, pas une estimation LLM :

@@ -1,0 +1,110 @@
+{
+  "version": "1.0.0",
+  "crops": [
+    {
+      "id": "example-crop-rice",
+      "name": "Rice",
+      "canonical_name": "Rice",
+      "scientific_name": "Oryza sativa",
+      "aliases": [],
+      "wastes": [
+        {
+          "id": "example-waste-rice-husk",
+          "name": "Rice Husk",
+          "canonical_name": "Rice Husk",
+          "category": "Husk",
+          "plant_part": "Husk",
+          "description": "The hard protective covering of the rice grain, removed during milling.",
+          "harvest_stage": "Post-harvest milling",
+          "composition": [
+            {
+              "component": "Silica",
+              "value": "18-22",
+              "unit": "%",
+              "confidence": 0.95,
+              "evidence_source": "DOCUMENT",
+              "references": []
+            },
+            {
+              "component": "Cellulose",
+              "value": "35-40",
+              "unit": "%",
+              "confidence": 0.9,
+              "evidence_source": "DOCUMENT",
+              "references": []
+            }
+          ],
+          "physical_properties": {},
+          "chemical_properties": {},
+          "transformations": [
+            {
+              "input_waste": "Rice Husk",
+              "process": "Pyrolysis",
+              "output_product": "Biochar",
+              "description": "Thermal decomposition in a low-oxygen environment produces biochar.",
+              "confidence": 0.9,
+              "evidence_source": "DOCUMENT",
+              "references": []
+            },
+            {
+              "input_waste": "Biochar",
+              "process": "Chemical activation",
+              "output_product": "Activated Carbon",
+              "description": "Activation increases surface area for adsorption applications.",
+              "confidence": 0.85,
+              "evidence_source": "DOCUMENT",
+              "references": []
+            }
+          ],
+          "final_products": ["Biochar", "Activated Carbon", "Silica gel"],
+          "industrial_applications": [
+            {
+              "name": "Water filtration media",
+              "category": "INDUSTRIAL",
+              "description": "Activated carbon derived from rice husk is used to filter contaminants from water.",
+              "environmental_benefit": "Reduces reliance on coal-based activated carbon.",
+              "confidence": 0.85,
+              "evidence_source": "DOCUMENT",
+              "references": []
+            }
+          ],
+          "agricultural_applications": [],
+          "environmental_applications": [
+            {
+              "name": "Soil amendment",
+              "category": "ENVIRONMENTAL",
+              "description": "Biochar improves soil water retention and carbon sequestration.",
+              "confidence": 0.85,
+              "evidence_source": "DOCUMENT",
+              "references": []
+            }
+          ],
+          "advantages": ["Abundant byproduct of rice milling", "High silica content useful for materials science"],
+          "limitations": ["Low bulk density complicates transport and storage"],
+          "confidence": 0.9,
+          "evidence_source": "DOCUMENT",
+          "evidence_strength": "HIGH",
+          "references": [
+            {
+              "source_type": "ACADEMIC_PAPER",
+              "title": "Example: Rice husk valorization pathways",
+              "url": null,
+              "doi": null,
+              "authors": ["Example Author"],
+              "published_year": 2022,
+              "page": null,
+              "snippet": "Example seed data for demonstration purposes only.",
+              "retrieved_at": "2026-01-01T00:00:00+00:00"
+            }
+          ],
+          "created_at": "2026-01-01T00:00:00+00:00",
+          "updated_at": "2026-01-01T00:00:00+00:00"
+        }
+      ],
+      "created_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-01-01T00:00:00+00:00",
+      "last_research_at": "2026-01-01T00:00:00+00:00"
+    }
+  ],
+  "updated_at": "2026-01-01T00:00:00+00:00"
+}
