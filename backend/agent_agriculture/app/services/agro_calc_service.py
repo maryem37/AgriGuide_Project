@@ -40,7 +40,7 @@ Every numeric constant below is a published reference value used for
 illustration at this project's scope, not a calibrated agronomic
 threshold — same rigor level as ml_service.py's crop tolerance ranges.
 """
-from app.models.schemas import SoilData, WeatherData, AgroCalcEstimate
+from app.models.schemas import SoilData, WeatherData, AgroCalcEstimate, DLCropObservation
 from app.services.yield_service import BASE_YIELD_Q_HA
 
 # kg N needed per quintal (100kg) of harvested yield — COMIFER/Arvalis
@@ -78,6 +78,53 @@ _LEGUME_STARTER_N_KG_HA = {
 }
 
 _CAU = 0.7  # apparent utilization coefficient — typical published value for mineral N fertilizer
+
+# --- DL grassland-conversion N credit (Phase B integration) -----------------
+# Published, well-documented agronomic effect ("arrière-effet prairie" /
+# grassland plow-down effect): converting permanent or temporary meadow to
+# arable land releases meadow-accumulated organic N via mineralization for
+# roughly 1-2 following seasons, on top of the parcel's normal organic-carbon
+# supply. dl_service.py's TempCNN classifier is the only source in this
+# pipeline that can tell us the parcel is CURRENTLY under meadow — a
+# genuinely useful, real-world signal for what it actually observes (current
+# land cover), unlike using it as a suitability/yield signal (which the
+# rest of this project deliberately avoids — see yield_service.py).
+# Credit values are illustrative COMIFER-ballpark figures (permanent meadow
+# accumulates more organic N over time than a short temporary rotation),
+# same "documented approximation, not a real Nmin test" rigor as
+# _estimate_soil_n_supply below.
+_DL_PRAIRIE_N_CREDIT_KG_HA = {
+    "permanent meadows": 40.0,
+    "temporary meadows": 25.0,
+}
+_DL_MIN_CONFIDENCE_FOR_CREDIT = 0.5
+_DL_MIN_TIMESTEPS_FOR_CREDIT = 5
+
+
+def _dl_prairie_n_credit(dl_observation: "DLCropObservation | None") -> tuple[float, str | None]:
+    """Returns (credit_kg_ha, note). Credit is 0 / note is None unless the DL
+    classifier confidently observes the parcel as currently under meadow —
+    exactly the same confidence/timestep gate as ml_service.py's evidence
+    bonus, so both integrations degrade identically when the classifier is
+    unavailable or unsure."""
+    if dl_observation is None or dl_observation.source == "unavailable":
+        return 0.0, None
+    if dl_observation.confidence is None or dl_observation.confidence < _DL_MIN_CONFIDENCE_FOR_CREDIT:
+        return 0.0, None
+    if (dl_observation.observation_timesteps or 0) < _DL_MIN_TIMESTEPS_FOR_CREDIT:
+        return 0.0, None
+    credit = _DL_PRAIRIE_N_CREDIT_KG_HA.get(dl_observation.predicted_class_en or "")
+    if not credit:
+        return 0.0, None
+    note = (
+        f"Crédit azote de {credit} kg N/ha appliqué : le classifieur DL (TempCNN/BreizhCrops) "
+        f"observe cette parcelle actuellement en {dl_observation.predicted_class_fr} "
+        f"(confiance {round(dl_observation.confidence * 100)}%) — le retournement de prairie "
+        f"libère de l'azote organique minéralisé pendant 1-2 saisons (repère COMIFER), en plus "
+        f"de la fourniture du sol estimée ci-dessous. Approximation documentée, ne remplace pas "
+        f"un diagnostic agronomique de retournement réel."
+    )
+    return credit, note
 
 # Realistic regulatory-ballpark N dose ceilings, kg N/ha — French nitrate-
 # vulnerable-zone reference doses cap total N application regardless of
@@ -170,8 +217,13 @@ def _estimate_legume_nitrogen(crop: str, starter_dose: float) -> dict:
     }
 
 
-def estimate_nitrogen(crop: str, soil: SoilData, yield_objective_q_ha: float | None = None) -> dict:
-    """Returns dose_kg_ha, besoins_kg_ha, fournitures_kg_ha, yield_objective_q_ha, note, warning."""
+def estimate_nitrogen(
+    crop: str,
+    soil: SoilData,
+    yield_objective_q_ha: float | None = None,
+    dl_observation: "DLCropObservation | None" = None,
+) -> dict:
+    """Returns dose_kg_ha, besoins_kg_ha, fournitures_kg_ha, dl_credit_kg_ha, yield_objective_q_ha, note, warning."""
     if crop in _LEGUME_STARTER_N_KG_HA:
         return _estimate_legume_nitrogen(crop, _LEGUME_STARTER_N_KG_HA[crop])
 
@@ -184,7 +236,8 @@ def estimate_nitrogen(crop: str, soil: SoilData, yield_objective_q_ha: float | N
         return {"warning": f"Aucun objectif de rendement disponible (ni fourni, ni référence) pour la culture '{crop}'."}
     besoins = round(yield_obj * consts["b_n_kg_per_q"], 1)
     fournitures, supply_note = _estimate_soil_n_supply(soil)
-    dose = max(0.0, round((besoins - fournitures) / _CAU, 1))
+    dl_credit, dl_note = _dl_prairie_n_credit(dl_observation)
+    dose = max(0.0, round((besoins - fournitures - dl_credit) / _CAU, 1))
 
     ceiling = _MAX_REALISTIC_DOSE_KG_HA.get(crop)
     cap_note = ""
@@ -201,12 +254,18 @@ def estimate_nitrogen(crop: str, soil: SoilData, yield_objective_q_ha: float | N
         else f"Objectif de rendement fourni : {yield_obj} q/ha."
     )
 
+    note_parts = [yield_note, supply_note]
+    if dl_note:
+        note_parts.append(dl_note)
+    note = " ".join(note_parts) + cap_note
+
     return {
         "n_dose_kg_ha": dose,
         "n_besoins_kg_ha": besoins,
         "n_fournitures_kg_ha": fournitures,
+        "n_dl_credit_kg_ha": dl_credit,
         "yield_objective_q_ha": yield_obj,
-        "n_method_note": f"{yield_note} {supply_note}{cap_note}",
+        "n_method_note": note,
     }
 
 
@@ -241,9 +300,13 @@ def estimate_irrigation(crop: str, weather: WeatherData) -> dict:
 
 
 def estimate_fertilizer_and_irrigation(
-    crop: str, soil: SoilData, weather: WeatherData, yield_objective_q_ha: float | None = None
+    crop: str,
+    soil: SoilData,
+    weather: WeatherData,
+    yield_objective_q_ha: float | None = None,
+    dl_observation: "DLCropObservation | None" = None,
 ) -> AgroCalcEstimate:
-    n_result = estimate_nitrogen(crop, soil, yield_objective_q_ha)
+    n_result = estimate_nitrogen(crop, soil, yield_objective_q_ha, dl_observation)
     irr_result = estimate_irrigation(crop, weather)
 
     warnings = [w for w in (n_result.get("warning"), irr_result.get("warning")) if w]
@@ -253,6 +316,7 @@ def estimate_fertilizer_and_irrigation(
         n_dose_kg_ha=n_result.get("n_dose_kg_ha"),
         n_besoins_kg_ha=n_result.get("n_besoins_kg_ha"),
         n_fournitures_kg_ha=n_result.get("n_fournitures_kg_ha"),
+        n_dl_credit_kg_ha=n_result.get("n_dl_credit_kg_ha"),
         yield_objective_q_ha=n_result.get("yield_objective_q_ha"),
         n_method_note=n_result.get("n_method_note"),
         irrigation_need_mm=irr_result.get("irrigation_need_mm"),

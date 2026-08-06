@@ -100,11 +100,19 @@ async def ndvi_heatmap(req: ParcelRequest):
     return NdviHeatmapResponse(**result)
 
 
-def _besoins_for_crop(crop: str, soil: SoilData, weather: WeatherData, yield_objective_q_ha: float | None):
+def _besoins_for_crop(
+    crop: str,
+    soil: SoilData,
+    weather: WeatherData,
+    yield_objective_q_ha: float | None,
+    dl_observation: DLCropObservation | None = None,
+):
     """Runs the agro-calc formulas for one candidate crop (not just the
     top-ranked one) so every entry in the top-5 list carries real
     fertilizer/irrigation numbers, not just the winner."""
-    estimate = agro_calc_service.estimate_fertilizer_and_irrigation(crop, soil, weather, yield_objective_q_ha)
+    estimate = agro_calc_service.estimate_fertilizer_and_irrigation(
+        crop, soil, weather, yield_objective_q_ha, dl_observation
+    )
     besoins_irrigation = {
         "irrigation_need_mm": estimate.irrigation_need_mm,
         "irrigation_window_days": estimate.irrigation_window_days,
@@ -116,6 +124,7 @@ def _besoins_for_crop(crop: str, soil: SoilData, weather: WeatherData, yield_obj
         "n_dose_kg_ha": estimate.n_dose_kg_ha,
         "n_besoins_kg_ha": estimate.n_besoins_kg_ha,
         "n_fournitures_kg_ha": estimate.n_fournitures_kg_ha,
+        "n_dl_credit_kg_ha": estimate.n_dl_credit_kg_ha,
         "yield_objective_q_ha": estimate.yield_objective_q_ha,
         "note": estimate.n_method_note,
     }
@@ -214,8 +223,12 @@ async def analyze(req: AnalyzeRequest):
 
     # 3. Rule-based 9-crop scoring + real fertilizer/irrigation numbers for
     #    the top 5. Full pool is scored in ml_service; only top 5 are displayed.
+    #    dl_observation feeds both steps in a small, capped, transparent way
+    #    (see ml_service._dl_evidence_bonus and
+    #    agro_calc_service._dl_prairie_n_credit) and degrades to today's
+    #    behavior whenever the classifier is unavailable/unsure.
     _MAX_DISPLAYED_CROPS = 5
-    crop_recs = ml_service.recommend_crops(soil, weather)[:_MAX_DISPLAYED_CROPS]
+    crop_recs = ml_service.recommend_crops(soil, weather, dl_observation)[:_MAX_DISPLAYED_CROPS]
     crop_recommendations_out: list[CropRecommendationOut] = []
     top_crop_agro = None
     top_crop_yield: YieldEstimate | None = None
@@ -223,7 +236,7 @@ async def analyze(req: AnalyzeRequest):
         rec_yield = yield_service.estimate_yield(rec)
         yield_objective = req.yield_objective_q_ha or rec_yield.yield_estimate_q_ha
         estimate, besoins_irrigation, besoins_engrais, besoins_pesticides = _besoins_for_crop(
-            rec.crop, soil, weather, yield_objective
+            rec.crop, soil, weather, yield_objective, dl_observation
         )
         if rank == 1:
             top_crop_agro = estimate
@@ -248,35 +261,17 @@ async def analyze(req: AnalyzeRequest):
     #    calc) is still useful and returned regardless.
     report = None
     try:
-        crop_label = top_crop or "céréales"
-        # Dual retrieval: conseils (pratiques) + alertes (risques). No crop
-        # metadata filter — corpus was ingested with empty crop tags, so a
-        # crop_filter would always return nothing.
-        tip_chunks = await asyncio.to_thread(
+        chunks = await asyncio.to_thread(
             rag_service.retrieve,
-            query=(
-                f"conseils pratiques fertilisation irrigation travail du sol "
-                f"azote phosphore pour {crop_label}"
-            ),
-            crop_filter=None,
-            top_k=6,
+            query=f"bonnes pratiques agronomiques pour {top_crop}" if top_crop else "bonnes pratiques agronomiques",
+            crop_filter=top_crop,
         )
-        alert_chunks = await asyncio.to_thread(
-            rag_service.retrieve,
-            query=(
-                f"risques alertes pertes nitrate lixiviation stress hydrique "
-                f"maladies rendement pour {crop_label}"
-            ),
-            crop_filter=None,
-            top_k=6,
-        )
-        seen: set[str] = set()
-        chunks = []
-        for c in tip_chunks + alert_chunks:
-            if c.chunk_id in seen:
-                continue
-            seen.add(c.chunk_id)
-            chunks.append(c)
+        if not chunks and top_crop:
+            chunks = await asyncio.to_thread(
+                rag_service.retrieve,
+                query=f"bonnes pratiques agronomiques pour {top_crop}",
+                crop_filter=None,
+            )
         synthesis = await synthesis_service.synthesize_stage1(
             parcel, soil, weather, crop_recs, chunks, vegetation, dl_observation, top_crop_agro, top_crop_yield
         )

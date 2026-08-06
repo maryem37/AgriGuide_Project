@@ -12,11 +12,11 @@ paths updated to the `app.*` package layout). Run from
 import argparse
 import mimetypes
 from pathlib import Path
-
-import app._compat_shims  # noqa: F401 — must run before unstructured/pdfminer imports
+import app._compat_shims  # noqa: F401 — must run before the unstructured import below
 from unstructured.partition.auto import partition
 from app.services.rag_service import chunk_document, index_chunks, _collection
 from app.taxonomy import normalize_crop
+from app.hal_title_lookup import lookup_title_and_url
 
 # Files larger than this are skipped rather than risking a multi-hour
 # hang on pdfminer parsing a huge scanned/image-heavy PDF. Adjust up if
@@ -41,20 +41,7 @@ _EXTENSION_CONTENT_TYPES = {
 
 
 def extract_text(path: Path) -> str:
-    suffix = path.suffix.lower()
-    if suffix == ".pdf":
-        import pdfplumber
-
-        parts: list[str] = []
-        with pdfplumber.open(str(path)) as pdf:
-            for page in pdf.pages:
-                text = page.extract_text()
-                if text and text.strip():
-                    parts.append(text.strip())
-        if parts:
-            return "\n\n".join(parts)
-
-    content_type = _EXTENSION_CONTENT_TYPES.get(suffix) or mimetypes.guess_type(str(path))[0]
+    content_type = _EXTENSION_CONTENT_TYPES.get(path.suffix.lower()) or mimetypes.guess_type(str(path))[0]
     elements = partition(filename=str(path), content_type=content_type)
     return "\n\n".join(str(e) for e in elements)
 
@@ -106,6 +93,7 @@ def main():
                 continue
 
         try:
+            title, url, is_real = lookup_title_and_url(path.name)
             text = extract_text(path)
             chunks = chunk_document(
                 text,
@@ -114,10 +102,13 @@ def main():
                     "crop": normalize_crop(args.crop) if args.crop else "",
                     "region": args.region,
                     "topic": args.topic,
+                    "title": title,
+                    "url": url,
                 },
             )
             index_chunks(chunks)
-            print(f"Indexed {len(chunks)} chunks from {path.name}")
+            title_status = "" if is_real else "  [FALLBACK TITLE - HAL lookup failed/empty]"
+            print(f"Indexed {len(chunks)} chunks from {path.name}  (title: {title}){title_status}")
             succeeded.append(path.name)
         except Exception as e:
             print(f"[ERREUR] Failed on {path.name}: {e}")

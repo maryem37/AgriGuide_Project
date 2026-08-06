@@ -288,3 +288,60 @@ export function getReliefGrid(geometry: Record<string, unknown>): Promise<Relief
 export function getReliefOrthophoto(geometry: Record<string, unknown>): Promise<{ image_base64: string }> {
   return postJson<{ image_base64: string }>("/agriculture/relief/orthophoto", geometry);
 }
+
+// ---------------------------------------------------------------------------
+// Assistant conversationnel (widget flottant) — reflète ChatRequest/ChatResponse
+// ---------------------------------------------------------------------------
+
+export type ChatRole = "user" | "assistant";
+
+export type ChatMessage = {
+  role: ChatRole;
+  content: string;
+};
+
+export type ChatSource = {
+  title: string;
+  url: string;
+};
+
+/** Reflète `ChatParcelContext` — schemas.py. Sous-ensemble d'un AnalyzeResponse déjà en mémoire côté client. */
+export type ChatParcelContext = {
+  parcel?: ParcelResolution;
+  soil?: SoilData;
+  weather_stats?: WeatherStats;
+  vegetation?: VegetationData;
+  crop_recommendations?: CropRecommendationOut[];
+  yield_estimate?: YieldEstimate | null;
+  agro_calc_top_crop?: AgroCalcEstimate;
+};
+
+export type ChatRequest = {
+  question: string;
+  history: ChatMessage[];
+  parcel_context: ChatParcelContext | null;
+};
+
+export type ChatResponse = {
+  answer: string;
+  sources: ChatSource[];
+};
+
+/** Construit le contexte de parcelle envoyé au chatbot à partir d'un AnalyzeResponse déjà chargé. Retourne null si aucune parcelle n'a encore été analysée. */
+export function buildChatContext(analysis: AnalyzeResponse | null): ChatParcelContext | null {
+  if (!analysis) return null;
+  return {
+    parcel: analysis.parcel,
+    soil: analysis.soil,
+    weather_stats: analysis.weather_stats,
+    vegetation: analysis.vegetation,
+    crop_recommendations: analysis.crop_recommendations,
+    yield_estimate: analysis.yield_estimate,
+    agro_calc_top_crop: analysis.agro_calc_top_crop,
+  };
+}
+
+/** POST /agriculture/chat — question libre au widget flottant, avec historique et contexte de parcelle optionnels. */
+export function sendChatMessage(request: ChatRequest): Promise<ChatResponse> {
+  return postJson<ChatResponse>("/agriculture/chat", request);
+}
