@@ -25,6 +25,33 @@ export type ChatResponse = {
   answer: string;
 };
 
+// ---------------------------------------------------------------------------
+// Aides financières — reflète `Subsidy` / `SubsidyListResponse`
+// (backend/agent_regulation/app/schemas/subsidy.py)
+// ---------------------------------------------------------------------------
+
+export type Subsidy = {
+  id: string;
+  name: string;
+  description: string | null;
+  eligibility: string | null;
+  amount: string | null;
+  region: string | null;
+  start_date: string | null; // ISO date (YYYY-MM-DD)
+  end_date: string | null; // ISO date (YYYY-MM-DD)
+  application_procedure: string | null;
+  source_name: string;
+  source_url: string;
+  is_official: boolean;
+  last_verified_at: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type SubsidyListResponse = {
+  subsidies: Subsidy[];
+};
+
 export class RegulationApiError extends Error {
   constructor(
     message: string,
@@ -65,4 +92,33 @@ async function postJson<TResponse>(path: string, body: unknown): Promise<TRespon
 /** POST /chat — pose une question de réglementation agricole à l'agent. */
 export function askRegulationAgent(request: ChatRequest): Promise<ChatResponse> {
   return postJson<ChatResponse>("/chat", request);
+}
+
+async function getJson<TResponse>(path: string): Promise<TResponse> {
+  let response: Response;
+  try {
+    response = await fetch(`${REGULATION_API_BASE_URL}${path}`);
+  } catch {
+    throw new RegulationApiError(
+      `Impossible de joindre l'agent Régulation (${REGULATION_API_BASE_URL}). Vérifiez qu'il tourne (uvicorn app.main:app --reload --port 8001).`,
+    );
+  }
+
+  if (!response.ok) {
+    const detail = await response.json().catch(() => null);
+    throw new RegulationApiError(
+      (detail && typeof detail === "object" && "detail" in detail
+        ? String((detail as { detail: unknown }).detail)
+        : `Erreur ${response.status} de l'agent Régulation`),
+      response.status,
+    );
+  }
+
+  return response.json() as Promise<TResponse>;
+}
+
+/** GET /subsidies?limit=N — aides financières déjà en cache PostgreSQL,
+ * triées par échéance la plus proche (aucune recherche web déclenchée). */
+export function fetchSubsidies(limit = 4): Promise<SubsidyListResponse> {
+  return getJson<SubsidyListResponse>(`/subsidies?limit=${limit}`);
 }
