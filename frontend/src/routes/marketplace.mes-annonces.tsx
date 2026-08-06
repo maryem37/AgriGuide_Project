@@ -45,14 +45,13 @@ function Mine() {
     <div className="space-y-4">
       {items.map((l) => (
         <div key={l.id} className="card-soft p-4 flex flex-col sm:flex-row gap-4">
-          <div
-            className={
-              l.kind === "recolte"
-                ? "sm:w-32 aspect-square rounded-2xl bg-harvest/10 flex items-center justify-center text-5xl shrink-0"
-                : "sm:w-32 aspect-square rounded-2xl bg-waste/15 flex items-center justify-center text-5xl shrink-0"
-            }
-          >
-            <span aria-hidden>{l.emoji}</span>
+          <div className="sm:w-32 aspect-square rounded-2xl overflow-hidden bg-muted shrink-0">
+            <img
+              src={l.image}
+              alt={l.title}
+              className="h-full w-full object-cover"
+              loading="lazy"
+            />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">

@@ -2,9 +2,10 @@
  * Affiche, pour les cultures recommandées par l'agent Agriculture,
  * les déchets produits et leurs voies de valorisation (agent Déchets).
  */
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { Recycle, ChevronRight, Loader2, ArrowRight, Leaf } from "lucide-react";
+import { Recycle, ChevronRight, ChevronDown, ChevronUp, Loader2, ArrowRight, Leaf } from "lucide-react";
 import { AlertBanner } from "@/components/AlertBanner";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -88,7 +89,11 @@ function ProfileCard({
   profile: CropWasteProfile;
   highlighted: boolean;
 }) {
+  const [expanded, setExpanded] = useState(false);
   const label = profile.crop_label_fr || cultureLabel(profile.culture);
+  const wastes = profile.wastes.slice(0, 4);
+  const canExpand = profile.found && wastes.length > 0;
+
   return (
     <div
       className={cn(
@@ -111,11 +116,45 @@ function ProfileCard({
       {!profile.found ? (
         <p className="text-sm text-muted-foreground">{profile.message || "Pas encore de données."}</p>
       ) : (
-        <div className="space-y-2 flex-1">
-          {profile.wastes.slice(0, 4).map((w) => (
-            <WasteRow key={w.id} waste={w} culture={profile.culture} />
-          ))}
-        </div>
+        <>
+          <div
+            className={cn(
+              "space-y-2 flex-1 relative",
+              !expanded && canExpand && "max-h-32 overflow-hidden",
+            )}
+          >
+            {wastes.map((w) => (
+              <WasteRow key={w.id} waste={w} culture={profile.culture} />
+            ))}
+            {!expanded && canExpand && (
+              <div
+                className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-card to-transparent"
+                aria-hidden
+              />
+            )}
+          </div>
+          {canExpand && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="mt-2 w-full rounded-xl text-xs font-medium text-muted-foreground hover:text-foreground"
+              onClick={() => setExpanded((v) => !v)}
+            >
+              {expanded ? (
+                <>
+                  Réduire
+                  <ChevronUp className="h-3.5 w-3.5 ml-1" />
+                </>
+              ) : (
+                <>
+                  Voir plus
+                  <ChevronDown className="h-3.5 w-3.5 ml-1" />
+                </>
+              )}
+            </Button>
+          )}
+        </>
       )}
     </div>
   );
@@ -151,7 +190,7 @@ export function CropWasteValorization({ cultures, highlightCulture, className }:
       {query.isPending && (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {cultures.slice(0, 3).map((c) => (
-            <Skeleton key={c} className="h-48 rounded-3xl" />
+            <Skeleton key={c} className="h-36 rounded-3xl" />
           ))}
         </div>
       )}
