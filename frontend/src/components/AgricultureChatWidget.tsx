@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useMutation } from "@tanstack/react-query";
 import { Bot, MessageCircle, Send, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -41,11 +42,21 @@ export function AgricultureChatWidget({
   parcelContext?: ChatParcelContext | null;
 }) {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [messages, setMessages] = useState<UiMessage[]>([
     { id: "welcome", role: "assistant", text: WELCOME, animate: false },
   ]);
   const [input, setInput] = useState("");
   const scrollAnchorRef = useRef<HTMLDivElement>(null);
+
+  // Portail sur document.body : `<main class="page-enter">` (AppShell)
+  // porte une animation `transform`, ce qui en fait le containing block de
+  // tout `position: fixed` descendant — le widget resterait alors ancré à
+  // la page (et disparaîtrait au scroll) plutôt qu'à l'écran. Même fix que
+  // components/motion/ScrollMoreHint.tsx pour la même raison.
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const chatMutation = useMutation({
     mutationFn: (question: string) => {
@@ -80,7 +91,9 @@ export function AgricultureChatWidget({
         ? "Une erreur inattendue est survenue en contactant l'assistant."
         : null;
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <>
       {/* Icône flottante */}
       <button
@@ -224,6 +237,7 @@ export function AgricultureChatWidget({
           </footer>
         </div>
       )}
-    </>
+    </>,
+    document.body,
   );
 }
