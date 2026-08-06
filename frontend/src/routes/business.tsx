@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { AppShell } from "@/components/AppShell";
 import { AlertBanner } from "@/components/AlertBanner";
@@ -25,6 +25,7 @@ import {
   Loader2,
   Info,
   Quote,
+  Store,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import {
@@ -39,6 +40,7 @@ import {
 import { MOCK_CROP_RECOMMENDATIONS, loadRealCropRecommendations, cultureLabel } from "@/lib/cropRecommendations";
 import { saveFarmerDecision } from "@/lib/farmerDecision";
 import { useAuth } from "@/lib/auth-context";
+import { MarketplaceWasteSuggestions } from "@/components/CropWasteValorization";
 
 export const Route = createFileRoute("/business")({
   head: () => ({
@@ -234,9 +236,17 @@ function Page() {
           </div>
         </div>
 
-        <div className="mt-6 flex justify-center">
+        <MarketplaceWasteSuggestions culture={selected.culture} />
+
+        <div className="mt-6 flex flex-col sm:flex-row justify-center gap-3">
           <Button variant="outline" onClick={reset} className="rounded-xl">
             Choisir un autre scénario
+          </Button>
+          <Button asChild className="rounded-xl">
+            <Link to="/marketplace/nouveau" search={{ kind: "dechet", culture: selected.culture }}>
+              <Store className="h-4 w-4 mr-2" />
+              Aller à la marketplace
+            </Link>
           </Button>
         </div>
       </AppShell>
