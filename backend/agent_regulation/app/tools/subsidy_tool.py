@@ -25,6 +25,7 @@ _FIELD_LABELS: list[tuple[str, str]] = [
     ("region", "Région"),
     ("date_ouverture", "Date d'ouverture"),
     ("date_limite", "Date limite"),
+    ("statut", "Statut"),
     ("procedure", "Procédure"),
     ("documents_necessaires", "Documents nécessaires"),
 ]
@@ -37,6 +38,9 @@ def _format_subsidy(index: int, subsidy: SubsidyInfo) -> str:
         value = getattr(subsidy, field)
         if value:
             lines.append(f"{label} : {value}")
+    if not subsidy.date_limite:
+        # Ne jamais laisser croire à une échéance certaine quand elle est inconnue.
+        lines.append("Date limite : non précisée (à vérifier auprès de l'organisme)")
     lines.append(f"{fiabilite} : {subsidy.source_officielle}")
     lines.append(f"URL : {subsidy.source_url}")
     return "\n".join(lines)

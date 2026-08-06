@@ -165,6 +165,33 @@ CREATE TABLE dossiers_administratifs (
     date_maj        TIMESTAMPTZ DEFAULT now()
 );
 
+-- Aides financières agricoles (subventions, appels à projets) trouvées par le
+-- Subsidy Search de l'agent Régulation (voir agent_regulation/app/services/
+-- subsidy_sync_service.py) et mises en cache ici pour que le frontend les
+-- affiche sans relancer une recherche web à chaque ouverture.
+-- `source_url` sert de clé de dédoublonnage lors de la synchronisation
+-- (une aide = une page source).
+CREATE TABLE subsidies (
+    id                      UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name                    VARCHAR(255) NOT NULL,
+    description             TEXT,
+    eligibility             TEXT,
+    amount                  TEXT,
+    region                  VARCHAR(100),
+    start_date              DATE,
+    end_date                DATE,
+    application_procedure   TEXT,
+    source_name             VARCHAR(150) NOT NULL,
+    source_url              TEXT NOT NULL,
+    is_official             BOOLEAN DEFAULT false,
+    last_verified_at        TIMESTAMPTZ DEFAULT now(),
+    created_at              TIMESTAMPTZ DEFAULT now(),
+    updated_at              TIMESTAMPTZ DEFAULT now(),
+    UNIQUE (source_url)
+);
+-- Recherche rapide des aides actives triées par échéance la plus proche.
+CREATE INDEX idx_subsidies_end_date ON subsidies(end_date);
+
 -- ============================================================
 -- 5. SUIVI QUOTIDIEN (Monitoring Agent)
 -- ============================================================

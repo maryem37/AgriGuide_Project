@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { AppShell } from "@/components/AppShell";
 import { AlertBanner } from "@/components/AlertBanner";
 import { PageHeader } from "@/components/PageHeader";
@@ -8,6 +8,7 @@ import { WaitingMascot } from "@/components/chat/WaitingMascot";
 import { TypewriterMarkdown } from "@/components/chat/TypewriterMarkdown";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   FileText,
   ExternalLink,
@@ -19,7 +20,7 @@ import {
   User,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { askRegulationAgent, RegulationApiError } from "@/lib/regulationApi";
+import { askRegulationAgent, fetchSubsidies, RegulationApiError, type Subsidy } from "@/lib/regulationApi";
 import { MarkdownLite } from "@/lib/markdownLite";
 import { useAuth } from "@/lib/auth-context";
 import { cn } from "@/lib/utils";
@@ -47,36 +48,26 @@ const suggestions = [
   "Quels documents pour vendre en circuit court ?",
 ];
 
-const docs = [
-  {
-    title: "Aide au génotypage des ovins et caprins",
-    description:
-      "Soutien aux programmes de génotypage visant notamment à améliorer la sélection génétique et la résistance à la tremblante chez les ovins/caprins.",
-    tag: "Jusqu'au 30/07/2026 à 23h59",
-    url: "https://demarche.numerique.gouv.fr/commencer/demande-d-aide-au-genotypage-des-ovins-et-des-capr-2",
-  },
-  {
-    title: "Aide à la plantation de vergers de fruits à cidre",
-    description:
-      "Aide FranceAgriMer pour accompagner la plantation/renouvellement de vergers de pommes et poires à cidre et améliorer la performance des exploitations.",
-    tag: "Jusqu'au 31/07/2026",
-    url: "https://www.franceagrimer.fr/index.php/aides/aide-la-plantation-de-vergers-de-fruits-cidre-campagne-20262027",
-  },
-  {
-    title: "Rénovation des vergers arboricoles",
-    description:
-      "Aide aux arboriculteurs pour renouveler et développer les vergers, améliorer les variétés et la performance environnementale. Pour les espèces hors fruits à noyaux, la clôture est le 31 juillet.",
-    tag: "Jusqu'au 31/07/2026",
-    url: "https://draaf.occitanie.agriculture.gouv.fr/renovation-des-vergers-arboricoles-campagnes-2026-2027-et-2027-2028-a10059.html",
-  },
-  {
-    title: "Aide à la protection des troupeaux contre la prédation du loup et de l'ours",
-    description:
-      "Soutien aux éleveurs ovins/caprins exposés à la prédation pour financer notamment le gardiennage, les chiens de protection et les clôtures.",
-    tag: "Jusqu'au 31/07/2026 à minuit",
-    url: "https://agriculture.gouv.fr/aides-contre-la-predation",
-  },
-];
+/** "2026-07-31" -> "31/07/2026" (les dates renvoyées par l'API sont des ISO dates simples). */
+function formatDate(iso: string | null): string | null {
+  if (!iso) return null;
+  const [year, month, day] = iso.split("-");
+  if (!year || !month || !day) return null;
+  return `${day}/${month}/${year}`;
+}
+
+function subsidyDateRange(s: Subsidy): string | null {
+  const start = formatDate(s.start_date);
+  const end = formatDate(s.end_date);
+  if (start && end) return `Du ${start} au ${end}`;
+  if (end) return `Jusqu'au ${end}`;
+  if (start) return `À partir du ${start}`;
+  return null;
+}
+
+function subsidyMeta(s: Subsidy): string {
+  return [s.source_name, s.region, subsidyDateRange(s)].filter(Boolean).join(" · ");
+}
 
 type ChatMessage = {
   id: string;
@@ -115,6 +106,12 @@ function Page() {
       ]);
     },
   });
+
+  const subsidiesQuery = useQuery({
+    queryKey: ["subsidies", 4],
+    queryFn: () => fetchSubsidies(4),
+  });
+  const subsidies = subsidiesQuery.data?.subsidies ?? [];
 
   useEffect(() => {
     scrollAnchorRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -321,30 +318,66 @@ function Page() {
               </p>
             </div>
             <div className="flex-1 space-y-1 overflow-y-auto p-2.5 sm:p-3">
-              {docs.map((d, i) => (
-                <a
-                  key={d.title}
-                  href={d.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{ animationDelay: `${0.1 + i * 0.07}s` }}
-                  className="page-enter group flex items-start gap-3 rounded-xl p-3 transition-colors hover:bg-secondary/80"
-                >
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky/20 text-sky-foreground transition-transform duration-400 group-hover:scale-105 group-hover:rotate-2">
-                    <FileText className="h-4 w-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="text-sm font-medium leading-snug">{d.title}</div>
-                    <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
-                      {d.description}
-                    </p>
-                    <div className="mt-1.5 text-[11px] font-semibold text-primary/80">
-                      {d.tag}
+              {subsidiesQuery.isPending && (
+                <div className="space-y-3 p-1">
+                  {[0, 1, 2, 3].map((i) => (
+                    <div key={i} className="flex items-start gap-3 p-3">
+                      <Skeleton className="h-9 w-9 rounded-lg shrink-0" />
+                      <div className="flex-1 space-y-2">
+                        <Skeleton className="h-4 w-3/4" />
+                        <Skeleton className="h-3 w-full" />
+                        <Skeleton className="h-3 w-1/2" />
+                      </div>
                     </div>
-                  </div>
-                  <ExternalLink className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-foreground" />
-                </a>
-              ))}
+                  ))}
+                </div>
+              )}
+
+              {subsidiesQuery.isError && (
+                <div className="p-1">
+                  <AlertBanner tone="danger" title="Aides financières indisponibles">
+                    {subsidiesQuery.error instanceof RegulationApiError
+                      ? subsidiesQuery.error.message
+                      : "Une erreur inattendue est survenue."}
+                  </AlertBanner>
+                </div>
+              )}
+
+              {!subsidiesQuery.isPending && !subsidiesQuery.isError && subsidies.length === 0 && (
+                <div className="flex items-start gap-3 rounded-xl p-3 text-sm text-muted-foreground">
+                  <FileText className="h-5 w-5 shrink-0 mt-0.5" />
+                  <span>Aucune aide financière disponible pour le moment.</span>
+                </div>
+              )}
+
+              {!subsidiesQuery.isPending &&
+                !subsidiesQuery.isError &&
+                subsidies.map((s, i) => (
+                  <a
+                    key={s.id}
+                    href={s.source_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ animationDelay: `${0.1 + i * 0.07}s` }}
+                    className="page-enter group flex items-start gap-3 rounded-xl p-3 transition-colors hover:bg-secondary/80"
+                  >
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky/20 text-sky-foreground transition-transform duration-400 group-hover:scale-105 group-hover:rotate-2">
+                      <FileText className="h-4 w-4" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-medium leading-snug">{s.name}</div>
+                      {s.description && (
+                        <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+                          {s.description}
+                        </p>
+                      )}
+                      <div className="mt-1.5 text-[11px] font-semibold text-primary/80">
+                        {subsidyMeta(s)}
+                      </div>
+                    </div>
+                    <ExternalLink className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-foreground" />
+                  </a>
+                ))}
             </div>
           </aside>
         </Reveal>
