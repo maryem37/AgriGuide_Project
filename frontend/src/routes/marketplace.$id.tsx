@@ -31,22 +31,31 @@ function Detail() {
 
       <div className="mt-4 grid gap-6 md:grid-cols-[1fr_320px]">
         <div>
-          <div
-            className={
-              l.kind === "recolte"
-                ? "aspect-[4/3] rounded-3xl bg-harvest/10 flex items-center justify-center text-9xl"
-                : "aspect-[4/3] rounded-3xl bg-waste/15 flex items-center justify-center text-9xl"
-            }
-          >
-            <span aria-hidden>{l.emoji}</span>
+          <div className="relative aspect-[4/3] overflow-hidden rounded-3xl bg-muted">
+            <img
+              src={l.image}
+              alt={l.title}
+              className="h-full w-full object-cover"
+            />
+            <div
+              className="absolute inset-0 bg-gradient-to-t from-[#1C2B1C]/35 via-transparent to-transparent"
+              aria-hidden
+            />
+            <div className="absolute left-3 top-3 flex gap-2">
+              {l.kind === "recolte" ? (
+                <Badge className="border-0 bg-white/95 text-harvest shadow-sm">Récolte</Badge>
+              ) : (
+                <Badge className="border-0 bg-white/95 text-waste-foreground shadow-sm">
+                  Déchet valorisable
+                </Badge>
+              )}
+              {l.status === "reserve" && (
+                <Badge className="border-0 bg-foreground/80 text-background shadow-sm">Réservé</Badge>
+              )}
+            </div>
           </div>
 
           <div className="mt-6 flex items-center gap-2">
-            {l.kind === "recolte" ? (
-              <Badge className="border border-harvest/30 bg-harvest/15 text-harvest">Récolte</Badge>
-            ) : (
-              <Badge className="border border-waste/40 bg-waste/20 text-waste-foreground">Déchet valorisable</Badge>
-            )}
             <span className="text-sm text-muted-foreground inline-flex items-center gap-1">
               <MapPin className="h-3.5 w-3.5" /> {l.region} · {l.distance}
             </span>
@@ -96,7 +105,7 @@ function Detail() {
           )}
 
           <p className="text-xs text-muted-foreground mt-4">
-            Aucune commission — vous discutez directement avec l'agriculteur.
+            Aucune commission - vous discutez directement avec l'agriculteur.
           </p>
         </aside>
       </div>

@@ -6,8 +6,9 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: "Nunito", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Fraunces", ui-serif, Georgia, serif;
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Syne", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -49,6 +50,17 @@
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--destructive);
+  --color-signal: var(--signal);
+  --color-signal-foreground: var(--signal-foreground);
+  --color-ink: var(--ink);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
 
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
@@ -58,70 +70,80 @@
 }
 
 :root {
-  --radius: 1rem;
+  --radius: 0.75rem;
 
-  /* Warm cream background, deep forest foreground */
-  --background: oklch(0.985 0.014 95);
-  --foreground: oklch(0.28 0.04 145);
+  /* Field Signal — cool mist canvas, ink green, lime signal */
+  --background: oklch(0.965 0.012 160);
+  --foreground: oklch(0.22 0.035 155);
 
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.28 0.04 145);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.28 0.04 145);
+  --card: oklch(0.99 0.004 160 / 0.78);
+  --card-foreground: oklch(0.22 0.035 155);
+  --popover: oklch(0.995 0.004 160);
+  --popover-foreground: oklch(0.22 0.035 155);
 
-  /* Primary: leafy field green */
-  --primary: oklch(0.52 0.14 145);
-  --primary-foreground: oklch(0.985 0.014 95);
+  /* Primary: deep field ink */
+  --primary: oklch(0.32 0.07 150);
+  --primary-foreground: oklch(0.97 0.04 125);
 
-  /* Secondary: soft sage */
-  --secondary: oklch(0.94 0.03 130);
-  --secondary-foreground: oklch(0.32 0.05 145);
+  /* Secondary: cool sage wash */
+  --secondary: oklch(0.94 0.02 155);
+  --secondary-foreground: oklch(0.28 0.04 155);
 
-  --muted: oklch(0.95 0.02 100);
-  --muted-foreground: oklch(0.5 0.03 130);
+  --muted: oklch(0.94 0.015 160);
+  --muted-foreground: oklch(0.48 0.025 155);
 
-  --accent: oklch(0.9 0.06 130);
-  --accent-foreground: oklch(0.28 0.04 145);
+  /* Accent: electric field lime */
+  --accent: oklch(0.9 0.16 125);
+  --accent-foreground: oklch(0.22 0.05 150);
 
-  --destructive: oklch(0.6 0.2 25);
+  --destructive: oklch(0.58 0.2 25);
   --destructive-foreground: oklch(0.99 0 0);
 
-  --border: oklch(0.9 0.02 110);
-  --input: oklch(0.92 0.02 110);
-  --ring: oklch(0.52 0.14 145);
+  --border: oklch(0.88 0.02 155);
+  --input: oklch(0.92 0.015 155);
+  --ring: oklch(0.55 0.14 145);
 
   /* Domain tokens */
-  --earth: oklch(0.55 0.09 55);          /* warm soil */
+  --earth: oklch(0.52 0.08 55);
   --earth-foreground: oklch(0.99 0 0);
-  --sky: oklch(0.78 0.09 230);           /* soft sky blue */
-  --sky-foreground: oklch(0.25 0.05 240);
-  --harvest: oklch(0.62 0.16 140);       /* fresh harvest green */
-  --harvest-foreground: oklch(0.99 0 0);
-  --waste: oklch(0.73 0.15 75);          /* amber for reusable waste */
-  --waste-foreground: oklch(0.25 0.05 60);
-  --success: oklch(0.62 0.16 140);
-  --warning: oklch(0.75 0.15 75);
+  --sky: oklch(0.72 0.1 230);
+  --sky-foreground: oklch(0.28 0.06 240);
+  --harvest: oklch(0.72 0.18 130);
+  --harvest-foreground: oklch(0.22 0.05 150);
+  --waste: oklch(0.78 0.14 80);
+  --waste-foreground: oklch(0.28 0.05 60);
+  --success: oklch(0.62 0.15 145);
+  --warning: oklch(0.78 0.14 80);
 
-  --chart-1: oklch(0.52 0.14 145);
-  --chart-2: oklch(0.55 0.09 55);
-  --chart-3: oklch(0.78 0.09 230);
-  --chart-4: oklch(0.73 0.15 75);
-  --chart-5: oklch(0.62 0.16 140);
+  --chart-1: oklch(0.45 0.1 150);
+  --chart-2: oklch(0.72 0.18 130);
+  --chart-3: oklch(0.72 0.1 230);
+  --chart-4: oklch(0.52 0.08 55);
+  --chart-5: oklch(0.78 0.14 80);
 
-  --sidebar: oklch(0.985 0.014 95);
-  --sidebar-foreground: oklch(0.28 0.04 145);
-  --sidebar-primary: oklch(0.52 0.14 145);
-  --sidebar-primary-foreground: oklch(0.985 0.014 95);
-  --sidebar-accent: oklch(0.94 0.03 130);
-  --sidebar-accent-foreground: oklch(0.32 0.05 145);
-  --sidebar-border: oklch(0.9 0.02 110);
-  --sidebar-ring: oklch(0.52 0.14 145);
+  /* Soft ink — darker than mist, lighter than deep forest */
+  --sidebar: oklch(0.36 0.04 155);
+  --sidebar-foreground: oklch(0.96 0.015 150);
+  --sidebar-primary: oklch(0.88 0.18 125);
+  --sidebar-primary-foreground: oklch(0.22 0.05 150);
+  --sidebar-accent: oklch(0.42 0.04 155);
+  --sidebar-accent-foreground: oklch(0.96 0.015 150);
+  --sidebar-border: oklch(1 0 0 / 12%);
+  --sidebar-ring: oklch(0.88 0.18 125);
 
-  --shadow-soft: 0 6px 24px -8px oklch(0.28 0.04 145 / 0.15);
-  --shadow-lift: 0 12px 40px -12px oklch(0.28 0.04 145 / 0.22);
-  --gradient-hero: linear-gradient(135deg, oklch(0.62 0.16 140) 0%, oklch(0.52 0.14 145) 50%, oklch(0.45 0.1 155) 100%);
-  --gradient-warm: linear-gradient(135deg, oklch(0.94 0.05 95) 0%, oklch(0.9 0.06 130) 100%);
-  --gradient-sky: linear-gradient(180deg, oklch(0.88 0.06 230) 0%, oklch(0.94 0.04 210) 100%);
+  --signal: oklch(0.88 0.18 125);
+  --signal-foreground: oklch(0.22 0.05 150);
+  --ink: oklch(0.18 0.03 155);
+
+  --shadow-soft: 0 1px 0 oklch(0.22 0.035 155 / 0.04), 0 8px 28px -14px oklch(0.22 0.035 155 / 0.18);
+  --shadow-lift: 0 1px 0 oklch(0.22 0.035 155 / 0.05), 0 18px 40px -18px oklch(0.22 0.035 155 / 0.28);
+  --gradient-hero: linear-gradient(135deg, oklch(0.28 0.06 150) 0%, oklch(0.38 0.08 155) 45%, oklch(0.5 0.12 140) 100%);
+  --gradient-warm: linear-gradient(145deg, oklch(0.95 0.03 160) 0%, oklch(0.92 0.06 130) 100%);
+  --gradient-sky: linear-gradient(180deg, oklch(0.9 0.04 220) 0%, oklch(0.95 0.02 170) 100%);
+  --gradient-mesh:
+    radial-gradient(ellipse 80% 55% at 12% -10%, oklch(0.88 0.12 125 / 0.35), transparent 55%),
+    radial-gradient(ellipse 60% 45% at 95% 8%, oklch(0.82 0.08 200 / 0.22), transparent 50%),
+    radial-gradient(ellipse 50% 40% at 70% 100%, oklch(0.9 0.05 155 / 0.4), transparent 55%);
 }
 
 .dark {
@@ -164,33 +186,60 @@
   }
   body {
     background-color: var(--color-background);
+    background-image: var(--gradient-mesh);
+    background-attachment: fixed;
     color: var(--color-foreground);
-    font-size: 1.05rem;
+    font-size: 1rem;
     line-height: 1.55;
   }
   h1, h2, h3 {
     font-family: var(--font-display);
-    letter-spacing: -0.01em;
+    letter-spacing: -0.03em;
+    font-weight: 700;
   }
 }
 
 @utility card-soft {
   background: var(--color-card);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-2xl);
+  border: 1px solid color-mix(in oklab, var(--color-border), transparent 20%);
+  border-radius: var(--radius-xl);
   box-shadow: var(--shadow-soft);
-  transition: transform .2s ease, box-shadow .2s ease;
+  backdrop-filter: blur(12px);
+  transition: transform .25s var(--ease-out-soft), box-shadow .25s var(--ease-out-soft), border-color .25s ease;
 }
 @utility card-lift {
   box-shadow: var(--shadow-lift);
   transform: translateY(-2px);
+  border-color: color-mix(in oklab, var(--signal), transparent 55%);
 }
 @utility bg-gradient-hero { background-image: var(--gradient-hero); }
 @utility bg-gradient-warm { background-image: var(--gradient-warm); }
 @utility bg-gradient-sky  { background-image: var(--gradient-sky); }
+@utility bg-mesh { background-image: var(--gradient-mesh); }
+@utility surface-glass {
+  background: color-mix(in oklab, var(--color-card), transparent 8%);
+  border: 1px solid color-mix(in oklab, var(--color-border), transparent 25%);
+  backdrop-filter: blur(16px) saturate(1.15);
+  box-shadow: var(--shadow-soft);
+}
+@utility signal-bar {
+  background: linear-gradient(90deg, var(--signal) 0%, oklch(0.75 0.12 145) 55%, oklch(0.7 0.1 200) 100%);
+}
 
 /* Leaflet fixes */
 .leaflet-container { font-family: var(--font-sans); border-radius: var(--radius-2xl); z-index: 0 !important; }
+
+/* ------------------------------------------------------------------ *
+ * Motion system
+ * Easings, keyframes and utilities shared by the landing page and the
+ * authenticated app. Everything here degrades to "no movement" under
+ * prefers-reduced-motion (see the media query at the bottom).
+ * ------------------------------------------------------------------ */
+
+:root {
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
 
 /* Landing — motion */
 @keyframes agrilogo-buzz {
@@ -228,3 +277,512 @@
   animation: landing-float 5.5s ease-in-out infinite;
   color: #E7F0E8;
 }
+
+/* --- Scroll reveal (driven by <Reveal>) -------------------------------- */
+/* Hidden state is only applied once JS has flagged the element, so content
+   stays visible when JS is unavailable or still hydrating. */
+[data-reveal="hidden"] {
+  opacity: 0;
+  transform: translateY(40px);
+  will-change: opacity, transform;
+}
+[data-reveal="hidden"][data-reveal-from="left"]  { transform: translateX(-40px); }
+[data-reveal="hidden"][data-reveal-from="right"] { transform: translateX(40px); }
+[data-reveal="hidden"][data-reveal-from="scale"] { transform: scale(0.92) translateY(16px); }
+[data-reveal="hidden"][data-reveal-from="blur"]  { filter: blur(10px); transform: translateY(24px); }
+
+[data-reveal="shown"] {
+  opacity: 1;
+  transform: none;
+  filter: none;
+  transition:
+    opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+/* Landing + pages plateforme : animations de scroll volontaires,
+   même si Windows / le navigateur a "réduire les animations" activé. */
+.landing-page [data-reveal="hidden"],
+.app-motion [data-reveal="hidden"] {
+  opacity: 0 !important;
+  transform: translateY(40px) !important;
+  filter: none !important;
+  transition: none !important;
+}
+.landing-page [data-reveal="hidden"][data-reveal-from="left"],
+.app-motion [data-reveal="hidden"][data-reveal-from="left"]  { transform: translateX(-40px) !important; }
+.landing-page [data-reveal="hidden"][data-reveal-from="right"],
+.app-motion [data-reveal="hidden"][data-reveal-from="right"] { transform: translateX(40px) !important; }
+.landing-page [data-reveal="hidden"][data-reveal-from="scale"],
+.app-motion [data-reveal="hidden"][data-reveal-from="scale"] {
+  transform: scale(0.92) translateY(16px) !important;
+}
+.landing-page [data-reveal="hidden"][data-reveal-from="blur"],
+.app-motion [data-reveal="hidden"][data-reveal-from="blur"] {
+  filter: blur(10px) !important;
+  transform: translateY(24px) !important;
+}
+.landing-page [data-reveal="shown"],
+.app-motion [data-reveal="shown"] {
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+  transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.85s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  transition-delay: var(--reveal-delay, 0ms) !important;
+  transition-duration: 0.85s !important;
+}
+
+/* Séparateurs signal entre sections de la landing */
+.landing-section-divider {
+  height: 3px;
+  width: 100%;
+  background: linear-gradient(90deg, oklch(0.32 0.07 150) 0%, oklch(0.88 0.18 125) 50%, oklch(0.7 0.1 200) 100%);
+}
+
+/* Grain subtil pour la profondeur (sans carte lourde) */
+.app-canvas {
+  isolation: isolate;
+}
+.app-canvas::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.04;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* --- Page / route transition ------------------------------------------ */
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.page-enter {
+  animation: page-enter 0.45s var(--ease-out-soft) both;
+}
+
+/* --- Ken Burns (slow drift on photos) --------------------------------- */
+@keyframes ken-burns {
+  0%   { transform: scale(1.06) translate3d(0, 0, 0); }
+  50%  { transform: scale(1.16) translate3d(-1.5%, -1.5%, 0); }
+  100% { transform: scale(1.06) translate3d(0, 0, 0); }
+}
+.ken-burns {
+  animation: ken-burns 26s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* --- Marquee (equipment strip) ---------------------------------------- */
+@keyframes marquee-x {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee-x var(--marquee-duration, 42s) linear infinite;
+}
+.marquee-mask {
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.marquee-pause:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* --- Ambient motion --------------------------------------------------- */
+@keyframes float-soft {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.float-soft { animation: float-soft 6s ease-in-out infinite; }
+
+/* --- Chat mascot / typewriter ----------------------------------------- */
+@keyframes chat-mascot-bob {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-5px) rotate(2deg); }
+}
+@keyframes chat-mascot-blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  96% { transform: scaleY(0.12); }
+}
+@keyframes chat-mascot-antenna {
+  0%, 100% { transform: rotate(-6deg); }
+  50% { transform: rotate(8deg); }
+}
+@keyframes chat-dot-bounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.45; }
+  40% { transform: translateY(-4px); opacity: 1; }
+}
+@keyframes chat-caret {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.chat-caret {
+  animation: chat-caret 0.9s step-end infinite;
+}
+.chat-mascot {
+  animation: chat-mascot-bob 1.6s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+.chat-mascot-soft {
+  animation: chat-mascot-bob 2.2s ease-in-out infinite;
+}
+.chat-mascot-blink {
+  transform-origin: center;
+  animation: chat-mascot-blink 3.2s step-end infinite;
+}
+.chat-mascot-antenna {
+  transform-origin: 26px 12px;
+  animation: chat-mascot-antenna 1.4s ease-in-out infinite;
+}
+.chat-mascot-antenna-r {
+  transform-origin: 38px 12px;
+  animation: chat-mascot-antenna 1.4s ease-in-out infinite reverse;
+}
+
+@keyframes sheen {
+  from { transform: translateX(-120%) skewX(-18deg); }
+  to { transform: translateX(320%) skewX(-18deg); }
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.85); opacity: 0.65; }
+  70% { transform: scale(1.6); opacity: 0; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+.pulse-ring::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 2px solid currentColor;
+  animation: pulse-ring 2.4s var(--ease-out-soft) infinite;
+}
+
+@keyframes gauge-draw {
+  from { stroke-dashoffset: var(--gauge-circumference); }
+  to { stroke-dashoffset: var(--gauge-offset); }
+}
+.gauge-arc {
+  animation: gauge-draw 1.2s var(--ease-out-soft) both;
+}
+
+/* --- Interaction utilities -------------------------------------------- */
+/* Lift + shadow on hover, used by cards across the app. */
+@utility hover-lift {
+  transition:
+    transform 0.35s var(--ease-out-soft),
+    box-shadow 0.35s var(--ease-out-soft),
+    border-color 0.35s var(--ease-out-soft);
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lift);
+  }
+}
+
+/* Zoom the <img> inside on hover — pair with `overflow-hidden`. */
+@utility zoom-media {
+  & img,
+  & video {
+    transition: transform 0.7s var(--ease-out-soft);
+  }
+  &:hover img,
+  &:hover video {
+    transform: scale(1.06);
+  }
+}
+
+/* Nudge an arrow/icon forward on hover. */
+@utility nudge-x {
+  & .nudge-target {
+    transition: transform 0.3s var(--ease-out-soft);
+  }
+  &:hover .nudge-target {
+    transform: translateX(4px);
+  }
+}
+
+@utility press {
+  transition: transform 0.15s var(--ease-out-soft);
+  &:active { transform: scale(0.97); }
+}
+
+/* Animated conic border for "hero" cards. */
+@keyframes spin-slow {
+  to { transform: rotate(1turn); }
+}
+.spin-slow { animation: spin-slow 14s linear infinite; }
+
+/* Skeleton shimmer that follows the theme rather than a flat gray. */
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+.shimmer {
+  background-image: linear-gradient(
+    90deg,
+    var(--color-muted) 0%,
+    color-mix(in oklab, var(--color-muted), white 55%) 50%,
+    var(--color-muted) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+
+/* --- Weather panel (dashboard) ---------------------------------------- */
+.weather-panel {
+  min-height: 100%;
+  background:
+    radial-gradient(ellipse 90% 70% at 92% -5%, oklch(0.88 0.18 125 / 0.28) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 55% at 8% 18%, oklch(0.75 0.1 210 / 0.35) 0%, transparent 52%),
+    linear-gradient(155deg, #1a2e28 0%, #244a42 38%, #2f6a55 72%, #3d7a5c 100%);
+  box-shadow: var(--shadow-lift);
+}
+
+.weather-sky { overflow: hidden; }
+
+.weather-cloud {
+  position: absolute;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.22);
+  filter: blur(1px);
+  box-shadow:
+    1.6rem 0 0 -0.2rem rgba(255, 255, 255, 0.16),
+    -1.4rem 0.3rem 0 -0.35rem rgba(255, 255, 255, 0.14),
+    0.4rem -0.7rem 0 -0.15rem rgba(255, 255, 255, 0.18);
+}
+.weather-cloud-a {
+  top: 18%;
+  left: -8%;
+  width: 7rem;
+  height: 2.2rem;
+  animation: weather-drift 32s linear infinite;
+}
+.weather-cloud-b {
+  top: 32%;
+  left: 20%;
+  width: 5rem;
+  height: 1.6rem;
+  opacity: 0.7;
+  animation: weather-drift 42s linear infinite reverse;
+  animation-delay: -12s;
+}
+.weather-cloud-c {
+  top: 12%;
+  left: 48%;
+  width: 6rem;
+  height: 1.9rem;
+  opacity: 0.55;
+  animation: weather-drift 38s linear infinite;
+  animation-delay: -20s;
+}
+
+.weather-haze {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 45%;
+  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.12) 40%, rgba(82, 152, 115, 0.18));
+}
+
+.weather-horizon {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 28%;
+  background:
+    linear-gradient(180deg, transparent 0%, rgba(82, 152, 115, 0.2) 100%),
+    repeating-linear-gradient(
+      105deg,
+      transparent 0 10px,
+      rgba(255, 255, 255, 0.12) 10px 11px
+    );
+  opacity: 0.85;
+}
+
+.weather-field-lines {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 22%;
+  overflow: hidden;
+  opacity: 0.35;
+}
+.weather-field-lines span {
+  position: absolute;
+  left: -5%;
+  right: -5%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, oklch(0.88 0.18 125 / 0.45), transparent);
+  top: calc(20% + var(--i) * 12%);
+  transform: perspective(120px) rotateX(55deg) scaleX(calc(0.7 + var(--i) * 0.05));
+  animation: weather-field-shimmer 4.5s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 0.18s);
+}
+
+.weather-live-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 9999px;
+  background: oklch(0.88 0.18 125);
+  box-shadow: 0 0 0 0 oklch(0.88 0.18 125 / 0.7);
+  animation: weather-live-pulse 2s ease-out infinite;
+}
+
+.weather-orb {
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.2),
+    0 12px 40px -18px rgba(0, 0, 0, 0.35);
+}
+.weather-orb-arc {
+  animation: weather-orb-draw 1.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.weather-meter-fill {
+  transform-origin: left center;
+  animation: weather-meter-grow 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes weather-drift {
+  from { transform: translateX(0); }
+  to { transform: translateX(55vw); }
+}
+@keyframes weather-live-pulse {
+  0% { box-shadow: 0 0 0 0 oklch(0.88 0.18 125 / 0.65); }
+  70% { box-shadow: 0 0 0 8px oklch(0.88 0.18 125 / 0); }
+  100% { box-shadow: 0 0 0 0 oklch(0.88 0.18 125 / 0); }
+}
+@keyframes weather-orb-draw {
+  from { stroke-dashoffset: 326.7; }
+  to { stroke-dashoffset: 91.5; }
+}
+@keyframes weather-meter-grow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes weather-field-shimmer {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 0.7; }
+}
+
+/* Flèche « scroll pour la suite » */
+@keyframes scroll-hint-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(4px); }
+}
+@keyframes scroll-hint-float {
+  0%, 100% { transform: translate(-50%, 0); }
+  50% { transform: translate(-50%, -6px); }
+}
+.scroll-hint-arrow {
+  animation: scroll-hint-bounce 1.35s ease-in-out infinite;
+}
+.scroll-hint-float {
+  animation: scroll-hint-float 2.4s ease-in-out infinite;
+}
+.app-motion .scroll-hint-arrow,
+body > button .scroll-hint-arrow {
+  animation: scroll-hint-bounce 1.35s ease-in-out infinite;
+}
+.app-motion .scroll-hint-float,
+body > button.scroll-hint-float {
+  animation: scroll-hint-float 2.4s ease-in-out infinite;
+}
+
+/* --- Staggered children ----------------------------------------------- */
+/* `stagger` + `landing-rise`/`page-enter` on children = sequenced entrance. */
+.stagger > * { animation-delay: calc(var(--stagger-step, 70ms) * var(--i, 0)); }
+
+/* --- Respect the user's motion preference ----------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  body:not(:has(.landing-page)):not(:has(.app-motion)) [data-reveal="hidden"] {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+  .ken-burns,
+  .spin-slow,
+  .agrilogo-bug,
+  .landing-float {
+    animation: none !important;
+  }
+  /* Landing + plateforme : réactive les animations. */
+  .landing-page .marquee-track {
+    animation: marquee-x var(--marquee-duration, 42s) linear infinite !important;
+    animation-duration: 46s !important;
+  }
+  .landing-page .float-soft,
+  .app-motion .float-soft {
+    animation: float-soft 6s ease-in-out infinite !important;
+    animation-duration: 6s !important;
+  }
+  .app-motion .weather-cloud-a,
+  .app-motion .weather-cloud-b,
+  .app-motion .weather-cloud-c {
+    animation-duration: 36s !important;
+    animation-iteration-count: infinite !important;
+  }
+  .app-motion .chat-caret {
+    animation: chat-caret 0.9s step-end infinite !important;
+    animation-duration: 0.9s !important;
+    animation-iteration-count: infinite !important;
+  }
+  .app-motion .weather-live-dot {
+    animation: weather-live-pulse 2s ease-out infinite !important;
+  }
+  .app-motion .weather-field-lines span {
+    animation: weather-field-shimmer 4.5s ease-in-out infinite !important;
+  }
+  .app-motion .weather-orb-arc {
+    animation: weather-orb-draw 1.4s cubic-bezier(0.22, 1, 0.36, 1) both !important;
+  }
+  .app-motion .weather-meter-fill {
+    animation: weather-meter-grow 1.1s cubic-bezier(0.22, 1, 0.36, 1) both !important;
+  }
+  .app-motion .scroll-hint-arrow {
+    animation: scroll-hint-bounce 1.35s ease-in-out infinite !important;
+  }
+  .app-motion .scroll-hint-float,
+  body > button.scroll-hint-float {
+    animation: scroll-hint-float 2.4s ease-in-out infinite !important;
+  }
+  .landing-page .landing-rise,
+  .app-motion .landing-rise,
+  .app-motion .page-enter {
+    animation-duration: 0.8s !important;
+  }
+  .landing-page .landing-rise {
+    animation: landing-rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) both !important;
+  }
+  .app-motion .page-enter {
+    animation: page-enter 0.45s cubic-bezier(0.22, 1, 0.36, 1) both !important;
+  }
+  .landing-page .landing-rise-delay-1 { animation-delay: 0.12s !important; }
+  .landing-page .landing-rise-delay-2 { animation-delay: 0.24s !important; }
+  .landing-page .landing-rise-delay-3 { animation-delay: 0.36s !important; }
+  .landing-page [data-reveal="shown"],
+  .app-motion [data-reveal="shown"] {
+    transition-duration: 0.85s !important;
+  }
+  .pulse-ring::after { display: none; }
+}
+

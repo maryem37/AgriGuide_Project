@@ -20,9 +20,9 @@ import { getCropVisual, scoreTone } from "@/lib/cropVisual";
  * `backend/agent_agriculture/app/services/synthesis_service.py`).
  *
  * The synthesis prompt is deliberately constrained to an EXACT, predictable
- * structure — `## <section>` headings in a fixed order, with `### N. <crop>`
+ * structure - `## <section>` headings in a fixed order, with `### N. <crop>`
  * sub-headings inside "Cultures recommandées" each starting with
- * `**Score : NN%**` — so instead of dumping a long scrolling wall of
+ * `**Score : NN%**` - so instead of dumping a long scrolling wall of
  * markdown text (which reads like a newsletter), each top-level section
  * becomes its own icon-labeled card, and crop entries become compact score
  * cards. Unknown/renamed headings still render (generic icon + text), so a
@@ -235,10 +235,50 @@ function renderBody(lines: string[]): ReactNode[] {
 }
 
 function renderInline(text: string): ReactNode {
-  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g);
-  return parts.map((part, i) => {
-    if (part.startsWith("**") && part.endsWith("**")) return <strong key={i}>{part.slice(2, -2)}</strong>;
-    if (part.startsWith("*") && part.endsWith("*")) return <em key={i}>{part.slice(1, -1)}</em>;
-    return <span key={i}>{part}</span>;
-  });
+  const parts: ReactNode[] = [];
+  const regex = /\*\*([^*]+)\*\*|\*([^*]+)\*|\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|(https?:\/\/[^\s)]+)/g;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  let i = 0;
+
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(<span key={`t-${i}`}>{text.slice(lastIndex, match.index)}</span>);
+    }
+    if (match[1] !== undefined) {
+      parts.push(<strong key={`b-${i}`}>{match[1]}</strong>);
+    } else if (match[2] !== undefined) {
+      parts.push(<em key={`e-${i}`}>{match[2]}</em>);
+    } else if (match[3] !== undefined) {
+      parts.push(
+        <a
+          key={`a-${i}`}
+          href={match[4]}
+          target="_blank"
+          rel="noreferrer"
+          className="underline underline-offset-2 text-primary font-medium"
+        >
+          {match[3]}
+        </a>,
+      );
+    } else if (match[5] !== undefined) {
+      parts.push(
+        <a
+          key={`u-${i}`}
+          href={match[5]}
+          target="_blank"
+          rel="noreferrer"
+          className="underline underline-offset-2 break-all text-primary"
+        >
+          {match[5]}
+        </a>,
+      );
+    }
+    lastIndex = regex.lastIndex;
+    i++;
+  }
+  if (lastIndex < text.length) {
+    parts.push(<span key="t-end">{text.slice(lastIndex)}</span>);
+  }
+  return parts.length > 0 ? <>{parts}</> : text;
 }

@@ -19,6 +19,7 @@ from sentence_transformers import SentenceTransformer
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception
 from app.config import settings
 from app.models.schemas import RetrievedChunk
+from app.services.source_links import source_url_for_document
 
 _client = chromadb.PersistentClient(
     path=settings.chroma_persist_dir,
@@ -187,6 +188,9 @@ def index_chunks(chunks: list[dict]) -> None:
         metadatas=[
             {
                 "source_document": c["source_document"],
+                "source_url": c.get("source_url")
+                or source_url_for_document(c["source_document"])
+                or "",
                 "crop": c.get("crop", ""),
                 "region": c.get("region", ""),
                 "topic": c.get("topic", ""),
@@ -235,11 +239,15 @@ def retrieve(
     metas = results.get("metadatas", [[]])[0]
     dists = results.get("distances", [[]])[0]
     for i, doc, meta, dist in zip(ids, docs, metas, dists):
+        source_document = meta.get("source_document", "unknown")
         out.append(
             RetrievedChunk(
                 chunk_id=i,
                 text=doc,
-                source_document=meta.get("source_document", "unknown"),
+                source_document=source_document,
+                source_url=source_url_for_document(
+                    source_document, meta.get("source_url") or None
+                ),
                 crop=meta.get("crop") or None,
                 region=meta.get("region") or None,
                 topic=meta.get("topic") or None,

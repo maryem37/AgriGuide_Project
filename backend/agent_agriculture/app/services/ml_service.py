@@ -60,6 +60,40 @@ _CROP_PROFILES = {
         "nitrogen_range": (0.7, 2.2), "cec_range": (8, 20),
         "precip_range": (0.5, 3.0),
     },
+
+    # --- Crop-pool expansion ---
+    "pomme_de_terre": {
+        # Prefers slightly acidic soil (also limits common scab); needs
+        # loose, well-drained soil for tuber development; heavy feeder
+        # given very high fresh-weight yield; high water demand.
+        "ph_range": (5.0, 6.5), "temp_range": (14, 22),
+        "nitrogen_range": (1.2, 3.0), "cec_range": (10, 25),
+        "precip_range": (1.5, 5.0),
+    },
+    "betterave_sucriere": {
+        # Sensitive to acidity (poor nodule/root development below ~6.5,
+        # ARVALIS/ITB reference), tolerates near-neutral to mildly
+        # alkaline soils well; moderate-to-warm season crop.
+        "ph_range": (6.5, 7.8), "temp_range": (12, 24),
+        "nitrogen_range": (1.0, 2.8), "cec_range": (12, 25),
+        "precip_range": (1.0, 4.0),
+    },
+    "soja": {
+        # Warm-season legume. Low nitrogen_range is deliberate — it
+        # fixes its own N via rhizobia and performs best (and nodulates
+        # best) on moderate, not high, background soil N.
+        "ph_range": (6.0, 7.0), "temp_range": (18, 28),
+        "nitrogen_range": (0.3, 1.8), "cec_range": (10, 22),
+        "precip_range": (1.2, 4.5),
+    },
+    "pois_proteagineux": {
+        # Cool-season legume (spring-sown), tolerant of a wider temp
+        # band than soja. Low nitrogen_range for the same reason as
+        # soja — self-fixing, doesn't want/need high background soil N.
+        "ph_range": (6.0, 7.5), "temp_range": (8, 20),
+        "nitrogen_range": (0.3, 1.8), "cec_range": (8, 20),
+        "precip_range": (0.8, 3.5),
+    },
 }
 
 # Component weights — must sum to 1.0. pH/temp still dominate since
@@ -153,15 +187,22 @@ def recommend_crops(soil: SoilData, weather: WeatherData) -> list[CropRecommenda
     return sorted(recs, key=lambda r: r.suitability_score, reverse=True)
 
 
-# Typical crop-cycle length (days from sowing to harvest) for the 5 core
-# crops — indicative French averages (Arvalis/Terre-net ballpark), used
-# only to populate `CropRecommendationOut.cycle_jours` (the DB schema and
-# `frontend/src/lib/businessApi.ts` both expect it). Not agronomically
-# calibrated per-parcel — same placeholder rigor as the rest of this file.
+# Typical crop-cycle length (days from sowing to harvest) for the full
+# 9-crop pool — indicative French averages (Arvalis/Terre-net/ITB
+# ballpark), used only to populate `CropRecommendationOut.cycle_jours`
+# (the DB schema and `frontend/src/lib/businessApi.ts` both expect it).
+# Not agronomically calibrated per-parcel — same placeholder rigor as
+# the rest of this file.
 CYCLE_DAYS = {
     "ble_tendre": 240,  # semis d'automne -> moisson (~8 mois)
     "mais": 150,
     "colza": 270,  # semis d'été -> récolte l'été suivant
     "orge": 120,   # orge de printemps
     "tournesol": 130,
+
+    # --- Crop-pool expansion ---
+    "pomme_de_terre": 130,       # plantation avril -> récolte août/sept (variété demi-tardive)
+    "betterave_sucriere": 210,   # semis mars/avril -> arrachage sept/nov
+    "soja": 145,                 # semis mai -> récolte sept/oct
+    "pois_proteagineux": 100,    # pois de printemps: semis fév/mars -> récolte juillet
 }

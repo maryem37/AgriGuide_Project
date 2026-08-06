@@ -249,7 +249,10 @@ async def get_neighboring_crop_context(
         crop_distribution_pct=distribution,
         neighbors=neighbors,
         note=(
-            f"{len(neighbors)} parcelle(s) RPG trouvée(s) dans un rayon de {int(radius_m)}m. "
-            f"Pourcentages calculés par nombre de parcelles, pas par surface."
-        ),
+            f"{len(neighbors)} parcelle(s) RPG trouvée(s) dans un rayon de "
+            f"{(radius_m / 1000):.0f} km. "
+            if radius_m >= 1000
+            else f"{len(neighbors)} parcelle(s) RPG trouvée(s) dans un rayon de {int(radius_m)} m. "
+        )
+        + "Pourcentages calculés par nombre de parcelles, pas par surface.",
     )

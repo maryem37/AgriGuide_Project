@@ -67,8 +67,13 @@ ordre (dans le même venv) :
 pip install chroma-hnswlib==0.7.5   # a un wheel cp312-win_amd64 ; compatible en API avec 0.7.6
 pip install chromadb==0.5.15 --no-deps
 # installe le reste de requirements.txt SANS re-déclencher la résolution de
-# dépendances de chromadb (qui retenterait 0.7.6) :
-pip install (Get-Content requirements.txt | Where-Object { $_ -notmatch '^chromadb==' })
+# dépendances de chromadb (qui retenterait 0.7.6). Filtrer aussi les commentaires
+# et lignes vides — sinon pip reçoit des lignes `# ...` (ex. `numpy<2`) comme
+# exigences invalides :
+$pkgs = Get-Content requirements.txt | Where-Object {
+  $_ -match '\S' -and $_ -notmatch '^\s*#' -and $_ -notmatch '^chromadb=='
+}
+pip install @pkgs
 ```
 
 `pip` affichera un avertissement `chromadb ... requires chroma-hnswlib==0.7.6,

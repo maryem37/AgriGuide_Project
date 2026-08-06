@@ -1,7 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { AppShell } from "@/components/AppShell";
+import { PageHeader } from "@/components/PageHeader";
+import { Reveal } from "@/components/motion/Reveal";
 import { MapPicker } from "@/components/MapPicker";
+import { TerrainMap3D } from "@/components/TerrainMap3D";
 import { AlertBanner } from "@/components/AlertBanner";
 import { ReportMarkdown } from "@/components/ReportMarkdown";
 import { Button } from "@/components/ui/button";
@@ -51,9 +54,10 @@ import {
   ChevronUp,
   Eye,
   EyeOff,
+  Box,
 } from "lucide-react";
 import { getCropVisual, scoreTone } from "@/lib/cropVisual";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   Dialog,
   DialogContent,
@@ -72,6 +76,7 @@ import {
 import {
   resolveParcel,
   getNeighbors,
+  getNdviHeatmap,
   analyzeParcel,
   AgricultureApiError,
   type AnalyzeResponse,
@@ -79,11 +84,16 @@ import {
   type VegetationData,
   type WeatherData,
   type AgroCalcEstimate,
+  type YieldEstimate,
   type NeighborCropContext,
   type CropRecommendationOut,
   type ParcelResolution,
 } from "@/lib/agricultureApi";
 import { saveRealCropRecommendations, cultureLabel } from "@/lib/cropRecommendations";
+
+const Terrain3DDialog = lazy(() =>
+  import("@/components/Terrain3DDialog").then((module) => ({ default: module.Terrain3DDialog })),
+);
 
 type GeoPolygon =
   | { type: "Polygon"; coordinates: number[][][] }
@@ -119,9 +129,9 @@ function geometryToPoints(geometry: Record<string, unknown> | null | undefined):
 export const Route = createFileRoute("/agriculture")({
   head: () => ({
     meta: [
-      { title: "Conseiller Agricole — AgriMent" },
+      { title: "Conseiller Agricole - AgriMent" },
       { name: "description", content: "Analyse du sol, données satellite et top 5 des cultures recommandées pour votre parcelle." },
-      { property: "og:title", content: "Conseiller Agricole — AgriMent" },
+      { property: "og:title", content: "Conseiller Agricole - AgriMent" },
       { property: "og:description", content: "Découvrez les cultures les plus adaptées à votre terrain." },
     ],
   }),
@@ -210,6 +220,14 @@ function Page() {
   const [showSaveForm, setShowSaveForm] = useState(false);
   const [terrainError, setTerrainError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [showRelief3d, setShowRelief3d] = useState(false);
+  const [mapView, setMapView] = useState<"2d" | "3d">("2d");
+  const [ndviOverlay, setNdviOverlay] = useState<{
+    imageBase64: string;
+    bounds: { south: number; west: number; north: number; east: number };
+  } | null>(null);
+  const [ndviLoading, setNdviLoading] = useState(false);
+  const [ndviError, setNdviError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!selectedTerrainId && terrains[0]) {
@@ -227,6 +245,12 @@ function Page() {
       : selectionSource === "carte"
         ? clickedPoint
         : null;
+
+
+  useEffect(() => {
+    setNdviOverlay(null);
+    setNdviError(null);
+  }, [activePoint?.[0], activePoint?.[1]]);
 
   const previewQuery = useQuery({
     queryKey: ["agriculture-parcel-preview", activePoint?.[0], activePoint?.[1], selectionSource],
@@ -313,7 +337,7 @@ function Page() {
     if (!token || !previewQuery.data?.resolved) return;
     const points = geometryToPoints(previewQuery.data.geometry);
     if (!points) {
-      setTerrainError("Contour cadastral introuvable — impossible d'enregistrer ce terrain.");
+      setTerrainError("Contour cadastral introuvable - impossible d'enregistrer ce terrain.");
       return;
     }
     const nom = saveName.trim() || previewQuery.data.parcel_id || "Ma parcelle";
@@ -358,21 +382,39 @@ function Page() {
     }
   }
 
+
+  async function handleToggleNdviHeatmap() {
+    if (!activePoint) return;
+    if (ndviOverlay) {
+      setNdviOverlay(null);
+      return;
+    }
+    setNdviLoading(true);
+    setNdviError(null);
+    try {
+      const result = await getNdviHeatmap({ point: { lat: activePoint[0], lon: activePoint[1] } });
+      if (!result.image_base64 || !result.bounds) {
+        setNdviError(result.warning ?? "Carte NDVI indisponible pour cette parcelle.");
+        return;
+      }
+      setNdviOverlay({ imageBase64: result.image_base64, bounds: result.bounds });
+    } catch (err) {
+      setNdviError(err instanceof AgricultureApiError ? err.message : "Erreur réseau lors du chargement de la carte NDVI.");
+    } finally {
+      setNdviLoading(false);
+    }
+  }
+
   return (
     <AppShell>
-      <div className="flex items-center gap-3 mb-2">
-        <div className="h-11 w-11 rounded-2xl bg-harvest/15 text-harvest flex items-center justify-center">
-          <Sprout className="h-6 w-6" />
-        </div>
-        <div>
-          <h1 className="font-display text-3xl md:text-4xl font-semibold leading-none">Conseiller Agricole</h1>
-          <p className="text-muted-foreground mt-1">
-            Cliquez une parcelle sur la carte, enregistrez-la, puis lancez l'analyse.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        icon={Sprout}
+        tone="harvest"
+        title="Conseiller Agricole"
+        subtitle="Cliquez une parcelle sur la carte, enregistrez-la, puis lancez l'analyse."
+      />
 
-      <div className="card-soft p-5 md:p-6 mt-6 space-y-4">
+      <Reveal from="up" delay={100} className="card-soft p-5 md:p-6 mt-6 space-y-4">
         <div className="flex flex-col lg:flex-row lg:items-center gap-3 justify-between">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-1 min-w-0">
             <Select value={selectValue} onValueChange={handleSelectTerrain}>
@@ -426,7 +468,8 @@ function Page() {
           </AlertBanner>
         )}
 
-        <MapPicker
+        {mapView === "2d" ? (
+          <MapPicker
           mode="point"
           onPoint={handleMapPoint}
           markerPosition={selectionSource === "carte" ? clickedPoint : terrainCentroid}
@@ -436,7 +479,36 @@ function Page() {
           zoom={mapZoom}
           height={440}
           showHint={false}
-        />
+        
+            ndviOverlay={ndviOverlay}
+          />
+        ) : (
+          <TerrainMap3D center={mapCenter} overlayGeometry={overlayGeometry} height={440} />
+        )}
+        <div className="mt-2 flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" onClick={() => setMapView((v) => (v === "2d" ? "3d" : "2d"))}>
+            <Box className="h-4 w-4 mr-1.5" />
+            {mapView === "2d" ? "Vue 3D du terrain" : "Retour à la carte 2D"}
+          </Button>
+          {mapView === "2d" && activePoint && (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={ndviLoading}
+              onClick={() => void handleToggleNdviHeatmap()}
+            >
+              {ndviLoading ? (
+                <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+              ) : ndviOverlay ? (
+                <EyeOff className="h-4 w-4 mr-1.5" />
+              ) : (
+                <Eye className="h-4 w-4 mr-1.5" />
+              )}
+              {ndviOverlay ? "Masquer la carte NDVI" : "Afficher la carte NDVI"}
+            </Button>
+          )}
+          {ndviError && <span className="text-xs text-destructive">{ndviError}</span>}
+        </div>
 
         {activePoint && (
           <div className="space-y-4">
@@ -480,6 +552,12 @@ function Page() {
                 </div>
 
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-end">
+                  {overlayGeometry && (
+                    <Button type="button" variant="outline" className="rounded-xl" onClick={() => setShowRelief3d(true)}>
+                      <Box className="h-4 w-4 mr-2" />
+                      Vue 3D
+                    </Button>
+                  )}
                   {canSaveExplored && !showSaveForm && (
                     <Button
                       type="button"
@@ -559,7 +637,7 @@ function Page() {
             )}
           </div>
         )}
-      </div>
+      </Reveal>
 
       {analyzeMutation.isError && (
         <div className="mt-6">
@@ -574,11 +652,11 @@ function Page() {
       {analyzeMutation.isPending && (
         <div className="mt-8 grid gap-5 md:grid-cols-3">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="card-soft p-6 space-y-4">
+            <Reveal key={i} from="up" delay={i * 100} className="card-soft p-6 space-y-4">
               <Skeleton className="h-4 w-1/2" />
               <Skeleton className="h-24 w-full" />
               <Skeleton className="h-4 w-2/3" />
-            </div>
+            </Reveal>
           ))}
         </div>
       )}
@@ -605,7 +683,13 @@ function Page() {
             <SummaryCard analysis={analysis} />
           </div>
 
-          {analysis.agro_calc_top_crop && (
+          {analysis.yield_estimate && (
+              <YieldCard
+                estimate={analysis.yield_estimate}
+                cropCode={analysis.crop_recommendations[0]?.culture ?? null}
+              />
+            )}
+            {analysis.agro_calc_top_crop && (
             <div className="mt-6">
               <AgroCalcCard
                 estimate={analysis.agro_calc_top_crop}
@@ -660,7 +744,7 @@ function Page() {
                   <div className="font-display text-xl font-semibold">
                     Rapport
                     {(analysis.report.parcel_id ?? analysis.parcel.parcel_id) &&
-                      ` — Réf. ${analysis.report.parcel_id ?? analysis.parcel.parcel_id}`}
+                      ` - Réf. ${analysis.report.parcel_id ?? analysis.parcel.parcel_id}`}
                   </div>
                   <div className="text-sm text-muted-foreground">
                     Généré le {new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
@@ -698,6 +782,14 @@ function Page() {
           )}
         </DialogContent>
       </Dialog>
+      <Suspense fallback={null}>
+        <Terrain3DDialog
+          open={showRelief3d}
+          onOpenChange={setShowRelief3d}
+          geometry={overlayGeometry as Record<string, unknown> | null}
+          label={selectedTerrain?.nom ?? previewQuery.data?.parcel_id}
+        />
+      </Suspense>
     </AppShell>
   );
 }
@@ -716,7 +808,7 @@ function weatherIcon(code: number | null | undefined) {
 }
 
 function formatClock(iso: string | null | undefined): string {
-  if (!iso) return "—";
+  if (!iso) return "-";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) {
     // Open-Meteo sometimes returns "HH:MM" already, or date without Z
@@ -758,21 +850,21 @@ function WeatherCard({ weather }: { weather: WeatherData }) {
   const metrics: { icon: typeof Droplets; value: string }[] = [
     {
       icon: CloudRain,
-      value: precip !== null && precip !== undefined ? `${Math.round(precip)}mm` : "—",
+      value: precip !== null && precip !== undefined ? `${Math.round(precip)}mm` : "-",
     },
     {
       icon: Wind,
       value:
         weather.current_wind_kmh !== null && weather.current_wind_kmh !== undefined
           ? `${Math.round(weather.current_wind_kmh)}km/h`
-          : "—",
+          : "-",
     },
     {
       icon: Droplet,
       value:
         weather.current_humidity_pct !== null && weather.current_humidity_pct !== undefined
           ? `${Math.round(weather.current_humidity_pct)}%`
-          : "—",
+          : "-",
     },
     { icon: Sunrise, value: formatClock(weather.sunrise) },
     { icon: Sunset, value: formatClock(weather.sunset) },
@@ -781,7 +873,7 @@ function WeatherCard({ weather }: { weather: WeatherData }) {
       value:
         weather.today_temp_min_c != null && weather.today_temp_max_c != null
           ? `${Math.round(weather.today_temp_min_c)}°c/${Math.round(weather.today_temp_max_c)}°c`
-          : "—",
+          : "-",
     },
   ];
 
@@ -799,7 +891,7 @@ function WeatherCard({ weather }: { weather: WeatherData }) {
           <Icon className="h-12 w-12 md:h-14 md:w-14" strokeWidth={1.5} />
         </div>
         <div className="font-display text-6xl md:text-7xl font-semibold tracking-tight leading-none">
-          {temp !== null ? `${temp}°c` : "—"}
+          {temp !== null ? `${temp}°c` : "-"}
         </div>
         <div className="text-sm text-muted-foreground md:ml-auto">{updatedLabel}</div>
       </div>
@@ -818,7 +910,7 @@ function WeatherCard({ weather }: { weather: WeatherData }) {
 
 function SoilCard({ soil }: { soil: SoilData }) {
   const rows: { label: string; value: ReactNode }[] = [];
-  if (soil.ph !== null) rows.push({ label: "pH", value: `${soil.ph.toFixed(1)} — ${phQualifier(soil.ph)}` });
+  if (soil.ph !== null) rows.push({ label: "pH", value: `${soil.ph.toFixed(1)} - ${phQualifier(soil.ph)}` });
   if (soil.organic_carbon_g_kg !== null) rows.push({ label: "Matière organique", value: `${soil.organic_carbon_g_kg.toFixed(1)} g/kg` });
   if (soil.nitrogen_g_kg !== null) rows.push({ label: "Azote total", value: `${soil.nitrogen_g_kg.toFixed(2)} g/kg` });
   if (soil.cec_cmolkg !== null) {
@@ -895,7 +987,7 @@ function NdviCard({ vegetation }: { vegetation: VegetationData }) {
             }}
           >
             <div className="absolute bottom-3 left-3 rounded-full bg-card/90 px-3 py-1 text-xs font-semibold">
-              {label} — NDVI {ndvi.toFixed(2)}
+              {label} - NDVI {ndvi.toFixed(2)}
             </div>
           </div>
           <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
@@ -910,7 +1002,7 @@ function NdviCard({ vegetation }: { vegetation: VegetationData }) {
           </div>
           {vegetation.observation_window_days !== null && (
             <p className="mt-3 text-[11px] text-muted-foreground">
-              Fenêtre d'observation : {vegetation.observation_window_days} jours ({vegetation.valid_pixel_count ?? 0} pixels valides) — Sentinel-2.
+              Fenêtre d'observation : {vegetation.observation_window_days} jours ({vegetation.valid_pixel_count ?? 0} pixels valides) - Sentinel-2.
             </p>
           )}
         </>
@@ -944,7 +1036,7 @@ function ParcelInfoCard({
 
   const ref = parcel.parcel_id ?? parcel.rpg_id_parcel;
   const sourceLabel = overrideLabel
-    ? `Mon terrain — ${overrideLabel}`
+    ? `Mon terrain - ${overrideLabel}`
     : parcel.source === "cadastre"
       ? "Cadastre (IGN)"
       : parcel.source === "rpg"
@@ -1008,7 +1100,7 @@ function NeighborsPreviewCard({ neighbors, radiusM }: { neighbors: NeighborCropC
     <div className="card-soft p-5">
       <div className="flex items-center gap-2 text-xs font-semibold tracking-widest text-muted-foreground uppercase mb-4">
         <Users className="h-4 w-4" />
-        Cultures voisines — {neighbors.neighbor_count} parcelle{neighbors.neighbor_count > 1 ? "s" : ""} ({radiusM} m)
+        Cultures voisines - {neighbors.neighbor_count} parcelle{neighbors.neighbor_count > 1 ? "s" : ""} ({radiusM >= 1000 ? `${radiusM / 1000} km` : `${radiusM} m`})
       </div>
       {entries.length === 0 ? (
         <p className="text-sm text-muted-foreground">{neighbors.note}</p>
@@ -1075,7 +1167,7 @@ function AgroCalcCard({ estimate, cropCode }: { estimate: AgroCalcEstimate; crop
     <div className="card-soft p-6">
       <div className="flex items-center gap-2 text-xs font-semibold tracking-widest text-muted-foreground uppercase">
         <FlaskConical className="h-4 w-4" />
-        Fertilisation & irrigation — {displayCrop(cropCode)}
+        Fertilisation & irrigation - {displayCrop(cropCode)}
       </div>
       <div className="mt-5 grid sm:grid-cols-2 gap-4">
         <Row
@@ -1191,6 +1283,30 @@ function Row({ icon: Icon, label, value }: { icon: typeof Droplets; label: strin
         <div className="text-xs text-muted-foreground">{label}</div>
         <div className="font-medium">{value}</div>
       </div>
+    </div>
+  );
+}
+
+function YieldCard({ estimate, cropCode }: { estimate: YieldEstimate; cropCode: string | null }) {
+  return (
+    <div className="card-soft p-6">
+      <div className="flex items-center gap-2 text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+        <TrendingUp className="h-4 w-4" />
+        Rendement estimé — {displayCrop(cropCode)}
+      </div>
+      <div className="mt-5">
+        <Row
+          icon={TrendingUp}
+          label="Rendement estimé"
+          value={
+            estimate.yield_estimate_q_ha !== null
+              ? `${formatValue(estimate.yield_estimate_q_ha)} q/ha (${formatValue(estimate.yield_range_low_q_ha)} - ${formatValue(estimate.yield_range_high_q_ha)} q/ha)`
+              : "N/A"
+          }
+        />
+      </div>
+      {estimate.method_note && <p className="mt-4 text-xs text-muted-foreground">{estimate.method_note}</p>}
+      {estimate.warning && <p className="mt-2 text-xs text-waste-foreground">{estimate.warning}</p>}
     </div>
   );
 }

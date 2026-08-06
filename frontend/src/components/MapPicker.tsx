@@ -12,6 +12,7 @@ export function MapPicker(props: {
   markerPosition?: [number, number] | null;
   overlayGeometry?: PolygonGeometry | MultiPolygonGeometry | null;
   neighborGeometries?: (PolygonGeometry | MultiPolygonGeometry)[];
+  ndviOverlay?: { imageBase64: string; bounds: { south: number; west: number; north: number; east: number } } | null;
   height?: number | string;
   center?: [number, number];
   zoom?: number;

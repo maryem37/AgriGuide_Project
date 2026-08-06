@@ -26,6 +26,23 @@ def normalize_crop(code: str | None) -> str | None:
     # Sunflower
     elif c in ["trn", "tournesol"]:
         return "tournesol"
+    # Potato — crop-pool expansion
+    elif c in ["pdt", "pomme de terre", "pomme_de_terre", "patate"]:
+        return "pomme_de_terre"
+    # Sugar beet — crop-pool expansion. RPG's "btr"/"btn" cover beet
+    # generally (industrial/sugar/fodder are not always distinguished in
+    # RPG declarations); normalized to the sugar-beet key since that's
+    # this project's scored variant.
+    elif c in ["btr", "btn", "bts", "betterave", "betterave sucriere", "betterave sucrière", "betterave_sucriere"]:
+        return "betterave_sucriere"
+    # Soybean — crop-pool expansion
+    elif c in ["soj", "soja"]:
+        return "soja"
+    # Field pea (protein pea) — crop-pool expansion. RPG's "pvt" (pois)
+    # covers pea generally; normalized to the protein-pea key since
+    # that's this project's scored variant.
+    elif c in ["pvt", "poi", "pois", "pois proteagineux", "pois protéagineux", "pois_proteagineux"]:
+        return "pois_proteagineux"
 
     return c.replace(" ", "_")
 
@@ -37,6 +54,10 @@ _DISPLAY_NAMES = {
     "colza": "Colza",
     "orge": "Orge",
     "tournesol": "Tournesol",
+    "pomme_de_terre": "Pomme de terre",
+    "betterave_sucriere": "Betterave sucrière",
+    "soja": "Soja",
+    "pois_proteagineux": "Pois protéagineux",
 
     # Common RPG fallback codes (when not normalized to core)
     "ptr": "Prairie temporaire",

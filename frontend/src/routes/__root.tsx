@@ -79,14 +79,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "AgriMent — Bienvenue" },
+      { title: "AgriMent - Bienvenue" },
       {
         name: "description",
         content:
           "AgriMent, l'assistant qui aide chaque agriculteur à cultiver, gérer et vendre en toute simplicité.",
       },
       { name: "author", content: "AgriMent" },
-      { property: "og:title", content: "AgriMent — Bienvenue" },
+      { property: "og:title", content: "AgriMent - Bienvenue" },
       {
         property: "og:description",
         content:
@@ -94,7 +94,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "AgriMent — Bienvenue" },
+      { name: "twitter:title", content: "AgriMent - Bienvenue" },
       {
         name: "twitter:description",
         content:
@@ -118,7 +118,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Nunito:wght@400;500;600;700;800&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Syne:wght@600;700;800&display=swap",
       },
     ],
   }),
@@ -149,7 +149,7 @@ function RootComponent() {
       <AuthProvider>
         {SKIP_AUTH && (
           <div className="fixed bottom-2 right-2 z-50 rounded-full bg-amber-500 px-3 py-1.5 text-xs font-semibold text-amber-950 shadow-lg">
-            Mode dev — auth désactivée (VITE_SKIP_AUTH)
+            Mode dev - auth désactivée (VITE_SKIP_AUTH)
           </div>
         )}
         <Outlet />
