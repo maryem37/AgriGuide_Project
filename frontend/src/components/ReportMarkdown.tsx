@@ -236,49 +236,36 @@ function renderBody(lines: string[]): ReactNode[] {
 
 function renderInline(text: string): ReactNode {
   const parts: ReactNode[] = [];
-  const regex = /\*\*([^*]+)\*\*|\*([^*]+)\*|\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|(https?:\/\/[^\s)]+)/g;
+  const regex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|(\*\*[^*]+\*\*)|(\*[^*]+\*)/g;
   let lastIndex = 0;
   let match: RegExpExecArray | null;
   let i = 0;
 
   while ((match = regex.exec(text)) !== null) {
-    if (match.index > lastIndex) {
-      parts.push(<span key={`t-${i}`}>{text.slice(lastIndex, match.index)}</span>);
-    }
+    if (match.index > lastIndex) parts.push(<span key={`t-${i}`}>{text.slice(lastIndex, match.index)}</span>);
     if (match[1] !== undefined) {
-      parts.push(<strong key={`b-${i}`}>{match[1]}</strong>);
-    } else if (match[2] !== undefined) {
-      parts.push(<em key={`e-${i}`}>{match[2]}</em>);
-    } else if (match[3] !== undefined) {
+      // [text](url) — e.g. a "## Conseils pratiques" citation link built by
+      // synthesis_service.py's _render_conseils_pratiques, pointing at a real
+      // HAL document (hal_title_lookup.py).
       parts.push(
         <a
           key={`a-${i}`}
-          href={match[4]}
+          href={match[2]}
           target="_blank"
           rel="noreferrer"
-          className="underline underline-offset-2 text-primary font-medium"
+          className="underline underline-offset-2"
         >
-          {match[3]}
+          {match[1]}
         </a>,
       );
-    } else if (match[5] !== undefined) {
-      parts.push(
-        <a
-          key={`u-${i}`}
-          href={match[5]}
-          target="_blank"
-          rel="noreferrer"
-          className="underline underline-offset-2 break-all text-primary"
-        >
-          {match[5]}
-        </a>,
-      );
+    } else if (match[3] !== undefined) {
+      parts.push(<strong key={`b-${i}`}>{match[3].slice(2, -2)}</strong>);
+    } else if (match[4] !== undefined) {
+      parts.push(<em key={`i-${i}`}>{match[4].slice(1, -1)}</em>);
     }
     lastIndex = regex.lastIndex;
     i++;
   }
-  if (lastIndex < text.length) {
-    parts.push(<span key="t-end">{text.slice(lastIndex)}</span>);
-  }
-  return parts.length > 0 ? <>{parts}</> : text;
+  if (lastIndex < text.length) parts.push(<span key={`t-${i}`}>{text.slice(lastIndex)}</span>);
+  return parts;
 }
