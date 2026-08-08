@@ -12,6 +12,7 @@ references it by `terrain_id`.
 
 import json
 from typing import Optional
+from uuid import UUID
 
 from app.db import get_cursor
 from app.models.schemas import CropRecommendationOut
@@ -21,6 +22,13 @@ def get_terrain(terrain_id: str) -> Optional[dict]:
     """Reads a terrain (any user) by id — this agent has no notion of
     ownership/JWT, that's enforced by whichever caller (frontend, via the
     Auth-issued terrain list) supplied this terrain_id in the first place."""
+    try:
+        terrain_uuid = UUID(terrain_id)
+    except (TypeError, ValueError):
+        # Avoid leaking a psycopg2 InvalidTextRepresentation as a 500 when a
+        # caller supplies a placeholder or otherwise malformed terrain id.
+        return None
+
     with get_cursor() as cur:
         cur.execute(
             """
@@ -30,7 +38,7 @@ def get_terrain(terrain_id: str) -> Optional[dict]:
                    ST_X(ST_Centroid(geometry)) AS centroid_lon
             FROM terrains WHERE id = %s
             """,
-            (terrain_id,),
+            (str(terrain_uuid),),
         )
         row = cur.fetchone()
         if not row:
