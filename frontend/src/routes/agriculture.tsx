@@ -7,6 +7,7 @@ import { MapPicker } from "@/components/MapPicker";
 import { TerrainMap3D } from "@/components/TerrainMap3D";
 import { AlertBanner } from "@/components/AlertBanner";
 import { ReportMarkdown } from "@/components/ReportMarkdown";
+import { AgricultureChatWidget } from "@/components/AgricultureChatWidget";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
@@ -39,6 +40,17 @@ import {
   Users,
   BookmarkPlus,
   Trash2,
+  Cloud,
+  CloudLightning,
+  CloudRain,
+  CloudFog,
+  CloudSun,
+  Snowflake,
+  Wind,
+  Droplet,
+  Sunrise,
+  Sunset,
+  Thermometer,
   ChevronDown,
   ChevronUp,
   Eye,
@@ -67,10 +79,12 @@ import {
   getNeighbors,
   getNdviHeatmap,
   analyzeParcel,
+  buildChatContext,
   AgricultureApiError,
   type AnalyzeResponse,
   type SoilData,
   type VegetationData,
+  type WeatherData,
   type AgroCalcEstimate,
   type YieldEstimate,
   type NeighborCropContext,
@@ -78,7 +92,6 @@ import {
   type ParcelResolution,
 } from "@/lib/agricultureApi";
 import { saveRealCropRecommendations, cultureLabel } from "@/lib/cropRecommendations";
-import { CropWasteValorization } from "@/components/CropWasteValorization";
 
 const Terrain3DDialog = lazy(() =>
   import("@/components/Terrain3DDialog").then((module) => ({ default: module.Terrain3DDialog })),
@@ -662,7 +675,11 @@ function Page() {
             </div>
           )}
 
-          <div className="mt-8 grid gap-5 md:grid-cols-3">
+          <div className="mt-8">
+            <WeatherCard weather={analysis.weather} />
+          </div>
+
+          <div className="mt-6 grid gap-5 md:grid-cols-3">
             <SoilCard soil={analysis.soil} />
             <NdviCard vegetation={analysis.vegetation} />
             <SummaryCard analysis={analysis} />
@@ -717,10 +734,6 @@ function Page() {
                 <CropCard key={c.culture} crop={c} onDetails={() => setOpenCrop(c)} />
               ))}
             </div>
-
-            <CropWasteValorization
-              cultures={analysis.crop_recommendations.map((c) => c.culture)}
-            />
           </div>
 
           {showReport && analysis.report && (
@@ -779,7 +792,122 @@ function Page() {
           label={selectedTerrain?.nom ?? previewQuery.data?.parcel_id}
         />
       </Suspense>
+      <AgricultureChatWidget parcelContext={buildChatContext(analysis)} />
     </AppShell>
+  );
+}
+
+/** WMO weather interpretation codes → Lucide icon (Open-Meteo). */
+function weatherIcon(code: number | null | undefined) {
+  if (code === null || code === undefined) return Cloud;
+  if (code === 0) return Sun;
+  if (code <= 2) return CloudSun;
+  if (code <= 3) return Cloud;
+  if (code <= 48) return CloudFog;
+  if (code <= 67 || (code >= 80 && code <= 82)) return CloudRain;
+  if (code <= 77 || code === 85 || code === 86) return Snowflake;
+  if (code >= 95) return CloudLightning;
+  return Cloud;
+}
+
+function formatClock(iso: string | null | undefined): string {
+  if (!iso) return "-";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) {
+    // Open-Meteo sometimes returns "HH:MM" already, or date without Z
+    const m = iso.match(/T(\d{2}):(\d{2})/);
+    if (m) return `${m[1]}h${m[2]}`;
+    return iso;
+  }
+  return `${String(d.getHours()).padStart(2, "0")}h${String(d.getMinutes()).padStart(2, "0")}`;
+}
+
+function WeatherCard({ weather }: { weather: WeatherData }) {
+  if (weather.source === "unavailable") {
+    return (
+      <div className="card-soft p-6">
+        <p className="text-sm text-muted-foreground">{weather.warning ?? "Météo indisponible pour cette parcelle."}</p>
+      </div>
+    );
+  }
+
+  const Icon = weatherIcon(weather.weather_code);
+  const now = new Date();
+  const dateLabel = now.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+  const timeLabel = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+  const updatedLabel = weather.observed_at
+    ? `Prévision actualisée à ${formatClock(weather.observed_at).replace("h", "h")}`
+    : "Prévision Open-Meteo";
+
+  const temp =
+    weather.current_temp_c !== null && weather.current_temp_c !== undefined
+      ? Math.round(weather.current_temp_c)
+      : weather.daily_temp_mean_c?.[0] != null
+        ? Math.round(weather.daily_temp_mean_c[0])
+        : null;
+
+  const precip =
+    weather.current_precip_mm ??
+    (weather.daily_precip_mm?.[0] != null ? weather.daily_precip_mm[0] : null);
+
+  const metrics: { icon: typeof Droplets; value: string }[] = [
+    {
+      icon: CloudRain,
+      value: precip !== null && precip !== undefined ? `${Math.round(precip)}mm` : "-",
+    },
+    {
+      icon: Wind,
+      value:
+        weather.current_wind_kmh !== null && weather.current_wind_kmh !== undefined
+          ? `${Math.round(weather.current_wind_kmh)}km/h`
+          : "-",
+    },
+    {
+      icon: Droplet,
+      value:
+        weather.current_humidity_pct !== null && weather.current_humidity_pct !== undefined
+          ? `${Math.round(weather.current_humidity_pct)}%`
+          : "-",
+    },
+    { icon: Sunrise, value: formatClock(weather.sunrise) },
+    { icon: Sunset, value: formatClock(weather.sunset) },
+    {
+      icon: Thermometer,
+      value:
+        weather.today_temp_min_c != null && weather.today_temp_max_c != null
+          ? `${Math.round(weather.today_temp_min_c)}°c/${Math.round(weather.today_temp_max_c)}°c`
+          : "-",
+    },
+  ];
+
+  return (
+    <div className="card-soft p-6 md:p-8">
+      <div className="text-sm text-muted-foreground">
+        {dateLabel} <span className="font-semibold text-foreground">{timeLabel}</span>
+      </div>
+
+      <div className="mt-5 flex items-center gap-6 flex-wrap">
+        <div
+          className="h-20 w-20 md:h-24 md:w-24 rounded-2xl flex items-center justify-center shrink-0"
+          style={{ background: "oklch(0.93 0.04 210)", color: "oklch(0.48 0.1 210)" }}
+        >
+          <Icon className="h-12 w-12 md:h-14 md:w-14" strokeWidth={1.5} />
+        </div>
+        <div className="font-display text-6xl md:text-7xl font-semibold tracking-tight leading-none">
+          {temp !== null ? `${temp}°c` : "-"}
+        </div>
+        <div className="text-sm text-muted-foreground md:ml-auto">{updatedLabel}</div>
+      </div>
+
+      <div className="mt-8 grid grid-cols-3 sm:grid-cols-6 gap-4">
+        {metrics.map((m, i) => (
+          <div key={i} className="flex flex-col items-center gap-2 text-center">
+            <m.icon className="h-6 w-6 text-foreground/80" strokeWidth={1.5} />
+            <span className="text-sm font-semibold">{m.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 

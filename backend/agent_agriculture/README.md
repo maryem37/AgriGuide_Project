@@ -15,9 +15,10 @@ fois cette migration terminée.
 Pipeline : résout une parcelle (cadastre/RPG) -> interroge en parallèle
 Sentinel-2 (NDVI), SoilGrids (sol), Open-Meteo (météo), et un classifieur DL
 optionnel (TempCNN) -> calcule le top 5 des cultures + besoins
-azote/irrigation avec des formules explicites (pas le LLM) -> génère un
-rapport français grounded via RAG (Chroma + Mistral) en deux étapes avec audit
-anti-hallucination.
+azote/irrigation avec des formules explicites (pas le LLM), avec deux
+intégrations DL ciblées et plafonnées (voir §"Classifieur DL" ci-dessous)
+-> génère un rapport français grounded via RAG (Chroma + Mistral) en deux
+étapes avec audit anti-hallucination.
 
 ## Entrée
 
@@ -137,8 +138,29 @@ arrière-plan fichier par fichier sans planter sur un document problématique.
 
 ## Classifieur DL (optionnel, Phase B)
 
-Observation satellite indépendante du scoring (jamais utilisée pour classer
-les cultures recommandées — voir `app/services/dl_service.py`) :
+Observation satellite de ce qui pousse *actuellement* sur la parcelle (voir
+`app/services/dl_service.py`), utilisée dans le pipeline de deux façons
+volontairement étroites et plafonnées — jamais comme un second avis qui
+recalcule le score sol/climat, seulement comme preuve de terrain
+complémentaire, et seulement quand la confiance et le nombre d'acquisitions
+satellite sont suffisants (sinon comportement inchangé, bonus/crédit = 0) :
+
+1. **Scoring des cultures** (`ml_service._dl_evidence_bonus`) : petit bonus
+   additif plafonné (+0.06 max, pondéré par la confiance du modèle) quand le
+   classifieur confirme qu'une culture candidate pousse déjà réellement sur
+   *cette* parcelle — une preuve de terrain indépendante du modèle
+   sol/climat, pas un doublon du même signal.
+2. **Fertilisation azotée** (`agro_calc_service._dl_prairie_n_credit`) :
+   crédit d'azote (25-40 kg N/ha) quand le classifieur observe la parcelle
+   actuellement en prairie permanente/temporaire — le retournement de
+   prairie libère de l'azote organique minéralisé pendant 1-2 saisons
+   (effet agronomique publié, repère COMIFER), un usage qui correspond à ce
+   que le DL observe réellement (couverture du sol actuelle), pas à une
+   prédiction de rendement futur.
+
+Le NDVI et `yield_service.py` continuent volontairement à ignorer le DL (et
+le NDVI) comme signal de rendement/adéquation future — voir leurs docstrings
+respectifs pour le raisonnement.
 
 ```bash
 pip install breizhcrops

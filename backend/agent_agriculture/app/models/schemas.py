@@ -90,11 +90,12 @@ class RetrievedChunk(BaseModel):
     chunk_id: str
     text: str
     source_document: str
-    source_url: Optional[str] = None  # HAL landing page when derivable from filename
     crop: Optional[str] = None
     region: Optional[str] = None
     topic: Optional[str] = None
     score: float
+    title: Optional[str] = None  # real HAL document title, looked up at ingest/backfill time — falls back to a filename-derived title if unavailable
+    url: Optional[str] = None    # HAL permalink (hal.science/{hal_id}), always constructible from the filename
 
 
 class CropRecommendation(BaseModel):
@@ -120,6 +121,7 @@ class AgroCalcEstimate(BaseModel):
     n_dose_kg_ha: Optional[float] = None
     n_besoins_kg_ha: Optional[float] = None       # crop need, from yield objective
     n_fournitures_kg_ha: Optional[float] = None   # estimated soil supply
+    n_dl_credit_kg_ha: Optional[float] = None     # grassland-conversion N credit, from dl_service observation (0 if not applicable)
     yield_objective_q_ha: Optional[float] = None
     n_method_note: Optional[str] = None
     # Irrigation
@@ -169,13 +171,6 @@ class SynthesisJSON(BaseModel):
     crop_recommendations: list[CropRecommendation]
     grounded_claims: list[dict]  # {"claim": str, "source_chunk_id": str}
     data_gaps: list[str]
-    # RAG-only bullets (chroma_store grounded claims) for ## Conseils / ## Alertes.
-    practical_tips: list[str] = Field(default_factory=list)
-    alerts: list[str] = Field(default_factory=list)
-    # Parcel-data bullets (sol/météo/NDVI/…) — shown only at the bottom of
-    # each section, after the RAG content; never mixed into the primary list.
-    practical_tips_context: list[str] = Field(default_factory=list)
-    alerts_context: list[str] = Field(default_factory=list)
 
 
 class AdvisorReport(BaseModel):
@@ -203,8 +198,21 @@ class NdviHeatmapResponse(BaseModel):
 
 
 class DLCropObservation(BaseModel):
-    """Phase B — descriptive only, same treatment as VegetationData/NDVI.
-    NOT fed into ml_service.py's crop-suitability scoring."""
+    """Phase B — a real-world satellite observation of what is CURRENTLY
+    growing on the parcel today, as opposed to ml_service.py's soil/climate
+    suitability model, which reasons about what WOULD grow well there.
+    Used in two narrow, explicitly-bounded ways (see ml_service.py's
+    _dl_evidence_bonus and agro_calc_service.py's _dl_prairie_n_credit):
+      1. crop scoring: a small, capped bonus when the DL model independently
+         confirms a candidate crop is already thriving on this exact parcel
+         (real-world evidence, not a second opinion feeding the same
+         soil/climate priors).
+      2. fertilization: a documented soil-N credit when the parcel is
+         currently under permanent/temporary meadow (grassland-to-arable
+         conversion releases mineralized N for 1-2 seasons — a real,
+         published agronomic effect, not a suitability judgement).
+    Everything else in the pipeline (yield_service.py, NDVI-based reasoning)
+    still deliberately ignores it — see those modules' own docstrings."""
     source: Literal["dl-tempcnn-breizhcrops", "unavailable"]
     predicted_class_fr: Optional[str] = None
     predicted_class_en: Optional[str] = None
@@ -256,5 +264,6 @@ class AnalyzeResponse(BaseModel):
     neighbors: Optional[NeighborCropContext] = None
     crop_recommendations: list[CropRecommendationOut]
     agro_calc_top_crop: AgroCalcEstimate
+    yield_estimate: Optional[YieldEstimate] = None  # top-recommended crop's yield estimate (Tier 3 addition — new response field)
     report: Optional[AdvisorReport] = None  # None when MISTRAL_API_KEY / RAG corpus aren't configured — degrades gracefully rather than failing the whole analysis
     warnings: list[str] = Field(default_factory=list)

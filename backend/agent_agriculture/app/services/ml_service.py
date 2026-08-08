@@ -30,7 +30,7 @@ Factors used, and why each is/isn't crop-differentiated:
   honesty pattern as the NDVI "descriptive, not predictive" framing
   elsewhere in this project).
 """
-from app.models.schemas import SoilData, WeatherData, CropRecommendation
+from app.models.schemas import SoilData, WeatherData, CropRecommendation, DLCropObservation
 
 # Simplified agronomic tolerance ranges — placeholder domain knowledge
 # until replaced by a trained model on real RPG + climate data.
@@ -104,6 +104,49 @@ _WEIGHTS = {
     "cec": 0.10, "precip": 0.10, "workability": 0.10,
 }
 
+# --- DL evidence bonus (Phase B integration) --------------------------------
+# dl_service.py's TempCNN classifier observes what is CURRENTLY growing on
+# the exact parcel from Sentinel-2 time series — a real-world, independent
+# signal, not derived from soil/climate like every other factor above. When
+# it confirms a candidate crop is already thriving there, that is genuine
+# ground-truth evidence of viability and deserves a small, capped nudge.
+#
+# Deliberately ADDITIVE and small (not folded into _WEIGHTS' 1.0 total):
+# this must never let a noisy/uncertain DL read override the soil/climate
+# fundamentals, and must degrade to exactly today's behavior (bonus = 0)
+# whenever the classifier is unavailable, low-confidence, or the crop simply
+# isn't one of BreizhCrops' 9 native classes (no legumes/potato/beet).
+_DL_MAX_BONUS = 0.06
+_DL_MIN_CONFIDENCE = 0.5
+_DL_MIN_TIMESTEPS = 5
+
+# Maps this project's crop keys to dl_service.py's French classnames.
+# Crops absent here (soja, pois_proteagineux, pomme_de_terre,
+# betterave_sucriere) simply never receive a bonus — BreizhCrops' 9 native
+# classes don't cover them, and no amount of confidence should invent one.
+_DL_CLASSNAME_FR = {
+    "ble_tendre": "blé",
+    "mais": "maïs",
+    "colza": "colza",
+    "orge": "orge",
+    "tournesol": "tournesol",
+}
+
+
+def _dl_evidence_bonus(crop: str, dl_observation: "DLCropObservation | None") -> float:
+    """Returns a bonus in [0, _DL_MAX_BONUS], scaled by the model's own
+    confidence, or 0 whenever the observation doesn't apply/isn't usable."""
+    if dl_observation is None or dl_observation.source == "unavailable":
+        return 0.0
+    if dl_observation.confidence is None or dl_observation.confidence < _DL_MIN_CONFIDENCE:
+        return 0.0
+    if (dl_observation.observation_timesteps or 0) < _DL_MIN_TIMESTEPS:
+        return 0.0
+    expected = _DL_CLASSNAME_FR.get(crop)
+    if expected is None or dl_observation.predicted_class_fr != expected:
+        return 0.0
+    return round(_DL_MAX_BONUS * dl_observation.confidence, 4)
+
 
 def _in_range_score(value: float | None, low: float, high: float) -> float:
     if value is None:
@@ -134,7 +177,9 @@ def _mean_precip(weather: WeatherData) -> float | None:
     return sum(valid) / len(valid) if valid else None
 
 
-def recommend_crops(soil: SoilData, weather: WeatherData) -> list[CropRecommendation]:
+def recommend_crops(
+    soil: SoilData, weather: WeatherData, dl_observation: "DLCropObservation | None" = None
+) -> list[CropRecommendation]:
     mean_temp = None
     if weather.daily_temp_mean_c:
         valid_temps = [t for t in weather.daily_temp_mean_c if t is not None]
@@ -152,7 +197,7 @@ def recommend_crops(soil: SoilData, weather: WeatherData) -> list[CropRecommenda
         cec_score = _in_range_score(soil.cec_cmolkg, *profile["cec_range"])
         precip_score = _in_range_score(mean_precip, *profile["precip_range"])
 
-        overall = round(
+        base_score = round(
             ph_score * _WEIGHTS["ph"]
             + temp_score * _WEIGHTS["temp"]
             + nitrogen_score * _WEIGHTS["nitrogen"]
@@ -161,6 +206,8 @@ def recommend_crops(soil: SoilData, weather: WeatherData) -> list[CropRecommenda
             + workability * _WEIGHTS["workability"],
             3,
         )
+        dl_bonus = _dl_evidence_bonus(crop, dl_observation)
+        overall = round(min(1.0, base_score + dl_bonus), 3)
 
         recs.append(
             CropRecommendation(
@@ -180,6 +227,14 @@ def recommend_crops(soil: SoilData, weather: WeatherData) -> list[CropRecommenda
                     "precip_score": round(precip_score, 3),
                     "workability_score": workability,
                     "weights": _WEIGHTS,
+                    "base_score_before_dl": base_score,
+                    "dl_evidence_bonus": dl_bonus,
+                    "dl_evidence_note": (
+                        f"Bonus capped at {_DL_MAX_BONUS} — appliqué uniquement si le classifieur DL "
+                        f"(TempCNN/BreizhCrops) confirme cette culture en croissance sur cette parcelle "
+                        f"avec confiance >= {_DL_MIN_CONFIDENCE} et >= {_DL_MIN_TIMESTEPS} acquisitions "
+                        f"satellite exploitables."
+                    ) if dl_bonus > 0 else None,
                     "method": "rule_based_placeholder",  # flip to "random_forest" once trained
                 },
             )
