@@ -19,7 +19,6 @@ from sentence_transformers import SentenceTransformer
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception
 from app.config import settings
 from app.models.schemas import RetrievedChunk
-from app.services.source_links import source_url_for_document
 
 _client = chromadb.PersistentClient(
     path=settings.chroma_persist_dir,
@@ -138,6 +137,37 @@ def embed_query_for_retrieval(text: str) -> list[float]:
         ) from e
 
 
+def _split_oversized_block(block: str, max_tok: int, overlap_ratio: float) -> list[str]:
+    """
+    Hard word-count split for a single block that alone exceeds
+    max_tok. Needed because chunk_document()'s packing loop only ever
+    decides whether to FLUSH the accumulator before adding a new block
+    — it never checks a block's own size, so a paragraph-less PDF
+    extraction (no blank-line breaks at all) can produce one "block"
+    that's the entire document. Caught live: a ~65,000-token single
+    block was sent whole to Mistral's embedding API, which has an
+    8192-token per-request limit — the failure then triggered a silent
+    fallback to a 768-dim local model mid-ingest-run, breaking every
+    subsequent file in that batch with a dimension mismatch against the
+    already-1024-dim collection. This function is the missing
+    "size-based splitting fallback within an oversized section" the
+    project's own design doc (Section 7.2) called for but never
+    implemented.
+    """
+    words = block.split()
+    if len(words) <= max_tok:
+        return [block]
+    step = max(1, int(max_tok * (1 - overlap_ratio)))
+    pieces = []
+    i = 0
+    while i < len(words):
+        pieces.append(" ".join(words[i : i + max_tok]))
+        if i + max_tok >= len(words):
+            break
+        i += step
+    return pieces
+
+
 def chunk_document(text: str, source_document: str, metadata_defaults: dict | None = None) -> list[dict]:
     """
     Structure-aware-ish chunking: splits on markdown headings/paragraph
@@ -145,12 +175,22 @@ def chunk_document(text: str, source_document: str, metadata_defaults: dict | No
     with overlap. For full PDF structural parsing, run documents through
     `unstructured` in scripts/ingest_rag_corpus.py before calling this —
     this function chunks already-extracted text/markdown.
+
+    Any block that alone exceeds chunk_max_tokens is now hard-split by
+    word count (via _split_oversized_block, same overlap ratio) BEFORE
+    packing — see that function's docstring for why this was needed.
     """
     metadata_defaults = metadata_defaults or {}
-    blocks = [b.strip() for b in text.split("\n\n") if b.strip()]
+    raw_blocks = [b.strip() for b in text.split("\n\n") if b.strip()]
+
+    max_tok, min_tok = settings.chunk_max_tokens, settings.chunk_min_tokens
+    overlap_ratio = settings.chunk_overlap_ratio
+
+    blocks = []
+    for b in raw_blocks:
+        blocks.extend(_split_oversized_block(b, max_tok, overlap_ratio))
 
     chunks, current, current_len = [], [], 0
-    max_tok, min_tok = settings.chunk_max_tokens, settings.chunk_min_tokens
 
     def flush():
         if current:
@@ -161,7 +201,7 @@ def chunk_document(text: str, source_document: str, metadata_defaults: dict | No
         if current_len + block_len > max_tok and current_len >= min_tok:
             flush()
             overlap_words = " ".join(current).split()
-            overlap_n = int(len(overlap_words) * settings.chunk_overlap_ratio)
+            overlap_n = int(len(overlap_words) * overlap_ratio)
             current = overlap_words[-overlap_n:] if overlap_n else []
             current_len = len(current)
         current.append(block)
@@ -188,12 +228,11 @@ def index_chunks(chunks: list[dict]) -> None:
         metadatas=[
             {
                 "source_document": c["source_document"],
-                "source_url": c.get("source_url")
-                or source_url_for_document(c["source_document"])
-                or "",
                 "crop": c.get("crop", ""),
                 "region": c.get("region", ""),
                 "topic": c.get("topic", ""),
+                "title": c.get("title", ""),
+                "url": c.get("url", ""),
             }
             for c in chunks
         ],
@@ -239,19 +278,17 @@ def retrieve(
     metas = results.get("metadatas", [[]])[0]
     dists = results.get("distances", [[]])[0]
     for i, doc, meta, dist in zip(ids, docs, metas, dists):
-        source_document = meta.get("source_document", "unknown")
         out.append(
             RetrievedChunk(
                 chunk_id=i,
                 text=doc,
-                source_document=source_document,
-                source_url=source_url_for_document(
-                    source_document, meta.get("source_url") or None
-                ),
+                source_document=meta.get("source_document", "unknown"),
                 crop=meta.get("crop") or None,
                 region=meta.get("region") or None,
                 topic=meta.get("topic") or None,
                 score=1 - dist,  # chroma returns distance; convert to similarity
+                title=meta.get("title") or None,
+                url=meta.get("url") or None,
             )
         )
     return out

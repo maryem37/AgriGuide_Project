@@ -7,6 +7,7 @@ import { MapPicker } from "@/components/MapPicker";
 import { TerrainMap3D } from "@/components/TerrainMap3D";
 import { AlertBanner } from "@/components/AlertBanner";
 import { ReportMarkdown } from "@/components/ReportMarkdown";
+import { AgricultureChatWidget } from "@/components/AgricultureChatWidget";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
@@ -54,7 +55,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { useAuth } from "@/lib/auth-context";
+import { SKIP_AUTH, useAuth } from "@/lib/auth-context";
 import { centroid, type LatLng } from "@/lib/terrain";
 import {
   addTerrain,
@@ -67,6 +68,7 @@ import {
   getNeighbors,
   getNdviHeatmap,
   analyzeParcel,
+  buildChatContext,
   AgricultureApiError,
   type AnalyzeResponse,
   type SoilData,
@@ -285,7 +287,10 @@ function Page() {
 
   function handleAnalyze() {
     if (!activePoint) return;
-    if (selectionSource === "terrain" && selectedTerrain) {
+    // The auth bypass exposes a visual demonstration terrain, but it is not
+    // persisted in Postgres and therefore has no database UUID. Analyze its
+    // centroid as a fresh map point instead of sending the placeholder id.
+    if (selectionSource === "terrain" && selectedTerrain && !SKIP_AUTH) {
       analyzeMutation.mutate({
         point: { lat: activePoint[0], lon: activePoint[1] },
         terrain_id: selectedTerrain.id,
@@ -717,8 +722,7 @@ function Page() {
                 <CropCard key={c.culture} crop={c} onDetails={() => setOpenCrop(c)} />
               ))}
             </div>
-
-            <CropWasteValorization
+            <CropWasteValorization 
               cultures={analysis.crop_recommendations.map((c) => c.culture)}
             />
           </div>
@@ -779,6 +783,7 @@ function Page() {
           label={selectedTerrain?.nom ?? previewQuery.data?.parcel_id}
         />
       </Suspense>
+      <AgricultureChatWidget parcelContext={buildChatContext(analysis)} />
     </AppShell>
   );
 }

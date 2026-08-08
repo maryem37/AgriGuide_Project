@@ -79,6 +79,21 @@ class Settings(BaseSettings):
     dl_checkpoint_path: str = str(_APP_DIR / "dl_checkpoints" / "tempcnn_finetuned.pth")
     dl_sequence_length: int = 45  # fixed input length the pretrained TempCNN architecture expects
 
+    # --- Qdrant Cloud (scripts/push_to_qdrant.py) — same hybrid dense+sparse
+    # collection shape as the Government Regulations feature's collections
+    # (agriculture_regulations), so every collection in the cluster stays
+    # queryable the same way. One-way export only (Chroma -> Qdrant) as of
+    # this addition — app/services/rag_service.py's retrieve() still reads
+    # from local Chroma at query time, this does not change that. ---
+    qdrant_url: str = ""
+    qdrant_api_key: str = ""
+    qdrant_collection: str = "Agricultural Advisor"
+    qdrant_timeout_seconds: int = 60
+    qdrant_dense_vector_name: str = "text-dense"
+    qdrant_sparse_vector_name: str = "text-sparse"
+    qdrant_dense_dim: int = 1024  # must match mistral-embed's output dim — same value ingest already assumes
+    qdrant_sparse_model: str = "Qdrant/bm25"  # fastembed model, same one the Regulations feature uses
+
     # --- Database (Postgres/PostGIS, shared with the other agents — see database/schema.sql) ---
     database_url: str = "postgresql://agriadvisor:changeme@localhost:5434/agriadvisor"
 

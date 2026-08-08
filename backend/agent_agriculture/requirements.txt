@@ -39,8 +39,9 @@ unstructured[pdf]==0.15.13
 # incompatible with current <inttypes.h>). Instead, pdfminer.six and
 # pdfplumber are left unpinned so pip resolves pdfplumber's own required
 # modern pdfminer.six version, and app/_compat_shims.py re-adds the missing
-# PSSyntaxError symbol as an alias before unstructured is imported. See
-# app/main.py for the shim import (must be the first import in that file).
+# PSSyntaxError symbol as an alias before unstructured is imported.
+# `unstructured` is only ever imported by scripts/ingest_rag_corpus.py (not
+# by any live-server module) — that script imports the shim first.
 pdfplumber==0.11.10
 
 # Optional Phase B — DL crop classifier (BreizhCrops-pretrained TempCNN).
@@ -53,3 +54,7 @@ breizhcrops==0.0.4.1
 scikit-learn==1.5.2
 pandas==2.2.3
 tqdm==4.66.5
+
+# --- Qdrant migration (scripts/push_to_qdrant.py) ---
+qdrant-client==1.12.1
+fastembed==0.7.4  # NOT 0.4.2 — that version doesn't exist on PyPI for py3.12+ (oldest available is 0.5.0); see requirements.txt of the standalone prototype, same fix
