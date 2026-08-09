@@ -29,6 +29,8 @@ export type CropRecommendation = {
 
 export type BusinessAdvisorRequest = {
   terrain_id: string;
+  /** Optional multi-parcelle selection; areas are summed server-side when present. */
+  terrain_ids?: string[];
   superficie_disponible_ha: number;
   budget_input: number;
   date_plantation_prevue: string; // ISO date (YYYY-MM-DD)
@@ -56,6 +58,8 @@ export type EtudeMarche = {
   tendance_label?: string | null;
   demande?: string | null;
   concurrence?: string | null;
+  rendement_std_kg_par_ha?: number | null;
+  rendement_fallback?: boolean;
 };
 
 /** Explique comment une métrique a été calculée : formule, valeurs intermédiaires, sources. */
@@ -84,7 +88,30 @@ export type BusinessScenario = {
   risque_description: string;
   solution_risque: string;
   matching_score: number; // 0 à 100
+  score_compatibilite: number;
   etude_marche: EtudeMarche;
+  indicateurs_financiers: {
+    revenu_brut_estime_eur: number;
+    cout_total_estime_eur: number;
+    profit_estime_eur: number;
+    profit_margin_pct: number;
+    roi_pct: number;
+    prix_seuil_rentabilite_eur_par_kg: number | null;
+    rendement_seuil_kg_par_ha: number | null;
+    budget_suffisant: boolean;
+    budget_gap_eur: number;
+    cout_production_eur_par_ha: number;
+    cout_mitigation_eur_par_ha: number;
+    cout_total_eur_par_ha: number;
+    source_cout: string;
+    cout_fallback: boolean;
+  };
+  confiance_donnees: {
+    niveau: "low" | "medium" | "high";
+    score: number;
+    raisons: string[];
+  };
+  raisons_risque: string[];
   superficie_max_financable_ha: number;
   superficie_conseillee_ha: number;
   detail_calcul: DetailCalculScenario;
@@ -109,6 +136,7 @@ export type AllocationChoisie = {
 
 export type FarmerDecisionRequest = {
   terrain_id: string;
+  terrain_ids?: string[];
   allocations: AllocationChoisie[];
   superficie_disponible_ha: number;
 };
@@ -141,12 +169,19 @@ export class BusinessApiError extends Error {
   }
 }
 
-async function postJson<TResponse>(path: string, body: unknown): Promise<TResponse> {
+async function postJson<TResponse>(
+  path: string,
+  body: unknown,
+  token: string,
+): Promise<TResponse> {
   let response: Response;
   try {
     response = await fetch(`${BUSINESS_API_BASE_URL}${path}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify(body),
     });
   } catch {
@@ -171,16 +206,33 @@ async function postJson<TResponse>(path: string, body: unknown): Promise<TRespon
 /** POST /business/scenarios — génère les N scénarios chiffrés pour ce budget/terrain. */
 export function fetchBusinessScenarios(
   request: BusinessAdvisorRequest,
+  token: string,
 ): Promise<BusinessAdvisorResponse> {
   return postJson<BusinessAdvisorResponse>("/business/scenarios", {
     nb_scenarios: 3,
     ...request,
-  });
+  }, token);
 }
 
 /** POST /business/decision — confirme la répartition finale choisie par le farmer. */
 export function confirmFarmerDecision(
   request: FarmerDecisionRequest,
+  token: string,
 ): Promise<FarmerDecisionResponse> {
-  return postJson<FarmerDecisionResponse>("/business/decision", request);
+  return postJson<FarmerDecisionResponse>("/business/decision", request, token);
+}
+
+/** Dernière décision persistée, utilisée pour reconstruire le contexte Monitoring. */
+export async function fetchLatestFarmerDecision(
+  terrainId: string,
+  token: string,
+): Promise<FarmerDecisionResponse> {
+  const response = await fetch(
+    `${BUSINESS_API_BASE_URL}/business/decisions/${encodeURIComponent(terrainId)}/latest`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  if (!response.ok) {
+    throw new BusinessApiError("Aucune décision Business persistée pour ce terrain.", response.status);
+  }
+  return response.json() as Promise<FarmerDecisionResponse>;
 }

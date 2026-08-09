@@ -712,7 +712,7 @@ function Page() {
                     className="rounded-xl"
                     onClick={() => navigate({ to: "/business" })}
                   >
-                    <TrendingUp className="h-4 w-4 mr-2" /> Utiliser dans Conseiller Business
+                    <TrendingUp className="h-4 w-4 mr-2" /> Utiliser dans Conseiller Financier
                   </Button>
                 )}
               </div>

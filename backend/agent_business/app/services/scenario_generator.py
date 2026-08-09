@@ -6,19 +6,25 @@ C'est ce service que le endpoint FastAPI appelle directement.
 """
 
 from datetime import date
+import uuid
 
-from app.data.mock_production_costs import get_mock_production_cost_per_ha
 from app.models.schemas import (
     BusinessAdvisorRequest,
     BusinessScenario,
+    ConfianceDonnees,
     CropRecommendation,
     DetailCalculMetrique,
     DetailCalculScenario,
+)
+from app.services.financial_service import (
+    compute_financial_indicators,
+    estimate_production_cost,
 )
 from app.services.market_study import estimer_marche
 from app.services.risk_study import evaluer_risque
 from app.services.scoring import (
     POIDS_BUDGET_FIT,
+    POIDS_COMPATIBILITE,
     POIDS_PROFIT,
     POIDS_RISQUE,
     CandidatScoring,
@@ -39,9 +45,10 @@ def _construire_candidat(
       ET le détail de calcul explicable
     """
     etude_marche = estimer_marche(crop, date_plantation)
-    etude_risque = evaluer_risque(crop)
+    cout_estime = estimate_production_cost(crop)
+    etude_risque = evaluer_risque(crop, etude_marche, cout_estime)
 
-    cout_production_par_ha = get_mock_production_cost_per_ha(crop.culture)
+    cout_production_par_ha = cout_estime.cost_per_ha
     cout_total_par_ha = cout_production_par_ha + etude_risque.cout_mitigation_eur_par_ha
 
     profit_net_par_ha = etude_marche.profit_brut_par_ha - cout_total_par_ha
@@ -52,6 +59,7 @@ def _construire_candidat(
         profit_net_par_ha=profit_net_par_ha,
         risque_normalise=etude_risque.risque_score_normalise,
         superficie_max_financable_ha=superficie_max_financable_ha,
+        compatibilite=crop.score_compatibilite / 100.0,
     )
 
     donnees_brutes = {
@@ -60,6 +68,8 @@ def _construire_candidat(
         "cycle_jours": crop.cycle_jours,
         "date_plantation": date_plantation,
         "cout_production_par_ha": cout_production_par_ha,
+        "cout_estime": cout_estime,
+        "score_compatibilite": crop.score_compatibilite,
         "cout_total_par_ha": cout_total_par_ha,
         "profit_net_par_ha": profit_net_par_ha,
         "superficie_max_financable_ha": superficie_max_financable_ha,
@@ -82,7 +92,8 @@ def _construire_detail_calcul(
 
     score_matching = DetailCalculMetrique(
         formule=(
-            "score = w1 * profit_normalisé + w2 * (1 - risque_normalisé) + w3 * fit_budget, "
+            "score = w1 * profit_normalisé + w2 * (1 - risque_normalisé) "
+            "+ w3 * fit_budget + w4 * compatibilité Agriculture, "
             "puis ramené sur 100. Normalisation min-max du profit net/ha sur toutes les "
             "cultures candidates. Calcul déterministe (le LLM n'intervient pas ici)."
         ),
@@ -90,9 +101,11 @@ def _construire_detail_calcul(
             "poids_profit_w1": POIDS_PROFIT,
             "poids_risque_w2": POIDS_RISQUE,
             "poids_budget_w3": POIDS_BUDGET_FIT,
+            "poids_compatibilite_w4": POIDS_COMPATIBILITE,
             "profit_normalise": score_detail.profit_normalise,
             "risque_normalise": score_detail.risque_normalise,
             "fit_budget": score_detail.fit_budget,
+            "compatibilite_agriculture": score_detail.compatibilite,
             "matching_score": score_detail.score,
         },
         sources=["Formule interne AgriAdvisor — backend/agent_business/app/services/scoring.py"],
@@ -113,7 +126,7 @@ def _construire_detail_calcul(
             "superficie_conseillee_ha": superficie_conseillee_ha,
         },
         sources=[
-            "Barème de coûts de production simulé — app/data/mock_production_costs.py",
+            donnees["cout_estime"].source,
             "Budget renseigné par l'agriculteur (budget_input)",
         ],
     )
@@ -155,8 +168,8 @@ def _construire_detail_calcul(
         },
         sources=[
             etude_marche.source,
-            "Barème de coûts de production simulé — app/data/mock_production_costs.py",
-            "Étude de risque (coût de mitigation) — app/data/mock_risks.py",
+            donnees["cout_estime"].source,
+            "Étude de risque déterministe Agriculture + marché + qualité des données",
         ],
     )
     if etude_marche.indice_pct_change is not None:
@@ -167,9 +180,6 @@ def _construire_detail_calcul(
         profit_estime_detail.valeurs["demande"] = etude_marche.demande
     if etude_marche.concurrence:
         profit_estime_detail.valeurs["concurrence"] = etude_marche.concurrence
-    if etude_marche.market_score is not None:
-        profit_estime_detail.valeurs["market_score_rag"] = etude_marche.market_score
-
     return DetailCalculScenario(
         score_matching=score_matching,
         surface_conseillee=surface_conseillee,
@@ -207,6 +217,39 @@ def generer_scenarios(request: BusinessAdvisorRequest) -> list[BusinessScenario]
             min(request.superficie_disponible_ha, donnees["superficie_max_financable_ha"]), 2
         )
         profit_estime = round(donnees["profit_net_par_ha"] * superficie_conseillee_ha, 2)
+        indicateurs = compute_financial_indicators(
+            area_ha=superficie_conseillee_ha,
+            available_area_ha=request.superficie_disponible_ha,
+            yield_kg_ha=etude_marche.rendement_estime_kg_par_ha,
+            price_eur_kg=etude_marche.prix_moyen_eur_par_kg,
+            production_cost_eur_ha=donnees["cout_production_par_ha"],
+            mitigation_cost_eur_ha=etude_risque.cout_mitigation_eur_par_ha,
+            budget_eur=request.budget_input,
+            cost_source=donnees["cout_estime"].source,
+            cost_fallback=donnees["cout_estime"].is_fallback,
+        )
+
+        confidence_score = donnees["cout_estime"].confidence
+        confidence_reasons = list(donnees["cout_estime"].reasons)
+        if etude_marche.indice_pct_change is not None:
+            confidence_score += 0.08
+            confidence_reasons.append("Tendance récente issue d'Agreste IPPAP.")
+        else:
+            confidence_reasons.append("Aucune série Agreste spécifique trouvée.")
+        if not etude_marche.rendement_fallback:
+            confidence_score += 0.12
+            confidence_reasons.append("Rendement calculé depuis l'historique FAOSTAT.")
+        else:
+            confidence_reasons.append("Rendement issu du barème de référence.")
+        if "barème de référence (prix absolu)" in etude_marche.source:
+            confidence_score = min(confidence_score, 0.74)
+            confidence_reasons.append(
+                "Prix absolu issu du barème de référence; la tendance IPPAP est réelle mais n'est pas un prix RNM."
+            )
+        confidence_score = round(min(1.0, confidence_score), 2)
+        confidence_level = (
+            "high" if confidence_score >= 0.75 else "medium" if confidence_score >= 0.5 else "low"
+        )
 
         detail_calcul = _construire_detail_calcul(
             culture=culture,
@@ -219,16 +262,25 @@ def generer_scenarios(request: BusinessAdvisorRequest) -> list[BusinessScenario]
 
         scenarios.append(
             BusinessScenario(
+                id=str(uuid.uuid4()),
                 terrain_id=request.terrain_id,
                 budget_input=request.budget_input,
                 culture=culture,
                 quantite_par_ha=etude_marche.rendement_estime_kg_par_ha,
-                profit_estime=profit_estime,
+                profit_estime=indicateurs.profit_estime_eur,
                 risque_score=etude_risque.risque_score_normalise,
                 risque_description=f"{etude_risque.risque_principal} — {etude_risque.description}",
                 solution_risque=etude_risque.solution_mitigation,
                 matching_score=score_detail.score,
+                score_compatibilite=donnees["score_compatibilite"],
                 etude_marche=etude_marche.model_dump(mode="json"),
+                indicateurs_financiers=indicateurs,
+                confiance_donnees=ConfianceDonnees(
+                    niveau=confidence_level,
+                    score=confidence_score,
+                    raisons=confidence_reasons,
+                ),
+                raisons_risque=etude_risque.raisons,
                 superficie_max_financable_ha=donnees["superficie_max_financable_ha"],
                 superficie_conseillee_ha=superficie_conseillee_ha,
                 detail_calcul=detail_calcul,

@@ -1,7 +1,18 @@
 # Agent Business
 
-**Rôle** : à partir des crop_recommendations + budget, proposer 3 scénarios
-chiffrés (quantité/ha, profit estimé, risque, solution au risque).
+**Rôle** : à partir des `crop_recommendations` réelles de l'agent Agriculture
+et du budget, proposer 3 scénarios financièrement détaillés, enregistrer le
+choix du farmer et fournir le contexte de culture à l'agent Monitoring.
+
+Le score final est déterministe :
+
+```text
+35% rentabilité + 20% maîtrise du risque + 20% adéquation budget
++ 25% compatibilité agronomique Agriculture
+```
+
+Le LLM peut résumer les documents de marché, mais ne calcule ni les finances
+ni le score de classement.
 
 ## Pipeline marché (réel)
 
@@ -19,8 +30,10 @@ market_study.estimer_marche() → scénarios Business
 |--------|--------|
 | Tendance de prix | Agreste IPPAP (CSV) |
 | Demande / concurrence / justification | FranceAgriMer PDF via RAG + Mistral |
-| Prix €/kg + rendement | Barème de référence (IPPAP = indice, pas €) |
-| Risques / coûts de production | Encore simulés |
+| Prix €/kg | Barème absolu + tendance réelle IPPAP (IPPAP = indice, pas €) |
+| Rendement | Historique FAOSTAT, fallback barème explicite |
+| Coûts | CSV opérateur ou calcul des intrants Agriculture, fallback explicite |
+| Risques | Compatibilité Agriculture + marché + volatilité + qualité des coûts |
 
 RAG s'active **automatiquement** si l'index vectoriel local existe et
 `MISTRAL_API_KEY` est défini. Désactiver avec `MARKET_RAG_ENABLED=0`.
@@ -60,6 +73,42 @@ MARKET_DATA_DIR=C:\chemin\vers\data
 - `GET /health` — statut + diagnostics marché
 - `POST /business/scenarios` — 3 scénarios
 - `POST /business/decision` — confirmation farmer
+- `GET /business/decisions/{terrain_id}/latest` — contexte persistant Monitoring
+
+Chaque scénario contient revenu brut, coût total, profit, marge, ROI, seuils
+de rentabilité, écart au budget, explications de risque et confiance des
+données. Les scénarios et décisions sont persistés dans PostgreSQL.
+Les endpoints Business exigent le JWT Bearer émis par Auth. Le terrain et
+son propriétaire sont vérifiés côté serveur; la superficie PostgreSQL est
+utilisée à la place de la valeur fournie par le navigateur.
+
+Pour une base déjà créée, appliquer une fois :
+
+```bash
+psql "$DATABASE_URL" -f database/migration_business_financials.sql
+```
+
+### Sources financières configurables
+
+```text
+BUSINESS_FAO_YIELD_CSV=/data/profit/faostat_france_yields.csv
+BUSINESS_COST_DATA_CSV=/data/profit/costs.csv
+# Sans BUSINESS_FAO_YIELD_CSV, le service utilise
+# app/market_intelligence/data/faostat_france_yields.csv
+```
+
+Le CSV de coûts accepte `culture` (ou `crop`), `cost_per_ha_eur` (ou
+`cout_eur_par_ha`), et optionnellement `source`, `year`. Sans ce CSV, le
+service calcule les intrants depuis `besoins_engrais`, `besoins_irrigation`
+et `besoins_pesticides`; un barème de secours n'est utilisé que si ces
+quantités sont absentes, et le scénario est alors marqué `cout_fallback`.
+
+Pour les tests hors PostgreSQL :
+
+```text
+BUSINESS_PERSISTENCE_MODE=memory
+BUSINESS_AUTH_DISABLED=1
+```
 
 ## Matching score (déterministe)
 

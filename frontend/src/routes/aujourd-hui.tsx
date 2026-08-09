@@ -1,19 +1,38 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMutation } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { AppShell } from "@/components/AppShell";
 import { AlertBanner } from "@/components/AlertBanner";
 import { PageHeader } from "@/components/PageHeader";
 import { Reveal } from "@/components/motion/Reveal";
 import { useCountUp } from "@/components/motion/useCountUp";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
 import type { LatLng, TerrainOut } from "@/lib/authApi";
 import { cultureLabel, loadRealCropRecommendations } from "@/lib/cropRecommendations";
 import { equipementLabel } from "@/lib/equipements";
 import { loadFarmerDecision } from "@/lib/farmerDecision";
+import { fetchLatestFarmerDecision, type FarmerDecisionResponse } from "@/lib/businessApi";
+import {
+  addSpendEntry,
+  loadSpendEntries,
+  monthKey,
+  monthLabelFr,
+  removeSpendEntry,
+  type SpendEntry,
+} from "@/lib/spendTracking";
 import {
   analyzeMonitoringDay,
   MonitoringApiError,
@@ -31,8 +50,10 @@ import {
   Droplets,
   LineChart,
   Loader2,
+  Plus,
   RefreshCw,
   Sprout,
+  Trash2,
   Wallet,
   Wind,
   Recycle,
@@ -116,69 +137,277 @@ function formatDayLabel(d = new Date()) {
   }).format(d);
 }
 
-function KpiCard({
-  label,
-  value,
-  icon: Icon,
-  accent,
-  delay,
-  format = "euro",
+function todayIso() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function campaignMonthKeys(decision: FarmerDecisionResponse): string[] {
+  let start = new Date(decision.created_at);
+  if (Number.isNaN(start.getTime())) {
+    const now = new Date();
+    start = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+  }
+  const maturityTimes = decision.allocations
+    .map((a) => (a.date_maturite_prevue ? new Date(a.date_maturite_prevue).getTime() : NaN))
+    .filter((t) => Number.isFinite(t));
+  const end = maturityTimes.length
+    ? new Date(Math.max(...maturityTimes))
+    : new Date(start.getFullYear(), start.getMonth() + 4, 1);
+  const cursor = new Date(start.getFullYear(), start.getMonth(), 1);
+  const last = new Date(end.getFullYear(), end.getMonth(), 1);
+  const keys: string[] = [];
+  while (cursor <= last && keys.length < 8) {
+    keys.push(
+      `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, "0")}`,
+    );
+    cursor.setMonth(cursor.getMonth() + 1);
+  }
+  return keys.length ? keys : [monthKey(todayIso())];
+}
+
+const costChartConfig = {
+  prevu: { label: "prévu", color: "var(--chart-2)" },
+  reel: { label: "réel", color: "var(--chart-1)" },
+} satisfies ChartConfig;
+
+function AllocationSummaryCard({
+  totalHa,
+  culturesCount,
 }: {
-  label: string;
-  value: number;
-  icon: typeof Wallet;
-  accent?: boolean;
-  delay: number;
-  format?: "euro" | "ha" | "int";
+  totalHa: number;
+  culturesCount: number;
 }) {
-  const [ref, displayed] = useCountUp<HTMLParagraphElement>(value, {
+  const [haRef, haDisplayed] = useCountUp<HTMLParagraphElement>(totalHa, {
     duration: 1400,
-    decimals: format === "ha" ? 1 : 0,
+    decimals: 1,
   });
-  const text =
-    format === "euro"
-      ? formatEuro(displayed)
-      : format === "ha"
-        ? `${displayed.toFixed(1)} ha`
-        : String(Math.round(displayed));
+  const [culturesRef, culturesDisplayed] = useCountUp<HTMLParagraphElement>(culturesCount, {
+    duration: 1400,
+    decimals: 0,
+  });
+
   return (
-    <Reveal from="up" delay={delay} className="flex">
-      <div
-        className={cn(
-          "group relative flex flex-1 overflow-hidden rounded-3xl p-5 transition-all duration-400 hover:-translate-y-1",
-          accent
-            ? "bg-primary/10 ring-1 ring-primary/20 shadow-[0_12px_36px_-22px_rgba(47,82,48,0.45)]"
-            : "bg-card ring-1 ring-border/80 shadow-[0_10px_30px_-20px_rgba(28,43,28,0.35)] hover:shadow-lift",
-        )}
-      >
-        <div
-          className={cn(
-            "pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full blur-2xl transition-opacity duration-500",
-            accent ? "bg-primary/25 opacity-80" : "bg-primary/10 opacity-0 group-hover:opacity-100",
-          )}
-          aria-hidden
-        />
-        <div className="relative flex w-full items-start justify-between gap-3">
-          <div>
-            <p className={cn("text-sm", accent ? "text-primary/80" : "text-muted-foreground")}>
-              {label}
-            </p>
-            <p
-              ref={ref}
-              className="mt-2 font-display text-3xl font-semibold tracking-tight text-primary tabular-nums"
-            >
-              {text}
-            </p>
+    <Reveal delay={60} className="h-full">
+      <div className="flex h-full flex-col overflow-hidden rounded-3xl bg-card p-5 shadow-[0_12px_40px_-24px_rgba(28,43,28,0.4)] ring-1 ring-border/80 md:p-6">
+        <h2 className="font-display text-xl font-semibold tracking-tight text-primary">
+          Suivi de campagne
+        </h2>
+        <div className="mt-5 flex flex-1 flex-col justify-center gap-5">
+          <div className="flex items-start gap-3">
+            <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-primary" />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm text-muted-foreground">Surface allouée</p>
+                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <Sprout className="h-4 w-4" />
+                </span>
+              </div>
+              <p
+                ref={haRef}
+                className="mt-1 font-display text-3xl font-semibold tracking-tight text-primary tabular-nums"
+              >
+                {haDisplayed.toFixed(1)} ha
+              </p>
+            </div>
           </div>
-          <span
-            className={cn(
-              "flex h-11 w-11 items-center justify-center rounded-2xl transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3",
-              accent ? "bg-primary/15 text-primary" : "bg-secondary text-primary",
-            )}
-          >
-            <Icon className="h-5 w-5" />
-          </span>
+          <div className="h-px bg-border/70" />
+          <div className="flex items-start gap-3">
+            <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-primary" />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm text-muted-foreground">Cultures actives</p>
+                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <LineChart className="h-4 w-4" />
+                </span>
+              </div>
+              <p
+                ref={culturesRef}
+                className="mt-1 font-display text-3xl font-semibold tracking-tight text-primary tabular-nums"
+              >
+                {Math.round(culturesDisplayed)}
+              </p>
+            </div>
+          </div>
         </div>
+      </div>
+    </Reveal>
+  );
+}
+
+function CostVsPlannedChart({
+  decision,
+  spends,
+}: {
+  decision: FarmerDecisionResponse;
+  spends: SpendEntry[];
+}) {
+  const months = useMemo(() => campaignMonthKeys(decision), [decision]);
+  const plannedPerMonth = decision.cout_final / months.length;
+  const spentByMonth = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const entry of spends) {
+      const key = monthKey(entry.date);
+      map.set(key, (map.get(key) ?? 0) + entry.amount);
+    }
+    return map;
+  }, [spends]);
+
+  const chartData = months.map((key) => ({
+    mois: monthLabelFr(key),
+    prevu: Math.round(plannedPerMonth),
+    reel: Math.round(spentByMonth.get(key) ?? 0),
+  }));
+
+  return (
+    <Reveal delay={120} className="h-full">
+      <div className="flex h-full flex-col overflow-hidden rounded-3xl bg-card p-5 shadow-[0_12px_40px_-24px_rgba(28,43,28,0.4)] ring-1 ring-border/80 md:p-6">
+        <div className="flex items-center gap-2.5">
+          <Wallet className="h-4 w-4 text-primary" />
+          <h2 className="font-display text-xl font-semibold tracking-tight text-primary">
+            Coût réel vs. prévu
+          </h2>
+        </div>
+
+        <ChartContainer config={costChartConfig} className="mt-3 aspect-[5/3] w-full min-h-0 flex-1">
+          <BarChart data={chartData} margin={{ top: 4, right: 4, left: -8, bottom: 0 }}>
+            <CartesianGrid vertical={false} strokeDasharray="4 4" />
+            <XAxis dataKey="mois" tickLine={false} axisLine={false} tickMargin={6} fontSize={11} />
+            <YAxis
+              tickLine={false}
+              axisLine={false}
+              width={36}
+              fontSize={11}
+              tickFormatter={(v) => String(Math.round(Number(v)))}
+            />
+            <ChartTooltip
+              content={
+                <ChartTooltipContent
+                  formatter={(value, name) => (
+                    <span className="font-medium">
+                      {formatEuro(Number(value))}{" "}
+                      <span className="text-muted-foreground">
+                        {name === "prevu" ? "prévu" : "réel"}
+                      </span>
+                    </span>
+                  )}
+                />
+              }
+            />
+            <ChartLegend content={<ChartLegendContent className="pt-1" />} />
+            <Bar dataKey="prevu" fill="var(--color-prevu)" radius={[4, 4, 0, 0]} maxBarSize={18} />
+            <Bar dataKey="reel" fill="var(--color-reel)" radius={[4, 4, 0, 0]} maxBarSize={18} />
+          </BarChart>
+        </ChartContainer>
+      </div>
+    </Reveal>
+  );
+}
+
+function SpendInputCard({
+  spends,
+  onAddSpend,
+  onRemoveSpend,
+}: {
+  spends: SpendEntry[];
+  onAddSpend: (input: { amount: number; date: string; label: string }) => void;
+  onRemoveSpend: (id: string) => void;
+}) {
+  const [amountText, setAmountText] = useState("");
+  const [labelText, setLabelText] = useState("");
+  const [dateText, setDateText] = useState(todayIso);
+  const [formError, setFormError] = useState<string | null>(null);
+
+  function submitSpend(e: FormEvent) {
+    e.preventDefault();
+    const amount = Number(amountText.replace(",", ".").replace(/\s/g, ""));
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setFormError("Indiquez un montant valide en euros.");
+      return;
+    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateText)) {
+      setFormError("Indiquez une date valide.");
+      return;
+    }
+    setFormError(null);
+    onAddSpend({ amount, date: dateText, label: labelText });
+    setAmountText("");
+    setLabelText("");
+    setDateText(todayIso());
+  }
+
+  return (
+    <Reveal delay={180} className="mt-4">
+      <div className="overflow-hidden rounded-3xl bg-card p-4 shadow-[0_12px_40px_-24px_rgba(28,43,28,0.4)] ring-1 ring-border/80 md:p-5">
+        <p className="text-sm font-medium text-primary">Saisir une dépense réelle</p>
+        <form onSubmit={submitSpend} className="mt-3 grid gap-3 sm:grid-cols-[1fr_1.2fr_auto_auto]">
+          <div className="relative">
+            <Input
+              type="text"
+              inputMode="decimal"
+              value={amountText}
+              onChange={(e) => {
+                setAmountText(e.target.value);
+                setFormError(null);
+              }}
+              placeholder="Montant"
+              aria-label="Montant dépensé"
+              className="h-10 rounded-xl pr-8"
+            />
+            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+              €
+            </span>
+          </div>
+          <Input
+            type="text"
+            value={labelText}
+            onChange={(e) => setLabelText(e.target.value)}
+            placeholder="Libellé (engrais, irrigation…)"
+            aria-label="Libellé de la dépense"
+            className="h-10 rounded-xl"
+          />
+          <Input
+            type="date"
+            value={dateText}
+            onChange={(e) => setDateText(e.target.value)}
+            aria-label="Date de la dépense"
+            className="h-10 rounded-xl"
+          />
+          <Button type="submit" className="h-10 rounded-xl">
+            <Plus className="mr-1.5 h-4 w-4" />
+            Ajouter
+          </Button>
+        </form>
+        {formError && <p className="mt-2 text-xs text-destructive">{formError}</p>}
+
+        {spends.length > 0 && (
+          <ul className="mt-3 max-h-28 space-y-1.5 overflow-y-auto">
+            {spends.slice(0, 6).map((entry) => (
+              <li
+                key={entry.id}
+                className="flex items-center justify-between gap-3 rounded-xl bg-muted/40 px-3 py-1.5 text-sm"
+              >
+                <div className="min-w-0">
+                  <div className="truncate font-medium">{entry.label}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {new Date(entry.date).toLocaleDateString("fr-FR")}
+                  </div>
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  <span className="font-display font-semibold">{formatEuro(entry.amount)}</span>
+                  <button
+                    type="button"
+                    onClick={() => onRemoveSpend(entry.id)}
+                    className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive"
+                    aria-label="Supprimer la dépense"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </Reveal>
   );
@@ -207,12 +436,25 @@ function riskLabel(risk: string) {
 }
 
 function Page() {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const terrain: TerrainOut | undefined = user?.terrains[0];
-  const decision = useMemo(
+  const localDecision = useMemo(
     () => (terrain ? loadFarmerDecision(terrain.id) : null),
     [terrain],
   );
+  const persistedDecision = useQuery({
+    queryKey: ["business-decision", terrain?.id],
+    queryFn: async () => {
+      try {
+        if (!token) return localDecision;
+        return await fetchLatestFarmerDecision(terrain!.id, token);
+      } catch {
+        return localDecision;
+      }
+    },
+    enabled: Boolean(terrain),
+  });
+  const decision = persistedDecision.data ?? localDecision;
   const cropRecs = useMemo(
     () => (terrain ? loadRealCropRecommendations(terrain.id) : null),
     [terrain],
@@ -220,6 +462,15 @@ function Page() {
 
   const [briefing, setBriefing] = useState<AnalyzeResponse | null>(null);
   const [done, setDone] = useState<Record<number, boolean>>({});
+  const [spends, setSpends] = useState<SpendEntry[]>([]);
+
+  useEffect(() => {
+    if (!decision?.decision_id) {
+      setSpends([]);
+      return;
+    }
+    setSpends(loadSpendEntries(decision.decision_id));
+  }, [decision?.decision_id]);
 
   const analyzeMutation = useMutation({
     mutationFn: analyzeMonitoringDay,
@@ -308,11 +559,11 @@ function Page() {
             title="Aucune culture confirmée"
             action={
               <Button asChild size="sm" variant="outline">
-                <Link to="/business">Business</Link>
+                <Link to="/business">Financier</Link>
               </Button>
             }
           >
-            Confirmez un scénario dans le conseiller Business pour activer le suivi
+            Confirmez un scénario dans le conseiller Financier pour activer le suivi
             quotidien (météo, irrigation, tâches).
           </AlertBanner>
         </div>
@@ -382,29 +633,19 @@ function Page() {
         </div>
       )}
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-3">
-        <KpiCard
-          label="Coût total"
-          value={decision.cout_final}
-          icon={Wallet}
-          delay={60}
-        />
-        <KpiCard
-          label="Surface allouée"
-          value={totalHa}
-          icon={Sprout}
-          delay={140}
-          format="ha"
-        />
-        <KpiCard
-          label="Cultures actives"
-          value={allocations.length}
-          icon={LineChart}
-          accent
-          delay={220}
-          format="int"
-        />
+      <div className="mt-6 grid gap-4 md:grid-cols-2 md:items-stretch">
+        <AllocationSummaryCard totalHa={totalHa} culturesCount={allocations.length} />
+        <CostVsPlannedChart decision={decision} spends={spends} />
       </div>
+      <SpendInputCard
+        spends={spends}
+        onAddSpend={(input) => {
+          setSpends(addSpendEntry(decision.decision_id, input));
+        }}
+        onRemoveSpend={(id) => {
+          setSpends(removeSpendEntry(decision.decision_id, id));
+        }}
+      />
 
       <Reveal delay={120} className="mt-6">
         <div className="overflow-hidden rounded-3xl bg-card p-5 md:p-6 shadow-[0_12px_40px_-24px_rgba(28,43,28,0.4)] ring-1 ring-border/80">

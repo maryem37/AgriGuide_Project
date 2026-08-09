@@ -79,6 +79,7 @@ CREATE TABLE crop_recommendations (
     rang                SMALLINT NOT NULL,          -- 1 à 5
     culture             VARCHAR(100) NOT NULL,
     score_compatibilite NUMERIC(5,2) NOT NULL,      -- 0-100
+    cycle_jours         SMALLINT NOT NULL CHECK (cycle_jours > 0),
     besoins_pesticides  JSONB,
     besoins_engrais     JSONB,
     besoins_irrigation  JSONB,
@@ -103,6 +104,9 @@ CREATE TABLE business_scenarios (
     solution_risque     TEXT,
     matching_score      NUMERIC(5,2) NOT NULL,   -- formule pondérée (voir README business agent)
     etude_marche        JSONB,               -- estimation temporelle, prix RNM utilisés
+    superficie_max_financable_ha NUMERIC(10,2),
+    superficie_conseillee_ha NUMERIC(10,2),
+    scenario_payload    JSONB NOT NULL,       -- contrat complet, indicateurs financiers + explicabilité
     created_at          TIMESTAMPTZ DEFAULT now()
 );
 CREATE INDEX idx_scenarios_terrain ON business_scenarios(terrain_id);
@@ -111,8 +115,10 @@ CREATE INDEX idx_scenarios_terrain ON business_scenarios(terrain_id);
 CREATE TABLE farmer_decisions (
     id                  UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     terrain_id          UUID NOT NULL REFERENCES terrains(id) ON DELETE CASCADE,
-    statut              VARCHAR(20) DEFAULT 'pending', -- pending | confirmed | monitoring
+    statut              VARCHAR(20) DEFAULT 'pending'
+                        CHECK (statut IN ('pending', 'confirmed', 'monitoring')),
     cout_final          NUMERIC(12,2),
+    decision_payload    JSONB,               -- réponse complète destinée au Monitoring
     created_at          TIMESTAMPTZ DEFAULT now(),
     confirmed_at        TIMESTAMPTZ
 );
@@ -123,9 +129,13 @@ CREATE TABLE decision_allocations (
     decision_id         UUID NOT NULL REFERENCES farmer_decisions(id) ON DELETE CASCADE,
     scenario_id         UUID NOT NULL REFERENCES business_scenarios(id),
     culture             VARCHAR(100) NOT NULL,
-    hectares_alloues    NUMERIC(8,2) NOT NULL,
-    date_maturite_prevue DATE                -- utilisé par l'agent de suivi pour anticiper le marketplace
+    hectares_alloues    NUMERIC(8,2) NOT NULL CHECK (hectares_alloues > 0),
+    cout_alloue         NUMERIC(12,2),
+    date_maturite_prevue DATE,               -- utilisé par l'agent de suivi pour anticiper le marketplace
+    UNIQUE (decision_id, scenario_id)
 );
+CREATE INDEX idx_decisions_terrain_status ON farmer_decisions(terrain_id, statut, created_at DESC);
+CREATE INDEX idx_allocations_decision ON decision_allocations(decision_id);
 
 -- ============================================================
 -- 4. RÉGULATION ADVISOR (RAG légal)

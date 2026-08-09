@@ -91,15 +91,16 @@ def save_crop_recommendations(land_profile_id: str, recommendations: list[CropRe
             cur.execute(
                 """
                 INSERT INTO crop_recommendations
-                    (land_profile_id, rang, culture, score_compatibilite,
+                    (land_profile_id, rang, culture, score_compatibilite, cycle_jours,
                      besoins_pesticides, besoins_engrais, besoins_irrigation, feature_importance)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """,
                 (
                     land_profile_id,
                     rec.rang,
                     rec.culture,
                     rec.score_compatibilite,
+                    rec.cycle_jours,
                     json.dumps(rec.besoins_pesticides, ensure_ascii=False),
                     json.dumps(rec.besoins_engrais, ensure_ascii=False),
                     json.dumps(rec.besoins_irrigation, ensure_ascii=False),
