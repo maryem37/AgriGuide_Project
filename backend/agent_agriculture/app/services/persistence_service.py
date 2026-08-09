@@ -107,3 +107,113 @@ def save_crop_recommendations(land_profile_id: str, recommendations: list[CropRe
                     json.dumps(rec.feature_importance, ensure_ascii=False),
                 ),
             )
+
+
+def get_user_chat_profile(user_id: str) -> Optional[dict]:
+    """Compact account snapshot for the chat widget — no password, no GeoJSON.
+
+    Includes terrains owned by the user and, when present, the latest land
+    profile's top crop recommendations (already persisted from /analyze).
+    """
+    try:
+        user_uuid = UUID(user_id)
+    except (TypeError, ValueError):
+        return None
+
+    with get_cursor() as cur:
+        cur.execute(
+            """
+            SELECT id, email, nom, telephone, role
+            FROM users WHERE id = %s
+            """,
+            (str(user_uuid),),
+        )
+        user = cur.fetchone()
+        if not user:
+            return None
+
+        cur.execute(
+            """
+            SELECT type_equipement
+            FROM farmer_equipements
+            WHERE user_id = %s
+            ORDER BY type_equipement
+            """,
+            (str(user_uuid),),
+        )
+        equipements = [row["type_equipement"] for row in cur.fetchall()]
+
+        cur.execute(
+            """
+            SELECT id, nom, superficie_ha, region
+            FROM terrains
+            WHERE user_id = %s
+            ORDER BY created_at
+            """,
+            (str(user_uuid),),
+        )
+        terrain_rows = cur.fetchall()
+
+        terrains: list[dict] = []
+        for t in terrain_rows:
+            terrain_id = str(t["id"])
+            cur.execute(
+                """
+                SELECT id, date_generation
+                FROM land_profiles
+                WHERE terrain_id = %s
+                ORDER BY date_generation DESC NULLS LAST, id DESC
+                LIMIT 1
+                """,
+                (terrain_id,),
+            )
+            profile = cur.fetchone()
+            top_crops: list[dict] = []
+            last_analysis_at = None
+            if profile:
+                last_analysis_at = (
+                    profile["date_generation"].isoformat()
+                    if profile.get("date_generation") is not None
+                    else None
+                )
+                cur.execute(
+                    """
+                    SELECT rang, culture, score_compatibilite
+                    FROM crop_recommendations
+                    WHERE land_profile_id = %s
+                    ORDER BY rang
+                    LIMIT 5
+                    """,
+                    (str(profile["id"]),),
+                )
+                top_crops = [
+                    {
+                        "rang": row["rang"],
+                        "culture": row["culture"],
+                        "score_compatibilite": float(row["score_compatibilite"])
+                        if row["score_compatibilite"] is not None
+                        else None,
+                    }
+                    for row in cur.fetchall()
+                ]
+
+            terrains.append(
+                {
+                    "id": terrain_id,
+                    "nom": t["nom"],
+                    "superficie_ha": float(t["superficie_ha"]) if t["superficie_ha"] is not None else None,
+                    "region": t["region"],
+                    "derniere_analyse_at": last_analysis_at,
+                    "cultures_recommandees": top_crops,
+                }
+            )
+
+    return {
+        "id": str(user["id"]),
+        "email": user["email"],
+        "nom": user["nom"],
+        "telephone": user["telephone"],
+        "role": user["role"],
+        "equipements": equipements,
+        "terrains": terrains,
+    }

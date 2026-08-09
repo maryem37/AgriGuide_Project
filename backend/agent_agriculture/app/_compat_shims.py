@@ -6,20 +6,26 @@ version).
 
 unstructured==0.15.13 does `from pdfminer.pdfparser import PSSyntaxError`.
 Newer pdfminer.six releases removed that symbol from pdfparser (it now
-lives in — or was folded into — pdfminer.psparser). Import THIS module
+lives in - or was folded into - pdfminer.psparser). Import THIS module
 before importing anything from `unstructured`, so the symbol exists by
 the time unstructured's own import runs.
 
 Usage: `import app._compat_shims  # noqa: F401` as the first import in
 any module that imports `unstructured`.
+
+Safe no-op when pdfminer is not installed: the API runtime does not need
+it (only scripts/ingest_rag_corpus.py does).
 """
-import pdfminer.pdfparser as _pdfparser
+try:
+    import pdfminer.pdfparser as _pdfparser
+except ImportError:
+    pass
+else:
+    if not hasattr(_pdfparser, "PSSyntaxError"):
+        try:
+            from pdfminer.psparser import PSSyntaxError as _PSSyntaxError
+        except ImportError:
+            class _PSSyntaxError(Exception):
+                """Fallback stand-in if pdfminer.six ever drops this entirely."""
 
-if not hasattr(_pdfparser, "PSSyntaxError"):
-    try:
-        from pdfminer.psparser import PSSyntaxError as _PSSyntaxError
-    except ImportError:
-        class _PSSyntaxError(Exception):
-            """Fallback stand-in if pdfminer.six ever drops this entirely."""
-
-    _pdfparser.PSSyntaxError = _PSSyntaxError
+        _pdfparser.PSSyntaxError = _PSSyntaxError

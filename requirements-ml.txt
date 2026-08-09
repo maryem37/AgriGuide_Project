@@ -1,0 +1,14 @@
+# Optional ML stack for Agriculture RAG + TempCNN classifier.
+# Install after requirements.txt when you need full Agriculture features:
+#   pip install -r requirements-ml.txt
+#
+# Windows note: chromadb 0.5.15 may need the workaround documented in
+# backend/agent_agriculture/README.md (chroma-hnswlib wheels).
+
+chromadb==0.5.15
+sentence-transformers==3.1.1
+scikit-learn==1.5.2
+torch==2.4.1
+breizhcrops==0.0.4.1
+unstructured[pdf]==0.15.13
+pdfplumber==0.11.10

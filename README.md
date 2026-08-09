@@ -39,6 +39,44 @@ cp .env.example .env    # remplir les clés API (voir .env.example)
 docker compose up -d    # lance postgres, redis, et les services backend
 ```
 
+### Dev local (un seul venv pour toute l'équipe)
+
+Une fois, à la racine du repo :
+
+```powershell
+# Windows
+.\scripts\setup_venv.ps1
+```
+
+```bash
+# macOS / Linux
+./scripts/setup_venv.sh
+```
+
+Ensuite, **une seule commande** pour Postgres + tous les agents :
+
+```powershell
+.\dev.ps1
+```
+
+```bash
+./dev.sh
+```
+
+Ports locaux :
+
+| Service        | Port |
+|----------------|------|
+| Business       | 8000 |
+| Auth           | 8001 |
+| Agriculture    | 8002 |
+| Monitoring     | 8003 |
+| Waste          | 8004 |
+| Regulation     | 8005 |
+
+Les `requirements.txt` dans chaque dossier `backend/*` restent valides pour Docker.
+Le venv global (`.venv/`) sert uniquement au développement local multi-agents.
+
 ## Équipe — répartition suggérée
 
 Chaque dossier sous `backend/` est un lot de travail quasi indépendant.

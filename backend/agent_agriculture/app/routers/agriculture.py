@@ -9,7 +9,7 @@ service module.
 import asyncio
 
 import psycopg2
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
 from app.models.schemas import (
     ParcelRequest,
@@ -25,6 +25,8 @@ from app.models.schemas import (
     DLCropObservation,
     YieldEstimate,
     NdviHeatmapResponse,
+    ChatRequest,
+    ChatResponse,
 )
 from app.services import (
     parcel_service,
@@ -39,9 +41,40 @@ from app.services import (
     dl_service,
     persistence_service,
     relief3d_service,
+    chatbot_service,
 )
+from app.security import get_optional_user_id
 
 router = APIRouter(prefix="/agriculture", tags=["agriculture"])
+
+
+@router.post("/chat", response_model=ChatResponse)
+async def chat(
+    req: ChatRequest,
+    user_id: str | None = Depends(get_optional_user_id),
+):
+    """Floating chat widget — RAG + optional parcel snapshot + logged-in user profile from DB."""
+    if not (req.question or "").strip():
+        raise HTTPException(status_code=400, detail="Question vide.")
+
+    user_profile = None
+    if user_id:
+        try:
+            user_profile = await asyncio.to_thread(persistence_service.get_user_chat_profile, user_id)
+        except Exception:  # noqa: BLE001 — profile is optional context; chat must still answer
+            user_profile = None
+
+    try:
+        return await chatbot_service.answer_question(
+            question=req.question.strip(),
+            history=req.history,
+            parcel_context=req.parcel_context,
+            user_profile=user_profile,
+        )
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=502, detail=f"Assistant indisponible : {exc}") from exc
 
 
 @router.post("/relief/grid")

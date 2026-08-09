@@ -5,13 +5,13 @@
  * `backend/agent_regulation/app/schemas/chat.py` pour éviter tout mapping
  * caché entre les deux couches.
  *
- * URL du service : `VITE_AGENT_REGULATION_URL` (défaut : http://localhost:8001,
- * cf. `backend/agent_regulation/README.md` — `uvicorn app.main:app --reload --port 8001`).
- * Port distinct de l'agent Business (8000) pour pouvoir lancer les deux en local.
+ * URL du service : `VITE_AGENT_REGULATION_URL` (défaut : http://localhost:8005,
+ * cf. `backend/agent_regulation/README.md` — `uvicorn app.main:app --reload --port 8005`).
+ * Port distinct de Auth (8001) et Business (8000) pour lancer les services en local.
  */
 
 const REGULATION_API_BASE_URL: string =
-  (import.meta.env.VITE_AGENT_REGULATION_URL as string | undefined) ?? "http://localhost:8001";
+  (import.meta.env.VITE_AGENT_REGULATION_URL as string | undefined) ?? "http://localhost:8005";
 
 // ---------------------------------------------------------------------------
 // Entrée/sortie — reflète ChatRequest / ChatResponse
@@ -72,7 +72,7 @@ async function postJson<TResponse>(path: string, body: unknown): Promise<TRespon
     });
   } catch {
     throw new RegulationApiError(
-      `Impossible de joindre l'agent Régulation (${REGULATION_API_BASE_URL}). Vérifiez qu'il tourne (uvicorn app.main:app --reload --port 8001).`,
+      `Impossible de joindre l'agent Régulation (${REGULATION_API_BASE_URL}). Vérifiez qu'il tourne (uvicorn app.main:app --reload --port 8005).`,
     );
   }
 
@@ -100,7 +100,7 @@ async function getJson<TResponse>(path: string): Promise<TResponse> {
     response = await fetch(`${REGULATION_API_BASE_URL}${path}`);
   } catch {
     throw new RegulationApiError(
-      `Impossible de joindre l'agent Régulation (${REGULATION_API_BASE_URL}). Vérifiez qu'il tourne (uvicorn app.main:app --reload --port 8001).`,
+      `Impossible de joindre l'agent Régulation (${REGULATION_API_BASE_URL}). Vérifiez qu'il tourne (uvicorn app.main:app --reload --port 8005).`,
     );
   }
 

@@ -127,7 +127,9 @@ CREATE TABLE farmer_decisions (
 CREATE TABLE decision_allocations (
     id                  UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     decision_id         UUID NOT NULL REFERENCES farmer_decisions(id) ON DELETE CASCADE,
-    scenario_id         UUID NOT NULL REFERENCES business_scenarios(id),
+    -- CASCADE so deleting a terrain (which cascades to business_scenarios) does not
+    -- leave orphan allocation rows pointing at scenarios that are about to disappear.
+    scenario_id         UUID NOT NULL REFERENCES business_scenarios(id) ON DELETE CASCADE,
     culture             VARCHAR(100) NOT NULL,
     hectares_alloues    NUMERIC(8,2) NOT NULL CHECK (hectares_alloues > 0),
     cout_alloue         NUMERIC(12,2),

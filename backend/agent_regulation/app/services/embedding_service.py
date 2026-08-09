@@ -7,7 +7,7 @@ compatibles avec le vecteur nommé "text-dense" de la collection Qdrant.
 
 from functools import lru_cache
 
-from mistralai.client import Mistral
+from mistralai import Mistral
 
 from app.config.settings import get_settings
 

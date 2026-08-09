@@ -1,19 +1,14 @@
 """
 Conversational assistant for the floating chat widget on the
-Agriculture page. Two blended modes, decided per-question rather than
-as a fixed toggle:
+Agriculture page. Three grounding sources, blended per-question:
 
-  1. General agricultural knowledge — grounded in the same Chroma RAG
-     corpus the advisor report uses (app.services.rag_service).
-  2. Questions about the currently selected parcel — grounded in
-     ChatParcelContext, a snapshot of a prior /analyze response the
-     frontend already has in memory (no second backend round-trip, no
-     DB read).
+  1. General agricultural knowledge — Chroma RAG (rag_service).
+  2. Selected parcel — ChatParcelContext from a prior /analyze (frontend).
+  3. Logged-in user profile — read from Postgres when a JWT is present
+     (persistence_service.get_user_chat_profile).
 
-Both grounding sources are simply included in the same prompt; the
-model decides which is relevant to the actual question. Stateless on
-the backend — the frontend resends the running message history each
-call, same pattern as the parcel context.
+All three are dumped into the same prompt; the model picks what matters.
+Stateless — history is resent by the frontend each call.
 """
 import asyncio
 import json
@@ -39,7 +34,7 @@ investisseurs agricoles en France. Tu réponds en français, de façon \
 concise et directe, comme un conseiller agricole expérimenté — pas \
 comme un moteur de recherche.
 
-Tu reçois potentiellement deux sources de contexte avec chaque question :
+Tu reçois potentiellement trois sources de contexte avec chaque question :
 
 1. "extraits_documentaires" — des passages d'un corpus documentaire \
 (ARVALIS, Terres Inovia, ITB, HAL, etc.) pertinents pour une question \
@@ -53,16 +48,26 @@ pas ce point plutôt que d'estimer.
 parcelle actuellement sélectionnée par l'utilisateur sur la carte (sol, \
 météo, végétation, cultures recommandées, rendement estimé, dose \
 d'azote). Utilise ces données pour toute question portant sur "cette \
-parcelle", "mon terrain", "ce sol", etc. Si ce contexte est absent, dis \
-à l'utilisateur qu'aucune parcelle n'est actuellement sélectionnée et \
-invite-le à en choisir une sur la carte s'il pose une question qui en \
-dépend.
+parcelle", "mon terrain" (au sens de la sélection carte), "ce sol", etc. \
+Si ce contexte est absent, dis à l'utilisateur qu'aucune parcelle n'est \
+actuellement sélectionnée et invite-le à en choisir une sur la carte \
+s'il pose une question qui en dépend.
 
-Ne mélange jamais les deux : un chiffre de la parcelle sélectionnée \
-n'est pas une règle générale, et un extrait documentaire générique \
-n'est pas une donnée mesurée sur cette parcelle précise. Si tu n'as ni \
-document pertinent ni donnée de parcelle pour répondre avec certitude, \
-dis-le clairement plutôt que de deviner.
+3. "profil_utilisateur" — compte connecté lu en base (nom, rôle, \
+équipements déclarés, liste des terrains enregistrés avec superficie / \
+région, et éventuellement les dernières cultures recommandées déjà \
+persistées). Utilise-le pour les questions du type "mes terrains", \
+"mon matériel", "combien d'hectares j'ai", "qui suis-je". Si ce \
+contexte est absent, l'utilisateur n'est pas connecté — invite-le à \
+se connecter plutôt que d'inventer un profil.
+
+Ne mélange jamais les sources : un chiffre de la parcelle sélectionnée \
+n'est pas une règle générale ; un extrait documentaire générique n'est \
+pas une mesure sur cette parcelle ; la liste des terrains du compte \
+n'est pas la parcelle carte actuellement sélectionnée. Si tu n'as pas \
+la source pertinente pour répondre avec certitude, dis-le clairement \
+plutôt que de deviner. Ne révèle jamais d'identifiant technique brut \
+(UUID) sauf si l'utilisateur le demande explicitement.
 
 Style de réponse — c'est le point le plus important : tu t'adresses à \
 un agriculteur, pas à un collègue chercheur. Explique comme tu \
@@ -115,6 +120,7 @@ async def answer_question(
     question: str,
     history: list[ChatMessage],
     parcel_context: ChatParcelContext | None,
+    user_profile: dict | None = None,
 ) -> ChatResponse:
     _require_client()
 
@@ -136,6 +142,8 @@ async def answer_question(
         ]
     if parcel_context is not None:
         context_payload["parcelle_selectionnee"] = parcel_context.model_dump(exclude_none=True)
+    if user_profile is not None:
+        context_payload["profil_utilisateur"] = user_profile
 
     messages = [{"role": "system", "content": _SYSTEM_PROMPT}]
     for turn in history[-_MAX_HISTORY_TURNS:]:
