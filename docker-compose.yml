@@ -50,10 +50,10 @@ services:
     environment:
       MARKET_DATA_DIR: /data/market
       AGRESTE_DATA_DIR: /data/market
-      BUSINESS_FAO_YIELD_CSV: "/data/profit/Crops and livestock products__ Average yield_hisorical yiels trends_production trends_harvested area.csv"
+      BUSINESS_FAO_YIELD_CSV: /data/profit/faostat_france_yields.csv
     volumes:
       - ./data:/data/market:ro
-      - ./backend/agent_business/profit_analysis/csv:/data/profit:ro
+      - ./backend/agent_business/app/market_intelligence/data:/data/profit:ro
       - business_market_store:/app/app/market_intelligence/rag/vector_store
     depends_on: [db]
 

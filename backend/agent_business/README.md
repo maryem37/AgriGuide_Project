@@ -91,8 +91,10 @@ psql "$DATABASE_URL" -f database/migration_business_financials.sql
 ### Sources financières configurables
 
 ```text
-BUSINESS_FAO_YIELD_CSV=/data/profit/faostat.csv
+BUSINESS_FAO_YIELD_CSV=/data/profit/faostat_france_yields.csv
 BUSINESS_COST_DATA_CSV=/data/profit/costs.csv
+# Sans BUSINESS_FAO_YIELD_CSV, le service utilise
+# app/market_intelligence/data/faostat_france_yields.csv
 ```
 
 Le CSV de coûts accepte `culture` (ou `crop`), `cost_per_ha_eur` (ou

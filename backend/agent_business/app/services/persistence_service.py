@@ -91,20 +91,35 @@ def save_scenarios(scenarios: list[BusinessScenario]) -> str:
 
 def get_owned_terrain_area(terrain_id: str, user_id: str) -> float | None:
     """Return the authoritative area only when the terrain belongs to user."""
+    areas = get_owned_terrains_total_area([terrain_id], user_id)
+    return areas
+
+
+def get_owned_terrains_total_area(terrain_ids: list[str], user_id: str) -> float | None:
+    """Sum superficie_ha for all owned terrains. None if any id is missing/unauthorized."""
+    unique_ids = list(dict.fromkeys([tid for tid in terrain_ids if tid]))
+    if not unique_ids:
+        return None
     if not _database_enabled():
         return None
     try:
         with get_cursor() as cursor:
             cursor.execute(
-                "SELECT superficie_ha FROM terrains WHERE id = %s AND user_id = %s",
-                (terrain_id, user_id),
+                """
+                SELECT id, superficie_ha
+                FROM terrains
+                WHERE user_id = %s AND id = ANY(%s::uuid[])
+                """,
+                (user_id, unique_ids),
             )
-            row = cursor.fetchone()
-            return float(row["superficie_ha"]) if row else None
+            rows = cursor.fetchall()
+            if len(rows) != len(unique_ids):
+                return None
+            return float(sum(float(row["superficie_ha"]) for row in rows))
     except Exception as exc:
         if _required():
             raise PersistenceUnavailableError(
-                f"Impossible de vérifier le terrain PostgreSQL: {exc}"
+                f"Impossible de vérifier les terrains PostgreSQL: {exc}"
             ) from exc
         return None
 

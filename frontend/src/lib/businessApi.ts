@@ -29,6 +29,8 @@ export type CropRecommendation = {
 
 export type BusinessAdvisorRequest = {
   terrain_id: string;
+  /** Optional multi-parcelle selection; areas are summed server-side when present. */
+  terrain_ids?: string[];
   superficie_disponible_ha: number;
   budget_input: number;
   date_plantation_prevue: string; // ISO date (YYYY-MM-DD)
@@ -134,6 +136,7 @@ export type AllocationChoisie = {
 
 export type FarmerDecisionRequest = {
   terrain_id: string;
+  terrain_ids?: string[];
   allocations: AllocationChoisie[];
   superficie_disponible_ha: number;
 };

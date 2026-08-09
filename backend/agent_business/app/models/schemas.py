@@ -31,6 +31,7 @@ class CropRecommendation(BaseModel):
 class BusinessAdvisorRequest(BaseModel):
     """Input du endpoint POST /business/scenarios"""
     terrain_id: str
+    terrain_ids: list[str] = Field(default_factory=list)
     superficie_disponible_ha: float = Field(gt=0)
     budget_input: float = Field(gt=0)
     date_plantation_prevue: date
@@ -44,6 +45,12 @@ class BusinessAdvisorRequest(BaseModel):
         if len(keys) != len(set(keys)):
             raise ValueError("Chaque culture ne peut apparaître qu'une fois")
         return values
+
+    def resolved_terrain_ids(self) -> list[str]:
+        ids = [value for value in self.terrain_ids if value]
+        if self.terrain_id and self.terrain_id not in ids:
+            ids.insert(0, self.terrain_id)
+        return ids or ([self.terrain_id] if self.terrain_id else [])
 
 
 # ---------------------------------------------------------------------------
@@ -181,8 +188,15 @@ class AllocationChoisie(BaseModel):
 class FarmerDecisionRequest(BaseModel):
     """Input du endpoint POST /business/decision (confirmation du farmer)"""
     terrain_id: str
+    terrain_ids: list[str] = Field(default_factory=list)
     allocations: list[AllocationChoisie] = Field(min_length=1)
     superficie_disponible_ha: float = Field(gt=0)
+
+    def resolved_terrain_ids(self) -> list[str]:
+        ids = [value for value in self.terrain_ids if value]
+        if self.terrain_id and self.terrain_id not in ids:
+            ids.insert(0, self.terrain_id)
+        return ids or ([self.terrain_id] if self.terrain_id else [])
 
 
 class FarmerDecisionResponse(BaseModel):

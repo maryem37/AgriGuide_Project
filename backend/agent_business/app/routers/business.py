@@ -13,11 +13,18 @@ from app.services.persistence_service import (
     database_persistence_enabled,
     get_latest_decision,
     get_owned_terrain_area,
+    get_owned_terrains_total_area,
     save_scenarios,
 )
 from app.security import get_current_user_id
 
 router = APIRouter(prefix="/business", tags=["business"])
+
+
+def _authoritative_area(terrain_ids: list[str], user_id: str) -> float | None:
+    if len(terrain_ids) <= 1:
+        return get_owned_terrain_area(terrain_ids[0], user_id) if terrain_ids else None
+    return get_owned_terrains_total_area(terrain_ids, user_id)
 
 
 @router.post("/scenarios", response_model=BusinessAdvisorResponse)
@@ -30,7 +37,8 @@ def obtenir_scenarios(
     de l'agent Agriculture + du budget fourni par le farmer.
     """
     try:
-        terrain_area = get_owned_terrain_area(request.terrain_id, user_id)
+        terrain_ids = request.resolved_terrain_ids()
+        terrain_area = _authoritative_area(terrain_ids, user_id)
         if database_persistence_enabled() and terrain_area is None:
             raise HTTPException(status_code=404, detail="Terrain introuvable ou non autorisé.")
         if terrain_area is not None:
@@ -57,7 +65,8 @@ def confirmer_decision_farmer(
     maturité prévues par culture (utilisées par l'agent Monitoring).
     """
     try:
-        terrain_area = get_owned_terrain_area(request.terrain_id, user_id)
+        terrain_ids = request.resolved_terrain_ids()
+        terrain_area = _authoritative_area(terrain_ids, user_id)
         if database_persistence_enabled() and terrain_area is None:
             raise HTTPException(status_code=404, detail="Terrain introuvable ou non autorisé.")
         if terrain_area is not None:

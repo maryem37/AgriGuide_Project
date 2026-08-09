@@ -41,6 +41,18 @@ export function loadRealCropRecommendations(terrainId: string): CropRecommendati
   }
 }
 
+/** Terrain analysé en dernier par le Conseiller Agriculture, ou `null`. */
+export function getLatestAnalyzedTerrainId(): string | null {
+  try {
+    const raw = localStorage.getItem(REAL_RECOMMENDATIONS_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as StoredRealRecommendations;
+    return parsed.terrainId || null;
+  } catch {
+    return null;
+  }
+}
+
 const CULTURE_LABELS: Record<string, string> = {
   tomate: "Tomate",
   pomme_de_terre: "Pomme de terre",

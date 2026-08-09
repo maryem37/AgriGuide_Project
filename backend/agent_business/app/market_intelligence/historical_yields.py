@@ -30,13 +30,8 @@ _FAO_ITEM = {
 def _candidate_paths() -> list[Path]:
     configured = os.getenv("BUSINESS_FAO_YIELD_CSV", "").strip()
     paths = [Path(configured)] if configured else []
-    # Development migration path; production should set BUSINESS_FAO_YIELD_CSV.
-    paths.append(
-        Path(__file__).resolve().parents[2]
-        / "profit_analysis"
-        / "csv"
-        / "Crops and livestock products__ Average yield_hisorical yiels trends_production trends_harvested area.csv"
-    )
+    # Bundled FAOSTAT France yields shipped with the Business agent.
+    paths.append(Path(__file__).resolve().parent / "data" / "faostat_france_yields.csv")
     return paths
 
 

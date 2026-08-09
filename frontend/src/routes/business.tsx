@@ -27,7 +27,7 @@ import {
   Quote,
   Store,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   fetchBusinessScenarios,
   confirmFarmerDecision,
@@ -38,21 +38,27 @@ import {
   type FarmerDecisionResponse,
   type FarmerDecisionRequest,
 } from "@/lib/businessApi";
-import { loadRealCropRecommendations, cultureLabel } from "@/lib/cropRecommendations";
+import {
+  getLatestAnalyzedTerrainId,
+  loadRealCropRecommendations,
+  cultureLabel,
+} from "@/lib/cropRecommendations";
 import { saveFarmerDecision } from "@/lib/farmerDecision";
 import { useAuth } from "@/lib/auth-context";
 import { MarketplaceWasteSuggestions } from "@/components/CropWasteValorization";
+import { Checkbox } from "@/components/ui/checkbox";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/business")({
   head: () => ({
     meta: [
-      { title: "Conseiller Business - AgriMent" },
+      { title: "Conseiller Financier - AgriMent" },
       {
         name: "description",
         content:
           "Simulez votre budget et comparez trois scénarios de cultures adaptés à votre exploitation.",
       },
-      { property: "og:title", content: "Conseiller Business - AgriMent" },
+      { property: "og:title", content: "Conseiller Financier - AgriMent" },
       {
         property: "og:description",
         content: "Comparez trois scénarios pour tirer le meilleur de votre budget.",
@@ -104,21 +110,57 @@ function Page() {
 
   const { user, token } = useAuth();
   const terrains = useMemo(() => user?.terrains ?? [], [user]);
-  // Un scénario appartient à un terrain précis; ne jamais additionner les
-  // surfaces de plusieurs terrains sous l'identifiant du premier.
-  const ha = terrains[0]?.superficie_ha ?? 0;
-  const superficieDisponibleHa = ha >= 0.1 ? Math.round(ha * 100) / 100 : FALLBACK_SUPERFICIE_HA;
-  const terrainId = terrains[0]?.id ?? "fallback-sans-terrain";
+  const [selectedTerrainIds, setSelectedTerrainIds] = useState<string[]>([]);
 
-  // Liaison réelle avec backend/agent_business - POST /business/scenarios.
-  // `crop_recommendations` vient de la dernière analyse réelle de l'agent
-  // Agriculture pour ce terrain (voir routes/agriculture.tsx), mise en cache
-  // via lib/cropRecommendations.ts. Aucun scénario financier n'est généré
-  // sans analyse Agriculture réelle.
-  const cropRecommendations = useMemo(
-    () => loadRealCropRecommendations(terrainId) ?? [],
-    [terrainId],
+  useEffect(() => {
+    if (!terrains.length) {
+      setSelectedTerrainIds([]);
+      return;
+    }
+    setSelectedTerrainIds((current) => {
+      const stillValid = current.filter((id) => terrains.some((t) => t.id === id));
+      if (stillValid.length > 0) return stillValid;
+      const analyzed = getLatestAnalyzedTerrainId();
+      if (analyzed && terrains.some((t) => t.id === analyzed)) return [analyzed];
+      return [terrains[0].id];
+    });
+  }, [terrains]);
+
+  const selectedTerrains = useMemo(
+    () => terrains.filter((t) => selectedTerrainIds.includes(t.id)),
+    [terrains, selectedTerrainIds],
   );
+  const ha = selectedTerrains.reduce((sum, t) => sum + (t.superficie_ha ?? 0), 0);
+  const superficieDisponibleHa = ha >= 0.1 ? Math.round(ha * 100) / 100 : FALLBACK_SUPERFICIE_HA;
+
+  // Primary terrain for persistence: prefer Agriculture-analyzed parcel among selection.
+  const terrainId = useMemo(() => {
+    const analyzed = getLatestAnalyzedTerrainId();
+    if (analyzed && selectedTerrainIds.includes(analyzed)) return analyzed;
+    for (const id of selectedTerrainIds) {
+      if ((loadRealCropRecommendations(id) ?? []).length > 0) return id;
+    }
+    return selectedTerrainIds[0] ?? "fallback-sans-terrain";
+  }, [selectedTerrainIds]);
+  const terrainIdsKey = selectedTerrainIds.slice().sort().join(",");
+
+  const cropRecommendations = useMemo(() => {
+    for (const id of selectedTerrainIds) {
+      const recs = loadRealCropRecommendations(id);
+      if (recs && recs.length > 0) return recs;
+    }
+    return loadRealCropRecommendations(terrainId) ?? [];
+  }, [selectedTerrainIds, terrainId]);
+
+  function toggleTerrain(id: string) {
+    setSelectedTerrainIds((current) => {
+      if (current.includes(id)) {
+        if (current.length === 1) return current;
+        return current.filter((value) => value !== id);
+      }
+      return [...current, id];
+    });
+  }
 
   const decisionMutation = useMutation({
     mutationFn: (request: FarmerDecisionRequest) => {
@@ -140,6 +182,7 @@ function Page() {
       if (!token) throw new Error("Authentification requise.");
       return fetchBusinessScenarios({
         terrain_id: terrainId,
+        terrain_ids: selectedTerrainIds,
         superficie_disponible_ha: superficieDisponibleHa,
         budget_input: budget,
         date_plantation_prevue: datePlantationPrevue(),
@@ -155,10 +198,23 @@ function Page() {
     },
   });
 
+  useEffect(() => {
+    setReport(null);
+    setSelected(null);
+    setDecision(null);
+    decisionMutation.reset();
+    scenariosMutation.reset();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [terrainIdsKey]);
+
   function generateReport() {
+    if (selectedTerrainIds.length === 0) {
+      setBudgetError("Sélectionnez au moins un terrain.");
+      return;
+    }
     if (cropRecommendations.length === 0) {
       setBudgetError(
-        "Analysez d'abord ce terrain dans le Conseiller Agriculture pour obtenir de vraies recommandations.",
+        "Analysez d'abord un des terrains sélectionnés dans le Conseiller Agriculture pour obtenir de vraies recommandations.",
       );
       return;
     }
@@ -174,6 +230,7 @@ function Page() {
   function chooseScenario(scenario: BusinessScenario) {
     decisionMutation.mutate({
       terrain_id: terrainId,
+      terrain_ids: selectedTerrainIds,
       superficie_disponible_ha: superficieDisponibleHa,
       allocations: [
         {
@@ -266,7 +323,7 @@ function Page() {
       <PageHeader
         icon={LineChart}
         tone="earth"
-        title="Conseiller Business"
+        title="Conseiller Financier"
         subtitle="Simulez vos revenus selon votre budget."
         className="mb-8"
       />
@@ -325,27 +382,60 @@ function Page() {
           </div>
           {terrains.length > 0 ? (
             <>
-              <div className="mt-3 flex items-baseline gap-2">
+              <p className="mt-2 text-xs text-sky-foreground/80">
+                Sélectionnez une ou plusieurs parcelles
+              </p>
+              <div className="mt-3 max-h-44 space-y-2 overflow-y-auto pr-1">
+                {terrains.map((t) => {
+                  const checked = selectedTerrainIds.includes(t.id);
+                  const isPrimary = t.id === terrainId;
+                  return (
+                    <label
+                      key={t.id}
+                      className={cn(
+                        "flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition",
+                        checked ? "bg-card/35 ring-1 ring-sky-foreground/25" : "bg-card/15 hover:bg-card/25",
+                      )}
+                    >
+                      <Checkbox
+                        checked={checked}
+                        onCheckedChange={() => toggleTerrain(t.id)}
+                        className="border-sky-foreground/40 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
+                      />
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate font-medium">
+                          {t.nom ?? "Terrain"}
+                          {isPrimary ? " · analyse Agri" : ""}
+                        </span>
+                        <span className="text-xs text-sky-foreground/75">
+                          {t.superficie_ha.toLocaleString("fr-FR", { maximumFractionDigits: 2 })} ha
+                        </span>
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+              <div className="mt-4 flex items-baseline gap-2">
                 <span className="font-display text-4xl font-semibold">
                   {ha.toLocaleString("fr-FR", { maximumFractionDigits: 2 })}
                 </span>
                 <span className="text-sky-foreground/80 inline-flex items-center gap-1 text-sm">
-                  <Ruler className="h-4 w-4" /> hectares au total
+                  <Ruler className="h-4 w-4" /> ha · {selectedTerrains.length} parcelle
+                  {selectedTerrains.length > 1 ? "s" : ""}
                 </span>
               </div>
-              <div className="mt-3 space-y-1.5">
-                {terrains.map((t) => (
-                  <div
-                    key={t.id}
-                    className="flex items-center justify-between text-sm bg-card/20 rounded-lg px-3 py-1.5"
-                  >
-                    <span className="font-medium">{t.nom ?? "Terrain"}</span>
-                    <span className="text-sky-foreground/80">
-                      {t.superficie_ha.toLocaleString("fr-FR", { maximumFractionDigits: 2 })} ha
-                    </span>
-                  </div>
-                ))}
-              </div>
+              {cropRecommendations.length > 0 ? (
+                <p className="mt-3 text-xs text-sky-foreground/85">
+                  Analyse Agriculture disponible
+                  ({cropRecommendations.length} culture
+                  {cropRecommendations.length > 1 ? "s" : ""}).
+                </p>
+              ) : (
+                <p className="mt-3 text-xs text-sky-foreground/85">
+                  Aucune analyse Agriculture pour les terrains sélectionnés — analysez-en un
+                  d’abord dans le Conseiller Agriculture.
+                </p>
+              )}
             </>
           ) : (
             <p className="mt-3 text-sm text-sky-foreground/90">
@@ -355,13 +445,12 @@ function Page() {
           )}
         </Reveal>
       </div>
-
       <Reveal as="h2" className="font-display text-2xl font-semibold mt-10 mb-4">
         Rapport financier et scénarios
       </Reveal>
 
       {scenariosMutation.isError && (
-        <AlertBanner tone="danger" title="Agent Business injoignable">
+        <AlertBanner tone="danger" title="Agent Financier injoignable">
           {scenariosMutation.error instanceof BusinessApiError
             ? scenariosMutation.error.message
             : "Une erreur inattendue est survenue."}
