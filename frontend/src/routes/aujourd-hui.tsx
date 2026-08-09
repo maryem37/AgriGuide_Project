@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { AlertBanner } from "@/components/AlertBanner";
@@ -14,6 +14,7 @@ import type { LatLng, TerrainOut } from "@/lib/authApi";
 import { cultureLabel, loadRealCropRecommendations } from "@/lib/cropRecommendations";
 import { equipementLabel } from "@/lib/equipements";
 import { loadFarmerDecision } from "@/lib/farmerDecision";
+import { fetchLatestFarmerDecision } from "@/lib/businessApi";
 import {
   analyzeMonitoringDay,
   MonitoringApiError,
@@ -207,12 +208,25 @@ function riskLabel(risk: string) {
 }
 
 function Page() {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const terrain: TerrainOut | undefined = user?.terrains[0];
-  const decision = useMemo(
+  const localDecision = useMemo(
     () => (terrain ? loadFarmerDecision(terrain.id) : null),
     [terrain],
   );
+  const persistedDecision = useQuery({
+    queryKey: ["business-decision", terrain?.id],
+    queryFn: async () => {
+      try {
+        if (!token) return localDecision;
+        return await fetchLatestFarmerDecision(terrain!.id, token);
+      } catch {
+        return localDecision;
+      }
+    },
+    enabled: Boolean(terrain),
+  });
+  const decision = persistedDecision.data ?? localDecision;
   const cropRecs = useMemo(
     () => (terrain ? loadRealCropRecommendations(terrain.id) : null),
     [terrain],

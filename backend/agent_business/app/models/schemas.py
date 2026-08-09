@@ -7,7 +7,7 @@ n'ait pas de mapping à réinventer.
 """
 
 from __future__ import annotations
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from typing import Optional
 from pydantic import BaseModel, Field, field_validator
 
@@ -34,8 +34,16 @@ class BusinessAdvisorRequest(BaseModel):
     superficie_disponible_ha: float = Field(gt=0)
     budget_input: float = Field(gt=0)
     date_plantation_prevue: date
-    crop_recommendations: list[CropRecommendation]
+    crop_recommendations: list[CropRecommendation] = Field(min_length=1)
     nb_scenarios: int = Field(default=3, ge=1, le=5)
+
+    @field_validator("crop_recommendations")
+    @classmethod
+    def cultures_uniques(cls, values: list[CropRecommendation]) -> list[CropRecommendation]:
+        keys = [value.culture.strip().lower() for value in values]
+        if len(keys) != len(set(keys)):
+            raise ValueError("Chaque culture ne peut apparaître qu'une fois")
+        return values
 
 
 # ---------------------------------------------------------------------------
@@ -58,6 +66,8 @@ class EtudeMarche(BaseModel):
     tendance_label: Optional[str] = None
     demande: Optional[str] = None  # forte|moderee|faible|inconnue
     concurrence: Optional[str] = None
+    rendement_std_kg_par_ha: Optional[float] = None
+    rendement_fallback: bool = True
 
 
 
@@ -69,6 +79,33 @@ class EtudeRisque(BaseModel):
     risque_score_normalise: float = Field(ge=0, le=1)  # probabilite * impact
     solution_mitigation: str
     cout_mitigation_eur_par_ha: float
+    raisons: list[str] = Field(default_factory=list)
+    sources: list[str] = Field(default_factory=list)
+    donnees_reelles: bool = False
+
+
+class IndicateursFinanciers(BaseModel):
+    """Indicateurs calculés de façon déterministe, jamais par le LLM."""
+    revenu_brut_estime_eur: float
+    cout_total_estime_eur: float
+    profit_estime_eur: float
+    profit_margin_pct: float
+    roi_pct: float
+    prix_seuil_rentabilite_eur_par_kg: Optional[float] = None
+    rendement_seuil_kg_par_ha: Optional[float] = None
+    budget_suffisant: bool
+    budget_gap_eur: float
+    cout_production_eur_par_ha: float
+    cout_mitigation_eur_par_ha: float
+    cout_total_eur_par_ha: float
+    source_cout: str
+    cout_fallback: bool
+
+
+class ConfianceDonnees(BaseModel):
+    niveau: str  # low | medium | high
+    score: float = Field(ge=0, le=1)
+    raisons: list[str] = Field(default_factory=list)
 
 
 # ---------------------------------------------------------------------------
@@ -107,11 +144,15 @@ class BusinessScenario(BaseModel):
     risque_description: str
     solution_risque: str
     matching_score: float = Field(ge=0, le=100)
+    score_compatibilite: float = Field(ge=0, le=100)
     etude_marche: dict
+    indicateurs_financiers: IndicateursFinanciers
+    confiance_donnees: ConfianceDonnees
+    raisons_risque: list[str] = Field(default_factory=list)
     superficie_max_financable_ha: float  # combien d'ha ce budget permet de couvrir
     superficie_conseillee_ha: float  # min(disponible, max_financable) — surface réellement recommandée
     detail_calcul: DetailCalculScenario
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class BusinessAdvisorResponse(BaseModel):
@@ -140,8 +181,8 @@ class AllocationChoisie(BaseModel):
 class FarmerDecisionRequest(BaseModel):
     """Input du endpoint POST /business/decision (confirmation du farmer)"""
     terrain_id: str
-    allocations: list[AllocationChoisie]
-    superficie_disponible_ha: float
+    allocations: list[AllocationChoisie] = Field(min_length=1)
+    superficie_disponible_ha: float = Field(gt=0)
 
 
 class FarmerDecisionResponse(BaseModel):
@@ -151,4 +192,4 @@ class FarmerDecisionResponse(BaseModel):
     cout_final: float
     superficie_totale_allouee_ha: float
     allocations: list[dict]  # inclut date_maturite_prevue par culture
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

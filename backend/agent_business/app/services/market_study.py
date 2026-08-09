@@ -49,4 +49,6 @@ def estimer_marche(crop: CropRecommendation, date_plantation: date) -> EtudeMarc
         tendance_label=prix_data.get("tendance_label"),
         demande=prix_data.get("demande"),
         concurrence=prix_data.get("concurrence"),
+        rendement_std_kg_par_ha=prix_data.get("rendement_std_kg_par_ha"),
+        rendement_fallback=prix_data.get("rendement_fallback", True),
     )

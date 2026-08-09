@@ -36,8 +36,9 @@ import {
   type BusinessScenario,
   type DetailCalculMetrique,
   type FarmerDecisionResponse,
+  type FarmerDecisionRequest,
 } from "@/lib/businessApi";
-import { MOCK_CROP_RECOMMENDATIONS, loadRealCropRecommendations, cultureLabel } from "@/lib/cropRecommendations";
+import { loadRealCropRecommendations, cultureLabel } from "@/lib/cropRecommendations";
 import { saveFarmerDecision } from "@/lib/farmerDecision";
 import { useAuth } from "@/lib/auth-context";
 import { MarketplaceWasteSuggestions } from "@/components/CropWasteValorization";
@@ -101,30 +102,29 @@ function Page() {
   const [decision, setDecision] = useState<FarmerDecisionResponse | null>(null);
   const [detailScenario, setDetailScenario] = useState<BusinessScenario | null>(null);
 
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const terrains = useMemo(() => user?.terrains ?? [], [user]);
-  // Le farmer peut avoir plusieurs terrains : la superficie disponible pour
-  // ce scénario est la somme de toutes ses parcelles déclarées (Profil).
-  const ha = useMemo(
-    () => terrains.reduce((total, t) => total + (t.superficie_ha ?? 0), 0),
-    [terrains],
-  );
+  // Un scénario appartient à un terrain précis; ne jamais additionner les
+  // surfaces de plusieurs terrains sous l'identifiant du premier.
+  const ha = terrains[0]?.superficie_ha ?? 0;
   const superficieDisponibleHa = ha >= 0.1 ? Math.round(ha * 100) / 100 : FALLBACK_SUPERFICIE_HA;
   const terrainId = terrains[0]?.id ?? "fallback-sans-terrain";
 
   // Liaison réelle avec backend/agent_business - POST /business/scenarios.
   // `crop_recommendations` vient de la dernière analyse réelle de l'agent
   // Agriculture pour ce terrain (voir routes/agriculture.tsx), mise en cache
-  // via lib/cropRecommendations.ts ; tant qu'aucune analyse n'a été faite
-  // pour ce terrain, on retombe sur des données factices pour rester
-  // utilisable indépendamment.
+  // via lib/cropRecommendations.ts. Aucun scénario financier n'est généré
+  // sans analyse Agriculture réelle.
   const cropRecommendations = useMemo(
-    () => loadRealCropRecommendations(terrainId) ?? MOCK_CROP_RECOMMENDATIONS,
+    () => loadRealCropRecommendations(terrainId) ?? [],
     [terrainId],
   );
 
   const decisionMutation = useMutation({
-    mutationFn: confirmFarmerDecision,
+    mutationFn: (request: FarmerDecisionRequest) => {
+      if (!token) throw new Error("Authentification requise.");
+      return confirmFarmerDecision(request, token);
+    },
     onSuccess: (data, variables) => {
       setDecision(data);
       saveFarmerDecision(data);
@@ -136,15 +136,17 @@ function Page() {
   });
 
   const scenariosMutation = useMutation({
-    mutationFn: (budget: number) =>
-      fetchBusinessScenarios({
+    mutationFn: (budget: number) => {
+      if (!token) throw new Error("Authentification requise.");
+      return fetchBusinessScenarios({
         terrain_id: terrainId,
         superficie_disponible_ha: superficieDisponibleHa,
         budget_input: budget,
         date_plantation_prevue: datePlantationPrevue(),
         crop_recommendations: cropRecommendations,
         nb_scenarios: 3,
-      }),
+      }, token);
+    },
     onSuccess: (data) => {
       setReport(data);
       setSelected(null);
@@ -154,6 +156,12 @@ function Page() {
   });
 
   function generateReport() {
+    if (cropRecommendations.length === 0) {
+      setBudgetError(
+        "Analysez d'abord ce terrain dans le Conseiller Agriculture pour obtenir de vraies recommandations.",
+      );
+      return;
+    }
     const budget = parseBudgetInput(budgetText);
     if (budget == null) {
       setBudgetError("Indiquez un budget valide en euros (ex. : 25000).");
@@ -169,7 +177,7 @@ function Page() {
       superficie_disponible_ha: superficieDisponibleHa,
       allocations: [
         {
-          scenario_id: `${scenario.culture}-scenario`,
+          scenario_id: scenario.id!,
           culture: scenario.culture,
           hectares_alloues: scenario.superficie_conseillee_ha,
         },
@@ -439,6 +447,10 @@ function Page() {
 
                 <div className="mt-5 space-y-3 text-sm">
                   <Row label="Score de matching" value={`${s.matching_score.toFixed(1)} / 100`} />
+                  <Row
+                    label="Compatibilité Agriculture"
+                    value={`${s.score_compatibilite.toFixed(1)} / 100`}
+                  />
                   <Row label="Surface conseillée" value={`${s.superficie_conseillee_ha} ha`} />
                   <Row
                     label="Rendement estimé"
@@ -451,9 +463,29 @@ function Page() {
                     )}
                   />
                   <Row
+                    label="Revenu brut"
+                    value={`${s.indicateurs_financiers.revenu_brut_estime_eur.toLocaleString("fr-FR")} €`}
+                  />
+                  <Row
+                    label="Coût total"
+                    value={`${s.indicateurs_financiers.cout_total_estime_eur.toLocaleString("fr-FR")} €`}
+                  />
+                  <Row
                     label="Profit estimé"
                     value={`${s.profit_estime.toLocaleString("fr-FR")} €`}
                     accent
+                  />
+                  <Row
+                    label="Marge / ROI"
+                    value={`${s.indicateurs_financiers.profit_margin_pct.toFixed(1)} % / ${s.indicateurs_financiers.roi_pct.toFixed(1)} %`}
+                  />
+                  <Row
+                    label="Écart au budget"
+                    value={`${s.indicateurs_financiers.budget_gap_eur.toLocaleString("fr-FR")} €`}
+                  />
+                  <Row
+                    label="Confiance données"
+                    value={`${s.confiance_donnees.niveau} (${Math.round(s.confiance_donnees.score * 100)} %)`}
                   />
                 </div>
 

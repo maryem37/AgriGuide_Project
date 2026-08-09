@@ -18,6 +18,7 @@ from app.market_intelligence.price_trends import (
     compute_price_trend,
     pct_change_to_tendance,
 )
+from app.market_intelligence.historical_yields import get_historical_yield
 from app.market_intelligence.reference_baselines import get_baseline
 
 _TENDANCE_LABEL = {
@@ -99,10 +100,21 @@ def get_market_price(culture: str) -> dict:
     """
     key = normalize_culture_key(culture)
     baseline = get_baseline(key)
+    historical_yield = get_historical_yield(key)
     trend = compute_price_trend(key)
 
     tendance = 0.0
-    source_parts = ["barème de référence (prix/rendement)"]
+    source_parts = ["barème de référence (prix absolu)"]
+    yield_kg_ha = baseline["rendement_moyen_kg_par_ha"]
+    yield_std_kg_ha = None
+    yield_is_fallback = True
+    if historical_yield:
+        yield_kg_ha = historical_yield["yield_kg_ha"]
+        yield_std_kg_ha = historical_yield["std_kg_ha"]
+        yield_is_fallback = False
+        source_parts.append(historical_yield["source"])
+    else:
+        source_parts.append("barème de référence (rendement)")
     enrichment: dict = {
         "indice_pct_change": None,
         "latest_index": None,
@@ -138,7 +150,9 @@ def get_market_price(culture: str) -> dict:
     rag = _optional_rag_score(key)
     if rag:
         enrichment["justification"] = rag.get("justification")
-        enrichment["market_score"] = rag.get("score")
+        # The LLM may summarize demand/competition, but its score is not used
+        # or exposed as an input to deterministic scenario ranking.
+        enrichment["market_score"] = None
         enrichment["demande"] = rag.get("demande")
         enrichment["concurrence"] = rag.get("concurrence")
         label = str(rag.get("tendance_prix") or "inconnue").lower()
@@ -146,10 +160,6 @@ def get_market_price(culture: str) -> dict:
         if trend is None or trend.get("pct_change") is None:
             tendance = _TENDANCE_LABEL.get(label, 0.0)
         # Soft blend: if RAG strongly disagrees with a weak CSV signal, nudge.
-        rag_score = rag.get("score")
-        if isinstance(rag_score, (int, float)) and rag.get("donnees_suffisantes"):
-            # Keep CSV tendance as primary; market_score is exposed for UI/details.
-            pass
         sources = rag.get("stats", {}).get("sources") or []
         if sources:
             source_parts.append("FranceAgriMer RAG: " + ", ".join(sources[:3]))
@@ -165,7 +175,9 @@ def get_market_price(culture: str) -> dict:
 
     return {
         "prix_moyen_eur_par_kg": baseline["prix_moyen_eur_par_kg"],
-        "rendement_moyen_kg_par_ha": baseline["rendement_moyen_kg_par_ha"],
+        "rendement_moyen_kg_par_ha": yield_kg_ha,
+        "rendement_std_kg_par_ha": yield_std_kg_ha,
+        "rendement_fallback": yield_is_fallback,
         "tendance": tendance,
         "source": " + ".join(source_parts),
         **enrichment,

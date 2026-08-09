@@ -1,0 +1,590 @@
+NOM;ANNREF;GEOGRAPHIE;GEOGRAPHIE_LIB;IPPAP_DIM1;IPPAP_DIM1_LIB;IPPAP_DIM1_MOD;IPPAP_DIM2;IPPAP_DIM2_LIB;IPPAP_DIM2_MOD;IPPAP_DIM3;IPPAP_DIM3_LIB;IPPAP_DIM3_MOD;VALEUR;QUALITE
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;Indice des Prix des Produits Agricoles a la Production;001;Periodicite;Fevrier;002;130.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;Indice des Prix des Produits Agricoles a la Production;001;Periodicite;Mai;005;128.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;Indice des Prix des Produits Agricoles a la Production;001;Periodicite;Janvier;001;130.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;Indice des Prix des Produits Agricoles a la Production;001;Periodicite;Mars;003;130.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;Indice des Prix des Produits Agricoles a la Production;001;Periodicite;Avril;004;129.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_Indice general sauf fruits et legumes, pommes de terre, fleurs coupees et plantes en pots;002;Periodicite;Janvier;001;132.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_Indice general sauf fruits et legumes, pommes de terre, fleurs coupees et plantes en pots;002;Periodicite;Mai;005;130.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_Indice general sauf fruits et legumes, pommes de terre, fleurs coupees et plantes en pots;002;Periodicite;Fevrier;002;132;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_Indice general sauf fruits et legumes, pommes de terre, fleurs coupees et plantes en pots;002;Periodicite;Mars;003;132.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_Indice general sauf fruits et legumes, pommes de terre, fleurs coupees et plantes en pots;002;Periodicite;Avril;004;130.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;__Produits vegetaux sauf fruits et legumes, pommes de terre, fleurs coupees et plantes en pots;003;Periodicite;Fevrier;002;109.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;__Produits vegetaux sauf fruits et legumes, pommes de terre, fleurs coupees et plantes en pots;003;Periodicite;Mars;003;110.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;__Produits vegetaux sauf fruits et legumes, pommes de terre, fleurs coupees et plantes en pots;003;Periodicite;Janvier;001;111.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;__Produits vegetaux sauf fruits et legumes, pommes de terre, fleurs coupees et plantes en pots;003;Periodicite;Mai;005;112.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;__Produits vegetaux sauf fruits et legumes, pommes de terre, fleurs coupees et plantes en pots;003;Periodicite;Avril;004;109.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Cereales (production);004;Periodicite;Mai;005;113.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Cereales (production);004;Periodicite;Janvier;001;103;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Cereales (production);004;Periodicite;Mars;003;106.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Cereales (production);004;Periodicite;Avril;004;105.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Cereales (production);004;Periodicite;Fevrier;002;103.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Orge;005;Periodicite;Mai;005;117.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Orge;005;Periodicite;Fevrier;002;111.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Orge;005;Periodicite;Avril;004;112.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Orge;005;Periodicite;Janvier;001;110.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Orge;005;Periodicite;Mars;003;111.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Orge de mouture;006;Periodicite;Avril;004;111.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Orge de mouture;006;Periodicite;Mars;003;114.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Orge de mouture;006;Periodicite;Fevrier;002;114.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Orge de mouture;006;Periodicite;Mai;005;117.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Orge de mouture;006;Periodicite;Janvier;001;114.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Orge de brasserie;007;Periodicite;Fevrier;002;106;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Orge de brasserie;007;Periodicite;Avril;004;114.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Orge de brasserie;007;Periodicite;Mars;003;106.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Orge de brasserie;007;Periodicite;Mai;005;117;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Orge de brasserie;007;Periodicite;Janvier;001;105.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Ble tendre;008;Periodicite;Fevrier;002;98.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Ble tendre;008;Periodicite;Avril;004;98.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Ble tendre;008;Periodicite;Mars;003;101.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Ble tendre;008;Periodicite;Janvier;001;98.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Ble tendre;008;Periodicite;Mai;005;109.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Ble dur;009;Periodicite;Avril;004;90.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Ble dur;009;Periodicite;Mars;003;88.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Ble dur;009;Periodicite;Janvier;001;89.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Ble dur;009;Periodicite;Fevrier;002;89.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Ble dur;009;Periodicite;Mai;005;92.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Avoine;010;Periodicite;Mars;003;87;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Avoine;010;Periodicite;Avril;004;90.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Avoine;010;Periodicite;Fevrier;002;87;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Avoine;010;Periodicite;Mai;005;92.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Avoine;010;Periodicite;Janvier;001;87;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Sorgho;011;Periodicite;Janvier;001;114.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Sorgho;011;Periodicite;Avril;004;123.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Sorgho;011;Periodicite;Fevrier;002;114.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Sorgho;011;Periodicite;Mars;003;115.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Sorgho;011;Periodicite;Mai;005;123.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Triticale;012;Periodicite;Fevrier;002;103.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Triticale;012;Periodicite;Avril;004;107.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Triticale;012;Periodicite;Mars;003;110.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Triticale;012;Periodicite;Janvier;001;102.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Triticale;012;Periodicite;Mai;005;106.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Mais;013;Periodicite;Janvier;001;112.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Mais;013;Periodicite;Fevrier;002;113.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Mais;013;Periodicite;Mai;005;126.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Mais;013;Periodicite;Avril;004;119.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Mais;013;Periodicite;Mars;003;120.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Oleagineux;014;Periodicite;Mai;005;133.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Oleagineux;014;Periodicite;Avril;004;131.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Oleagineux;014;Periodicite;Janvier;001;128.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Oleagineux;014;Periodicite;Fevrier;002;131.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Oleagineux;014;Periodicite;Mars;003;134.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Colza;015;Periodicite;Avril;004;131.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Colza;015;Periodicite;Fevrier;002;125.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Colza;015;Periodicite;Mai;005;134.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Colza;015;Periodicite;Mars;003;130.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Colza;015;Periodicite;Janvier;001;120.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Tournesol;016;Periodicite;Fevrier;002;148;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Tournesol;016;Periodicite;Avril;004;134.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Tournesol;016;Periodicite;Mai;005;134.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Tournesol;016;Periodicite;Janvier;001;148.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Tournesol;016;Periodicite;Mars;003;146.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Soja;017;Periodicite;Mai;005;121.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Soja;017;Periodicite;Avril;004;116.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Soja;017;Periodicite;Janvier;001;110;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Soja;017;Periodicite;Mars;003;116.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Soja;017;Periodicite;Fevrier;002;111.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Pomme de terre;018;Periodicite;Janvier;001;105.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Pomme de terre;018;Periodicite;Mai;005;104.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Pomme de terre;018;Periodicite;Mars;003;109.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Pomme de terre;018;Periodicite;Fevrier;002;103.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Pomme de terre;018;Periodicite;Avril;004;107;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Pomme de terre de consommation en frais;019;Periodicite;Mars;003;110.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Pomme de terre de consommation en frais;019;Periodicite;Mai;005;104.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Pomme de terre de consommation en frais;019;Periodicite;Avril;004;107.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Pomme de terre de consommation en frais;019;Periodicite;Janvier;001;105;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Pomme de terre de consommation en frais;019;Periodicite;Fevrier;002;102.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Pomme de terre primeur;020;Periodicite;Mars;003;250.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Pomme de terre primeur;020;Periodicite;Mai;005;136.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Pomme de terre primeur;020;Periodicite;Avril;004;178.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Pomme de terre de conservation;021;Periodicite;Janvier;001;105;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Pomme de terre de conservation;021;Periodicite;Fevrier;002;102.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Pomme de terre de conservation;021;Periodicite;Avril;004;96.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Pomme de terre de conservation;021;Periodicite;Mai;005;96.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Pomme de terre de conservation;021;Periodicite;Mars;003;99.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Pomme de terre a chair ferme;022;Periodicite;Janvier;001;100.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Pomme de terre a chair ferme;022;Periodicite;Mars;003;96.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Pomme de terre a chair ferme;022;Periodicite;Fevrier;002;99.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Pomme de terre a chair ferme;022;Periodicite;Avril;004;93.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Pomme de terre a chair ferme;022;Periodicite;Mai;005;93.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Pomme de terre a chair normale;023;Periodicite;Mai;005;98.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Pomme de terre a chair normale;023;Periodicite;Mars;003;101.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Pomme de terre a chair normale;023;Periodicite;Janvier;001;108.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Pomme de terre a chair normale;023;Periodicite;Avril;004;98.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Pomme de terre a chair normale;023;Periodicite;Fevrier;002;105.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Pomme de terre de feculerie;024;Periodicite;Janvier;001;157.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Pomme de terre de feculerie;024;Periodicite;Fevrier;002;157.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Pomme de terre de feculerie;024;Periodicite;Mai;005;157.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Pomme de terre de feculerie;024;Periodicite;Avril;004;157.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Pomme de terre de feculerie;024;Periodicite;Mars;003;157.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Pomme de terre pour l'industrie;025;Periodicite;Fevrier;002;93.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Pomme de terre pour l'industrie;025;Periodicite;Janvier;001;93.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Pomme de terre pour l'industrie;025;Periodicite;Mai;005;93.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Pomme de terre pour l'industrie;025;Periodicite;Avril;004;93.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Pomme de terre pour l'industrie;025;Periodicite;Mars;003;93.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Vins;026;Periodicite;Mai;005;101.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Vins;026;Periodicite;Avril;004;101.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Vins;026;Periodicite;Janvier;001;107.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Vins;026;Periodicite;Fevrier;002;103.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Vins;026;Periodicite;Mars;003;102.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Vins d'appellation d'origine protegee (AOP) hors vins pour champagne;027;Periodicite;Avril;004;94.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Vins d'appellation d'origine protegee (AOP) hors vins pour champagne;027;Periodicite;Janvier;001;105.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Vins d'appellation d'origine protegee (AOP) hors vins pour champagne;027;Periodicite;Mai;005;94.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Vins d'appellation d'origine protegee (AOP) hors vins pour champagne;027;Periodicite;Fevrier;002;99.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Vins d'appellation d'origine protegee (AOP) hors vins pour champagne;027;Periodicite;Mars;003;96.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Vins IGP et sans IG;028;Periodicite;Avril;004;104;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Vins IGP et sans IG;028;Periodicite;Janvier;001;103.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Vins IGP et sans IG;028;Periodicite;Mai;005;108.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Vins IGP et sans IG;028;Periodicite;Fevrier;002;102.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Vins IGP et sans IG;028;Periodicite;Mars;003;106.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Vins IGP;029;Periodicite;Mai;005;112;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Vins IGP;029;Periodicite;Janvier;001;104.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Vins IGP;029;Periodicite;Mars;003;106.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Vins IGP;029;Periodicite;Avril;004;106.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Vins IGP;029;Periodicite;Fevrier;002;103.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Vins sans IG;030;Periodicite;Mai;005;87.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Vins sans IG;030;Periodicite;Fevrier;002;94.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Vins sans IG;030;Periodicite;Janvier;001;96.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Vins sans IG;030;Periodicite;Mars;003;103.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Vins sans IG;030;Periodicite;Avril;004;91.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Produits de l'horticulture;031;Periodicite;Mai;005;139.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Produits de l'horticulture;031;Periodicite;Fevrier;002;137.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Produits de l'horticulture;031;Periodicite;Janvier;001;134.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Produits de l'horticulture;031;Periodicite;Mars;003;127.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Produits de l'horticulture;031;Periodicite;Avril;004;137.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Autres produits vegetaux;032;Periodicite;Avril;004;150;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Autres produits vegetaux;032;Periodicite;Janvier;001;148.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Autres produits vegetaux;032;Periodicite;Mars;003;149.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Autres produits vegetaux;032;Periodicite;Fevrier;002;148.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Autres produits vegetaux;032;Periodicite;Mai;005;150;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Semences et plants (production);033;Periodicite;Mars;003;118.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Semences et plants (production);033;Periodicite;Fevrier;002;118.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Semences et plants (production);033;Periodicite;Avril;004;118.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Semences et plants (production);033;Periodicite;Mai;005;118.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Semences et plants (production);033;Periodicite;Janvier;001;118.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Semences de cereales et oleagineux (production);034;Periodicite;Mai;005;124.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Semences de cereales et oleagineux (production);034;Periodicite;Janvier;001;124.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Semences de cereales et oleagineux (production);034;Periodicite;Mars;003;124.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Semences de cereales et oleagineux (production);034;Periodicite;Fevrier;002;124.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Semences de cereales et oleagineux (production);034;Periodicite;Avril;004;124.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Semences fourragères et autres (production);035;Periodicite;Mai;005;178.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Semences fourragères et autres (production);035;Periodicite;Mars;003;178.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Semences fourragères et autres (production);035;Periodicite;Avril;004;178.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Semences fourragères et autres (production);035;Periodicite;Janvier;001;178.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Semences fourragères et autres (production);035;Periodicite;Fevrier;002;178.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Plants de Pomme de terre (production);036;Periodicite;Janvier;001;96.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Plants de Pomme de terre (production);036;Periodicite;Mars;003;104.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Plants de Pomme de terre (production);036;Periodicite;Avril;004;108.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Plants de Pomme de terre (production);036;Periodicite;Mai;005;109.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Plants de Pomme de terre (production);036;Periodicite;Fevrier;002;99.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Betterave;037;Periodicite;Mai;005;151.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Betterave;037;Periodicite;Avril;004;151.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Betterave;037;Periodicite;Mars;003;151.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Betterave;037;Periodicite;Janvier;001;151.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Betterave;037;Periodicite;Fevrier;002;151.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Fourrages;038;Periodicite;Mai;005;117.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Fourrages;038;Periodicite;Janvier;001;118.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Fourrages;038;Periodicite;Mars;003;117.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Fourrages;038;Periodicite;Avril;004;117.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Fourrages;038;Periodicite;Fevrier;002;118.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Legumes secs;039;Periodicite;Janvier;001;217.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Legumes secs;039;Periodicite;Mars;003;228.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Legumes secs;039;Periodicite;Avril;004;229.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Legumes secs;039;Periodicite;Fevrier;002;221.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Legumes secs;039;Periodicite;Mai;005;229.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Pois proteagineux;040;Periodicite;Janvier;001;153.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Pois proteagineux;040;Periodicite;Mars;003;152.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Pois proteagineux;040;Periodicite;Mai;005;147.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Pois proteagineux;040;Periodicite;Avril;004;151.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Pois proteagineux;040;Periodicite;Fevrier;002;153.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Lin;041;Periodicite;Janvier;001;160.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Lin;041;Periodicite;Mai;005;156.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Lin;041;Periodicite;Mars;003;163.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Lin;041;Periodicite;Fevrier;002;161.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Lin;041;Periodicite;Avril;004;161.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Houblon;042;Periodicite;Fevrier;002;208.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Houblon;042;Periodicite;Avril;004;205.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Houblon;042;Periodicite;Mars;003;210.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Houblon;042;Periodicite;Mai;005;196.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Houblon;042;Periodicite;Janvier;001;204.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;__Animaux et produits animaux;043;Periodicite;Mai;005;212.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;__Animaux et produits animaux;043;Periodicite;Mars;003;229.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;__Animaux et produits animaux;043;Periodicite;Fevrier;002;228.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;__Animaux et produits animaux;043;Periodicite;Janvier;001;223.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;__Animaux et produits animaux;043;Periodicite;Avril;004;225.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Animaux;044;Periodicite;Janvier;001;201.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Animaux;044;Periodicite;Mai;005;193.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Animaux;044;Periodicite;Fevrier;002;205.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Animaux;044;Periodicite;Mars;003;207.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Animaux;044;Periodicite;Avril;004;202.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Gros bovins;045;Periodicite;Janvier;001;199.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Gros bovins;045;Periodicite;Mai;005;184.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Gros bovins;045;Periodicite;Avril;004;195.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Gros bovins;045;Periodicite;Mars;003;202.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Gros bovins;045;Periodicite;Fevrier;002;202.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Bovins maigres;046;Periodicite;Avril;004;209.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Bovins maigres;046;Periodicite;Mai;005;200.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Bovins maigres;046;Periodicite;Mars;003;213;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Bovins maigres;046;Periodicite;Janvier;001;207.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Bovins maigres;046;Periodicite;Fevrier;002;210.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Bovins de boucherie;047;Periodicite;Janvier;001;182.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Bovins de boucherie;047;Periodicite;Avril;004;183.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Bovins de boucherie;047;Periodicite;Fevrier;002;185.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Bovins de boucherie;047;Periodicite;Mai;005;179.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Bovins de boucherie;047;Periodicite;Mars;003;186.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Jeunes bovins;048;Periodicite;Fevrier;002;211.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Jeunes bovins;048;Periodicite;Mars;003;214.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Jeunes bovins;048;Periodicite;Avril;004;210.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Jeunes bovins;048;Periodicite;Janvier;001;207.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Jeunes bovins;048;Periodicite;Mai;005;201.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Boeufs;049;Periodicite;Mars;003;225.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Boeufs;049;Periodicite;Janvier;001;218.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Boeufs;049;Periodicite;Fevrier;002;223;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Boeufs;049;Periodicite;Mai;005;210.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Boeufs;049;Periodicite;Avril;004;220.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Genisses;050;Periodicite;Mars;003;176.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Genisses;050;Periodicite;Fevrier;002;176.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Genisses;050;Periodicite;Mai;005;163;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Genisses;050;Periodicite;Janvier;001;172.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Genisses;050;Periodicite;Avril;004;171.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Vaches;051;Periodicite;Fevrier;002;174.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Vaches;051;Periodicite;Mars;003;174.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Vaches;051;Periodicite;Janvier;001;171.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Vaches;051;Periodicite;Mai;005;159.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Vaches;051;Periodicite;Avril;004;168.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Taureaux;052;Periodicite;Mai;005;418.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Taureaux;052;Periodicite;Mars;003;372.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Taureaux;052;Periodicite;Fevrier;002;325.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Taureaux;052;Periodicite;Janvier;001;255.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Taureaux;052;Periodicite;Avril;004;381.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Veaux;053;Periodicite;Mars;003;103.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Veaux;053;Periodicite;Mai;005;105.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Veaux;053;Periodicite;Fevrier;002;103.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Veaux;053;Periodicite;Janvier;001;104.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Veaux;053;Periodicite;Avril;004;104.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Veaux de boucherie;054;Periodicite;Janvier;001;148.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Veaux de boucherie;054;Periodicite;Avril;004;157.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Veaux de boucherie;054;Periodicite;Mai;005;157.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Veaux de boucherie;054;Periodicite;Fevrier;002;146.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Veaux de boucherie;054;Periodicite;Mars;003;155.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Veaux de huit jours;055;Periodicite;Fevrier;002;122.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Veaux de huit jours;055;Periodicite;Avril;004;124.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Veaux de huit jours;055;Periodicite;Janvier;001;122.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Veaux de huit jours;055;Periodicite;Mai;005;124.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Veaux de huit jours;055;Periodicite;Mars;003;123.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Porcins;056;Periodicite;Mars;003;123.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Porcins;056;Periodicite;Mai;005;125.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Porcins;056;Periodicite;Avril;004;124.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Porcins;056;Periodicite;Janvier;001;122.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Porcins;056;Periodicite;Fevrier;002;122.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Ovins;057;Periodicite;Janvier;001;128.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Ovins;057;Periodicite;Mai;005;131.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Ovins;057;Periodicite;Mars;003;130.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Ovins;057;Periodicite;Avril;004;130.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Ovins;057;Periodicite;Fevrier;002;129.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Autres animaux;058;Periodicite;Fevrier;002;127.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Autres animaux;058;Periodicite;Avril;004;131.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Autres animaux;058;Periodicite;Mars;003;130.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Autres animaux;058;Periodicite;Mai;005;132.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Autres animaux;058;Periodicite;Janvier;001;127.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Volailles (Production);059;Periodicite;Avril;004;121.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Volailles (Production);059;Periodicite;Fevrier;002;120.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Volailles (Production);059;Periodicite;Mai;005;122.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Volailles (Production);059;Periodicite;Janvier;001;120.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Volailles (Production);059;Periodicite;Mars;003;120.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Dindes et dindons;060;Periodicite;Fevrier;002;117.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Dindes et dindons;060;Periodicite;Avril;004;117.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Dindes et dindons;060;Periodicite;Mai;005;117.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Dindes et dindons;060;Periodicite;Janvier;001;119.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Dindes et dindons;060;Periodicite;Mars;003;117.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Canard a rôtir;061;Periodicite;Fevrier;002;120.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Canard a rôtir;061;Periodicite;Mars;003;121.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Canard a rôtir;061;Periodicite;Mai;005;123.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Canard a rôtir;061;Periodicite;Avril;004;122.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Canard a rôtir;061;Periodicite;Janvier;001;120.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Poulet (Production);062;Periodicite;Mars;003;124.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Poulet (Production);062;Periodicite;Mai;005;123.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Poulet (Production);062;Periodicite;Fevrier;002;123.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Poulet (Production);062;Periodicite;Avril;004;124;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Poulet (Production);062;Periodicite;Janvier;001;124.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_______Poulet de label;063;Periodicite;Mai;005;118.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_______Poulet de label;063;Periodicite;Fevrier;002;118.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_______Poulet de label;063;Periodicite;Janvier;001;120.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_______Poulet de label;063;Periodicite;Avril;004;118.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_______Poulet de label;063;Periodicite;Mars;003;118.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_______Poulet standard;064;Periodicite;Mai;005;128;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_______Poulet standard;064;Periodicite;Fevrier;002;126.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_______Poulet standard;064;Periodicite;Avril;004;127.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_______Poulet standard;064;Periodicite;Mars;003;128.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_______Poulet standard;064;Periodicite;Janvier;001;127.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Pintade (production);065;Periodicite;Mai;005;115.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Pintade (production);065;Periodicite;Mars;003;124.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Pintade (production);065;Periodicite;Janvier;001;119.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Pintade (production);065;Periodicite;Fevrier;002;119.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Pintade (production);065;Periodicite;Avril;004;120.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_______Pintade de label;066;Periodicite;Janvier;001;146;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_______Pintade de label;066;Periodicite;Avril;004;138.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_______Pintade de label;066;Periodicite;Mars;003;139.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_______Pintade de label;066;Periodicite;Mai;005;136.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_______Pintade de label;066;Periodicite;Fevrier;002;142.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_______Pintade (autre);067;Periodicite;Avril;004;124;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_______Pintade (autre);067;Periodicite;Mars;003;124.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_______Pintade (autre);067;Periodicite;Janvier;001;132.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_______Pintade (autre);067;Periodicite;Fevrier;002;128.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_______Pintade (autre);067;Periodicite;Mai;005;124.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Lapin;068;Periodicite;Fevrier;002;128.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Lapin;068;Periodicite;Mai;005;124.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Lapin;068;Periodicite;Mars;003;125.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Lapin;068;Periodicite;Avril;004;124.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Lapin;068;Periodicite;Janvier;001;132.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Produits animaux;069;Periodicite;Mai;005;125.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Produits animaux;069;Periodicite;Fevrier;002;129.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Produits animaux;069;Periodicite;Avril;004;125.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Produits animaux;069;Periodicite;Mars;003;125.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Produits animaux;069;Periodicite;Janvier;001;133.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Lait (production);070;Periodicite;Avril;004;115.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Lait (production);070;Periodicite;Mai;005;115.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Lait (production);070;Periodicite;Mars;003;117.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Lait (production);070;Periodicite;Fevrier;002;125;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Lait (production);070;Periodicite;Janvier;001;131.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Lait de vache;071;Periodicite;Mai;005;237.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Lait de vache;071;Periodicite;Janvier;001;253;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Lait de vache;071;Periodicite;Mars;003;258.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Lait de vache;071;Periodicite;Avril;004;256.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Lait de vache;071;Periodicite;Fevrier;002;256.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Lait de brebis;072;Periodicite;Janvier;001;118.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Lait de brebis;072;Periodicite;Mars;003;125;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Lait de brebis;072;Periodicite;Mai;005;117.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Lait de brebis;072;Periodicite;Avril;004;123.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Lait de brebis;072;Periodicite;Fevrier;002;116.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Lait de chèvre;073;Periodicite;Avril;004;125.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Lait de chèvre;073;Periodicite;Mars;003;125.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Lait de chèvre;073;Periodicite;Janvier;001;119;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Lait de chèvre;073;Periodicite;Fevrier;002;114.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Lait de chèvre;073;Periodicite;Mai;005;118.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Œufs (production);074;Periodicite;Mars;003;122.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Œufs (production);074;Periodicite;Avril;004;117.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Œufs (production);074;Periodicite;Mai;005;121;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Œufs (production);074;Periodicite;Janvier;001;116.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Œufs (production);074;Periodicite;Fevrier;002;115.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;__Fruits et legumes frais (production);076;Periodicite;Mai;005;135.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Cerise (production);079;Periodicite;Avril;004;114;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Cerise (production);079;Periodicite;Mai;005;119;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Cerise (production);079;Periodicite;Mars;003;157.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Châtaigne (production);080;Periodicite;Mai;005;132.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Châtaigne (production);080;Periodicite;Mars;003;154.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Châtaigne (production);080;Periodicite;Avril;004;114.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Clementine (production);081;Periodicite;Mars;003;158.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Clementine (production);081;Periodicite;Mai;005;113.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Clementine (production);081;Periodicite;Avril;004;113.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Fraise (production);082;Periodicite;Mai;005;137.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Fraise allongee (production) ;083;Periodicite;Janvier;001;148.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Fraise allongee (production) ;083;Periodicite;Mars;003;148.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Fraise allongee (production) ;083;Periodicite;Fevrier;002;147.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Fraise allongee (production) ;083;Periodicite;Mai;005;150.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Fraise allongee (production) ;083;Periodicite;Avril;004;152.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Fraise ronde (production) ;084;Periodicite;Fevrier;002;121.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Fraise ronde (production) ;084;Periodicite;Janvier;001;122.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Fraise ronde (production) ;084;Periodicite;Mars;003;122;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Pêche et Nectarine (production);088;Periodicite;Fevrier;002;127.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Pêche et Nectarine (production);088;Periodicite;Janvier;001;130.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Pêche et Nectarine (production);088;Periodicite;Mars;003;117.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Pêche (production);090;Periodicite;Janvier;001;130.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Pêche (production);090;Periodicite;Mars;003;117.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Pêche (production);090;Periodicite;Fevrier;002;127.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Poire (production);091;Periodicite;Avril;004;115.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Poire (production);091;Periodicite;Mai;005;119.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Poire (production);091;Periodicite;Fevrier;002;109.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Poire (production);091;Periodicite;Mars;003;112.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Poire (production);091;Periodicite;Janvier;001;110.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Poire d'ete (production);092;Periodicite;Avril;004;126.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Poire d'ete (production);092;Periodicite;Janvier;001;110.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Poire d'ete (production);092;Periodicite;Fevrier;002;114.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Poire d'ete (production);092;Periodicite;Mai;005;139.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Poire d'ete (production);092;Periodicite;Mars;003;117.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Poire hors ete (production);093;Periodicite;Avril;004;115.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Poire hors ete (production);093;Periodicite;Janvier;001;112.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Poire hors ete (production);093;Periodicite;Fevrier;002;111.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Poire hors ete (production);093;Periodicite;Mai;005;120;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Poire hors ete (production);093;Periodicite;Mars;003;113.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Pomme (production);094;Periodicite;Mars;003;111.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Pomme (production);094;Periodicite;Fevrier;002;108.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Pomme (production);094;Periodicite;Avril;004;114;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Pomme (production);094;Periodicite;Mai;005;116.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Pomme (production);094;Periodicite;Janvier;001;110.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Pomme autres varietes;097;Periodicite;Mars;003;127.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Pomme autres varietes;097;Periodicite;Mai;005;116;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Pomme autres varietes;097;Periodicite;Avril;004;132.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Pomme autres varietes;097;Periodicite;Fevrier;002;113.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Pomme autres varietes;097;Periodicite;Janvier;001;120.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Prune (production);098;Periodicite;Janvier;001;171;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Prune (production);098;Periodicite;Fevrier;002;177.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Raisin (production);099;Periodicite;Mai;005;62.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Legumes frais (production);100;Periodicite;Avril;004;100;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Legumes frais (production);100;Periodicite;Mai;005;92.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Legumes frais (production);100;Periodicite;Mars;003;141.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Ail (production);101;Periodicite;Mai;005;123;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Artichaut (production);102;Periodicite;Janvier;001;123.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Artichaut (production);102;Periodicite;Mai;005;109.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Artichaut (production);102;Periodicite;Mars;003;124.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Artichaut (production);102;Periodicite;Fevrier;002;132.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Artichaut (production);102;Periodicite;Avril;004;109.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Asperge (production);103;Periodicite;Avril;004;128.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Asperge (production);103;Periodicite;Mars;003;128.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Asperge (production);103;Periodicite;Mai;005;128.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Asperge (production);103;Periodicite;Janvier;001;136.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Asperge (production);103;Periodicite;Fevrier;002;129.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Aubergine (production);104;Periodicite;Mars;003;126.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Aubergine (production);104;Periodicite;Janvier;001;103.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Aubergine (production);104;Periodicite;Mai;005;175.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Aubergine (production);104;Periodicite;Avril;004;154.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Aubergine (production);104;Periodicite;Fevrier;002;113.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Bette (production);105;Periodicite;Mai;005;117.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Bette (production);105;Periodicite;Avril;004;115.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Bette (production);105;Periodicite;Mars;003;112.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Bette (production);105;Periodicite;Janvier;001;119.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Bette (production);105;Periodicite;Fevrier;002;110.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Betterave (production);106;Periodicite;Mars;003;129.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Betterave (production);106;Periodicite;Janvier;001;137.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Betterave (production);106;Periodicite;Avril;004;130.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Betterave (production);106;Periodicite;Mai;005;130.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Betterave (production);106;Periodicite;Fevrier;002;130.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Carotte (production);107;Periodicite;Avril;004;163.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Carotte (production);107;Periodicite;Mars;003;133.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Carotte (production);107;Periodicite;Fevrier;002;85.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Carotte (production);107;Periodicite;Mai;005;190.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Carotte (production);107;Periodicite;Janvier;001;131.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Champignon (production);109;Periodicite;Janvier;001;137.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Champignon (production);109;Periodicite;Fevrier;002;79;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Champignon (production);109;Periodicite;Mars;003;139.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Champignon (production);109;Periodicite;Avril;004;155.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Champignon (production);109;Periodicite;Mai;005;190.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Chou (production);110;Periodicite;Mars;003;115.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Chou (production);110;Periodicite;Janvier;001;117.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Chou (production);110;Periodicite;Fevrier;002;105.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Chou (production);110;Periodicite;Avril;004;214;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Chou brocoli (production);111;Periodicite;Fevrier;002;183.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Chou brocoli (production);111;Periodicite;Mars;003;137.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Chou brocoli (production);111;Periodicite;Mai;005;120.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Chou brocoli (production);111;Periodicite;Avril;004;112;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Chou-fleur (production);112;Periodicite;Mai;005;134.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Chou pomme (production);113;Periodicite;Mars;003;69.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Chou pomme (production);113;Periodicite;Janvier;001;74.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Chou pomme (production);113;Periodicite;Fevrier;002;69.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Chou pomme (production);113;Periodicite;Avril;004;69.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Chou pomme (production);113;Periodicite;Mai;005;69.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Concombre (production);114;Periodicite;Janvier;001;94.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Concombre (production);114;Periodicite;Avril;004;87.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Concombre (production);114;Periodicite;Mars;003;77;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Concombre (production);114;Periodicite;Fevrier;002;85.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Concombre (production);114;Periodicite;Mai;005;93.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Courgette (production);115;Periodicite;Mars;003;135.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Courgette (production);115;Periodicite;Janvier;001;122.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Courgette (production);115;Periodicite;Fevrier;002;152.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Courgette (production);115;Periodicite;Avril;004;111.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Courgette (production);115;Periodicite;Mai;005;87.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Epinard (production);118;Periodicite;Fevrier;002;100.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Epinard (production);118;Periodicite;Mai;005;94.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Epinard (production);118;Periodicite;Mars;003;99.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Epinard (production);118;Periodicite;Janvier;001;101.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Epinard (production);118;Periodicite;Avril;004;95.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Haricot a ecosser (production);119;Periodicite;Mars;003;125.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Haricot a ecosser (production);119;Periodicite;Fevrier;002;125.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Haricot a ecosser (production);119;Periodicite;Avril;004;129.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Haricot a ecosser (production);119;Periodicite;Janvier;001;118.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Haricot a ecosser (production);119;Periodicite;Mai;005;133.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Melon (production);120;Periodicite;Mai;005;118.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Melon (production);120;Periodicite;Fevrier;002;125;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Melon (production);120;Periodicite;Mars;003;114.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Melon (production);120;Periodicite;Janvier;001;137.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Melon (production);120;Periodicite;Avril;004;118.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Navets (production);121;Periodicite;Fevrier;002;83.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Navets (production);121;Periodicite;Janvier;001;110.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Navets (production);121;Periodicite;Mai;005;159.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Navets (production);121;Periodicite;Avril;004;80.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Navets (production);121;Periodicite;Mars;003;76.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Oignons (production);122;Periodicite;Mai;005;184.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Persil (production);123;Periodicite;Janvier;001;140.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Persil (production);123;Periodicite;Fevrier;002;137.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Persil (production);123;Periodicite;Mars;003;132.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Poireau (production);124;Periodicite;Avril;004;115.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Poireau (production);124;Periodicite;Mai;005;112.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Poireau (production);124;Periodicite;Mars;003;111.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Poireau (production);124;Periodicite;Janvier;001;165.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Poireau (production);124;Periodicite;Fevrier;002;114.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Poivron (production);125;Periodicite;Mars;003;120.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Poivron (production);125;Periodicite;Mai;005;122.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Poivron (production);125;Periodicite;Janvier;001;124.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Poivron (production);125;Periodicite;Avril;004;128.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Poivron (production);125;Periodicite;Fevrier;002;119.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Potiron (production);126;Periodicite;Janvier;001;119.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Potiron (production);126;Periodicite;Mars;003;126.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Potiron (production);126;Periodicite;Fevrier;002;124.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Potiron (production);126;Periodicite;Mai;005;122.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Potiron (production);126;Periodicite;Avril;004;125.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Radis (production);127;Periodicite;Fevrier;002;121.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Radis (production);127;Periodicite;Mai;005;123.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Radis (production);127;Periodicite;Mars;003;118.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Radis (production);127;Periodicite;Janvier;001;117.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Radis (production);127;Periodicite;Avril;004;124.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Salade (production);128;Periodicite;Fevrier;002;128.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Salade (production);128;Periodicite;Mai;005;121.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Salade (production);128;Periodicite;Avril;004;127.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Salade (production);128;Periodicite;Mars;003;136.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Salade (production);128;Periodicite;Janvier;001;125.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Chicoree (production);129;Periodicite;Mars;003;125.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Chicoree (production);129;Periodicite;Avril;004;118.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Chicoree (production);129;Periodicite;Fevrier;002;123.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Chicoree (production);129;Periodicite;Mai;005;122.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Chicoree (production);129;Periodicite;Janvier;001;121;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Frisee (production);130;Periodicite;Mars;003;126;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Frisee (production);130;Periodicite;Avril;004;118.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Frisee (production);130;Periodicite;Fevrier;002;122.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Frisee (production);130;Periodicite;Mai;005;124.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Frisee (production);130;Periodicite;Janvier;001;119.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Scarole (production);131;Periodicite;Mars;003;124.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Scarole (production);131;Periodicite;Avril;004;119;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Scarole (production);131;Periodicite;Mai;005;121.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Scarole (production);131;Periodicite;Fevrier;002;122.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Scarole (production);131;Periodicite;Janvier;001;119.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Laitue (production);132;Periodicite;Fevrier;002;125.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Laitue (production);132;Periodicite;Avril;004;118.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Laitue (production);132;Periodicite;Mai;005;119;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Laitue (production);132;Periodicite;Mars;003;124.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Laitue (production);132;Periodicite;Janvier;001;124.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Batavia (production);133;Periodicite;Mars;003;111.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Batavia (production);133;Periodicite;Avril;004;138.8;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Batavia (production);133;Periodicite;Janvier;001;135.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Batavia (production);133;Periodicite;Fevrier;002;109.5;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Laitue a couper (production);134;Periodicite;Mai;005;117.2;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Laitue a couper (production);134;Periodicite;Mars;003;246;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Laitue a couper (production);134;Periodicite;Janvier;001;268.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Laitue a couper (production);134;Periodicite;Avril;004;213.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Laitue pommee (production);135;Periodicite;Mai;005;116.1;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Laitue pommee (production);135;Periodicite;Mars;003;246;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Laitue pommee (production);135;Periodicite;Janvier;001;268.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;______Laitue pommee (production);135;Periodicite;Avril;004;219.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Mâche (production);136;Periodicite;Avril;004;181.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;_____Mâche (production);136;Periodicite;Mai;005;122;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Tomate (production);137;Periodicite;Janvier;001;90.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Tomate (production);137;Periodicite;Fevrier;002;127.7;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Tomate hors petits fruits (production);138;Periodicite;Fevrier;002;117.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Tomate hors petits fruits (production);138;Periodicite;Mai;005;105;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Tomate hors petits fruits (production);138;Periodicite;Janvier;001;115.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Tomate hors petits fruits (production);138;Periodicite;Avril;004;114;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Tomate hors petits fruits (production);138;Periodicite;Mars;003;115;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Tomate petits fruits (production);139;Periodicite;Avril;004;106.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Tomate petits fruits (production);139;Periodicite;Mars;003;105;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Tomate petits fruits (production);139;Periodicite;Fevrier;002;109.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Tomate petits fruits (production);139;Periodicite;Mai;005;108.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;____Tomate petits fruits (production);139;Periodicite;Janvier;001;108.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;__Autres fruits et legumes;141;Periodicite;Fevrier;002;109.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;__Autres fruits et legumes;141;Periodicite;Janvier;001;108.4;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;__Autres fruits et legumes;141;Periodicite;Mai;005;108.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;__Autres fruits et legumes;141;Periodicite;Mars;003;105;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;__Autres fruits et legumes;141;Periodicite;Avril;004;106.3;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Fruits et legumes pour la transformation;142;Periodicite;Avril;004;122;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Fruits et legumes pour la transformation;142;Periodicite;Mars;003;124.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Fruits et legumes pour la transformation;142;Periodicite;Mai;005;100.6;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Fruits et legumes pour la transformation;142;Periodicite;Fevrier;002;124.9;OUI
+IPPAP;2026;METRO;FR metro - France metropolitaine;Indicateur;Indice Ippap base 100 en 2020 (1);001;Produit;___Fruits et legumes pour la transformation;142;Periodicite;Janvier;001;122.8;OUI
