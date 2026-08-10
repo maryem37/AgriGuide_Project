@@ -10,31 +10,59 @@ never match it, so a silent fallback there would always break, not
 just degrade.
 
 Ported as-is from the standalone `agri-advisor-parcelle` prototype.
+
+chromadb / sentence-transformers are optional at API runtime: without
+them (common on Windows when chroma-hnswlib fails to build), retrieve()
+returns [] and the advisor report degrades gracefully.
 """
 import sys
 import uuid
-import chromadb
-from chromadb.config import Settings as ChromaSettings
-from sentence_transformers import SentenceTransformer
+
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception
 from app.config import settings
 from app.models.schemas import RetrievedChunk
 
-_client = chromadb.PersistentClient(
-    path=settings.chroma_persist_dir,
-    settings=ChromaSettings(anonymized_telemetry=False),
-)
-_collection = _client.get_or_create_collection(settings.chroma_collection)
-
-_local_model: SentenceTransformer | None = None
+_client = None
+_collection = None
+_chroma_error: str | None = None
+_local_model = None
 _using_local_fallback = False  # tracks which embedding space is active this run
 
 _MISTRAL_EMBED_BATCH_SIZE = 8
 
 
-def _get_local_model() -> SentenceTransformer:
+def _ensure_chroma():
+    """Lazy-init Chroma. Returns False when the optional ML stack is missing."""
+    global _client, _collection, _chroma_error
+    if _collection is not None:
+        return True
+    if _chroma_error is not None:
+        return False
+    try:
+        import chromadb
+        from chromadb.config import Settings as ChromaSettings
+    except ImportError as e:
+        _chroma_error = (
+            f"chromadb not installed ({e}). Install requirements-ml.txt for RAG, "
+            f"or continue without documentary grounding."
+        )
+        return False
+    try:
+        _client = chromadb.PersistentClient(
+            path=settings.chroma_persist_dir,
+            settings=ChromaSettings(anonymized_telemetry=False),
+        )
+        _collection = _client.get_or_create_collection(settings.chroma_collection)
+        return True
+    except Exception as e:  # noqa: BLE001
+        _chroma_error = f"Chroma unavailable: {e}"
+        return False
+
+
+def _get_local_model():
     global _local_model
     if _local_model is None:
+        from sentence_transformers import SentenceTransformer
         _local_model = SentenceTransformer(settings.local_embed_model)
     return _local_model
 
@@ -97,7 +125,7 @@ def embed_texts_for_indexing(texts: list[str]) -> list[list[float]]:
             return _mistral_embed(texts)
         except Exception as e:
             print(
-                f"\n⚠️  WARNING: Mistral Embed failed after retries ({e}). "
+                f"\nWARNING: Mistral Embed failed after retries ({e}). "
                 f"Switching to local fallback model for the REST of this run. "
                 f"If the Chroma collection already has Mistral (1024-dim) embeddings, "
                 f"this WILL cause a dimension mismatch — delete chroma_store/ and "
@@ -220,6 +248,8 @@ def chunk_document(text: str, source_document: str, metadata_defaults: dict | No
 
 
 def index_chunks(chunks: list[dict]) -> None:
+    if not _ensure_chroma():
+        raise RuntimeError(_chroma_error or "Chroma unavailable")
     embeddings = embed_texts_for_indexing([c["text"] for c in chunks])
     _collection.add(
         ids=[c["id"] for c in chunks],
@@ -247,6 +277,9 @@ def retrieve(
     top_k: int | None = None,
 ) -> list[RetrievedChunk]:
     """Filter-then-semantic: metadata `where` narrows candidates before ranking."""
+    if not _ensure_chroma():
+        return []
+
     conditions = []
     if crop_filter:
         conditions.append({"crop": crop_filter})

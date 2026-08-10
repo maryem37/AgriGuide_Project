@@ -15,6 +15,7 @@ import {
   type ChatParcelContext,
   type ChatSource,
 } from "@/lib/agricultureApi";
+import { useAuth } from "@/lib/auth-context";
 
 type UiMessage = {
   id: string;
@@ -30,17 +31,15 @@ const WELCOME =
 
 /**
  * Widget flottant, ouvert depuis une icône en bas à droite. Répond aux
- * questions générales (RAG sur le corpus documentaire) et, si
- * `parcelContext` est fourni (parcelle déjà analysée sur la page
- * courante), aux questions portant sur cette parcelle précise —
- * `app/services/chatbot_service.py` décide lequel des deux contextes
- * utiliser selon la question posée.
+ * questions générales (RAG), à la parcelle sélectionnée (`parcelContext`),
+ * et au profil connecté (terrains / matériel lus en base via le JWT).
  */
 export function AgricultureChatWidget({
   parcelContext = null,
 }: {
   parcelContext?: ChatParcelContext | null;
 }) {
+  const { token } = useAuth();
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [messages, setMessages] = useState<UiMessage[]>([
@@ -63,7 +62,10 @@ export function AgricultureChatWidget({
       const history: ApiChatMessage[] = messages
         .filter((m) => m.id !== "welcome")
         .map((m) => ({ role: m.role, content: m.text }));
-      return sendChatMessage({ question, history, parcel_context: parcelContext });
+      return sendChatMessage(
+        { question, history, parcel_context: parcelContext },
+        token,
+      );
     },
     onSuccess: (data) => {
       setMessages((m) => [

@@ -267,3 +267,40 @@ class AnalyzeResponse(BaseModel):
     yield_estimate: Optional[YieldEstimate] = None  # top-recommended crop's yield estimate (Tier 3 addition — new response field)
     report: Optional[AdvisorReport] = None  # None when MISTRAL_API_KEY / RAG corpus aren't configured — degrades gracefully rather than failing the whole analysis
     warnings: list[str] = Field(default_factory=list)
+
+
+# ---------------------------------------------------------------------------
+# Floating chat widget — /agriculture/chat
+# ---------------------------------------------------------------------------
+
+
+class ChatMessage(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str
+
+
+class ChatSource(BaseModel):
+    title: str
+    url: str
+
+
+class ChatParcelContext(BaseModel):
+    """Subset of a prior AnalyzeResponse the frontend already has in memory."""
+    parcel: Optional[ParcelResolution] = None
+    soil: Optional[SoilData] = None
+    weather_stats: Optional[dict] = None
+    vegetation: Optional[VegetationData] = None
+    crop_recommendations: Optional[list[CropRecommendationOut]] = None
+    yield_estimate: Optional[YieldEstimate] = None
+    agro_calc_top_crop: Optional[AgroCalcEstimate] = None
+
+
+class ChatRequest(BaseModel):
+    question: str
+    history: list[ChatMessage] = Field(default_factory=list)
+    parcel_context: Optional[ChatParcelContext] = None
+
+
+class ChatResponse(BaseModel):
+    answer: str
+    sources: list[ChatSource] = Field(default_factory=list)

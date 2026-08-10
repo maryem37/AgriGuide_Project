@@ -26,7 +26,11 @@ _pool: pg_pool.SimpleConnectionPool | None = None
 def _get_pool() -> pg_pool.SimpleConnectionPool:
     global _pool
     if _pool is None:
-        _pool = pg_pool.SimpleConnectionPool(1, 10, dsn=DATABASE_URL)
+        # Fail fast when Docker/Postgres is down — without connect_timeout,
+        # sign-in hangs and the login button spins forever.
+        _pool = pg_pool.SimpleConnectionPool(
+            1, 10, dsn=DATABASE_URL, connect_timeout=5
+        )
     return _pool
 
 

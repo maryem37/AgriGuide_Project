@@ -232,12 +232,18 @@ export class AgricultureApiError extends Error {
   }
 }
 
-async function postJson<TResponse>(path: string, body: unknown): Promise<TResponse> {
+async function postJson<TResponse>(
+  path: string,
+  body: unknown,
+  token?: string | null,
+): Promise<TResponse> {
   let response: Response;
   try {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (token) headers.Authorization = `Bearer ${token}`;
     response = await fetch(`${AGRICULTURE_API_BASE_URL}${path}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify(body),
     });
   } catch {
@@ -341,7 +347,10 @@ export function buildChatContext(analysis: AnalyzeResponse | null): ChatParcelCo
   };
 }
 
-/** POST /agriculture/chat — question libre au widget flottant, avec historique et contexte de parcelle optionnels. */
-export function sendChatMessage(request: ChatRequest): Promise<ChatResponse> {
-  return postJson<ChatResponse>("/agriculture/chat", request);
+/** POST /agriculture/chat — question libre au widget flottant, avec historique, parcelle optionnelle, et JWT pour charger le profil en base. */
+export function sendChatMessage(
+  request: ChatRequest,
+  token?: string | null,
+): Promise<ChatResponse> {
+  return postJson<ChatResponse>("/agriculture/chat", request, token);
 }

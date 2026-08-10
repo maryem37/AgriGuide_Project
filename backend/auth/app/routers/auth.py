@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, Header, HTTPException
+from psycopg2 import OperationalError
 
 from app.models.schemas import (
     AuthResponse,
@@ -14,6 +15,11 @@ from app.security import create_access_token, decode_access_token, hash_password
 from app.services import user_service
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+_DB_UNAVAILABLE = (
+    "Base de données inaccessible (Postgres sur localhost:5434). "
+    "Démarrez Docker Desktop puis `docker compose up -d db` (ou relancez .\\dev.ps1)."
+)
 
 
 def get_current_user_id(authorization: str | None = Header(default=None)) -> str:
@@ -33,38 +39,44 @@ def _require_farmer(user: dict) -> None:
 
 @router.post("/signup", response_model=AuthResponse, status_code=201)
 def signup(request: SignUpRequest) -> AuthResponse:
-    if user_service.get_user_by_email(request.email):
-        raise HTTPException(status_code=409, detail="Un compte existe déjà avec cet email.")
+    try:
+        if user_service.get_user_by_email(request.email):
+            raise HTTPException(status_code=409, detail="Un compte existe déjà avec cet email.")
 
-    user_id = user_service.create_user(
-        email=request.email,
-        password_hash=hash_password(request.password),
-        nom=request.nom,
-        telephone=request.telephone,
-        role=request.role.value,
-    )
+        user_id = user_service.create_user(
+            email=request.email,
+            password_hash=hash_password(request.password),
+            nom=request.nom,
+            telephone=request.telephone,
+            role=request.role.value,
+        )
 
-    if request.role.value == "farmer":
-        user_service.set_farmer_equipements(user_id, list(request.equipements))
-        for terrain in request.terrains:
-            user_service.create_terrain(
-                user_id, terrain.nom, terrain.points, terrain.superficie_ha, terrain.region
-            )
+        if request.role.value == "farmer":
+            user_service.set_farmer_equipements(user_id, list(request.equipements))
+            for terrain in request.terrains:
+                user_service.create_terrain(
+                    user_id, terrain.nom, terrain.points, terrain.superficie_ha, terrain.region
+                )
 
-    user_out = user_service.build_user_out(user_id)
-    token = create_access_token(user_id)
-    return AuthResponse(access_token=token, user=UserOut(**user_out))
+        user_out = user_service.build_user_out(user_id)
+        token = create_access_token(user_id)
+        return AuthResponse(access_token=token, user=UserOut(**user_out))
+    except OperationalError as exc:
+        raise HTTPException(status_code=503, detail=_DB_UNAVAILABLE) from exc
 
 
 @router.post("/signin", response_model=AuthResponse)
 def signin(request: SignInRequest) -> AuthResponse:
-    row = user_service.get_user_by_email(request.email)
-    if not row or not verify_password(request.password, row["password_hash"]):
-        raise HTTPException(status_code=401, detail="Email ou mot de passe incorrect.")
+    try:
+        row = user_service.get_user_by_email(request.email)
+        if not row or not verify_password(request.password, row["password_hash"]):
+            raise HTTPException(status_code=401, detail="Email ou mot de passe incorrect.")
 
-    user_out = user_service.build_user_out(str(row["id"]))
-    token = create_access_token(str(row["id"]))
-    return AuthResponse(access_token=token, user=UserOut(**user_out))
+        user_out = user_service.build_user_out(str(row["id"]))
+        token = create_access_token(str(row["id"]))
+        return AuthResponse(access_token=token, user=UserOut(**user_out))
+    except OperationalError as exc:
+        raise HTTPException(status_code=503, detail=_DB_UNAVAILABLE) from exc
 
 
 @router.get("/me", response_model=UserOut)

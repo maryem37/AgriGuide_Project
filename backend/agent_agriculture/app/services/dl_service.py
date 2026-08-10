@@ -25,12 +25,20 @@ Without a checkpoint at `DL_CHECKPOINT_PATH`, this degrades gracefully
 (returns `source="unavailable"`) rather than crashing the pipeline.
 """
 import numpy as np
-import torch
-from breizhcrops.models.TempCNN import TempCNN
 
 from app.config import settings
 from app.models.schemas import DLCropObservation
 from app.services import satellite_service
+
+try:
+    import torch
+    from breizhcrops.models.TempCNN import TempCNN
+except ImportError as _dl_import_error:  # optional ML stack (requirements-ml.txt)
+    torch = None  # type: ignore[assignment]
+    TempCNN = None  # type: ignore[misc, assignment]
+    _DL_IMPORT_ERROR = str(_dl_import_error)
+else:
+    _DL_IMPORT_ERROR = None
 
 # BreizhCrops' 9 native classes, English -> French for the French-language report.
 # Order doesn't matter here (looked up by name, not index) — the model's own
@@ -57,6 +65,13 @@ def _load_model():
     if _model_cache["attempted"]:
         return
     _model_cache["attempted"] = True
+
+    if torch is None or TempCNN is None:
+        _model_cache["load_error"] = (
+            f"DL stack not installed ({_DL_IMPORT_ERROR}). "
+            f"Install requirements-ml.txt for TempCNN, or continue without DL observation."
+        )
+        return
 
     import os
     if not os.path.exists(settings.dl_checkpoint_path):

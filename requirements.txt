@@ -1,0 +1,53 @@
+# AgriGuide — shared Python deps for local multi-agent development.
+# Install once at the repo root:
+#   python -m venv .venv
+#   .\.venv\Scripts\activate          # Windows
+#   source .venv/bin/activate         # macOS/Linux
+#   pip install -r requirements.txt
+#
+# Optional heavy ML stack (Agriculture RAG / TempCNN):
+#   pip install -r requirements-ml.txt
+
+# --- HTTP APIs ---
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+httpx==0.27.2
+requests==2.32.3
+python-dotenv>=1.0.1
+tenacity==9.0.0
+
+# --- Validation / settings ---
+pydantic[email]==2.9.2
+pydantic-settings==2.5.2
+
+# --- Database / auth ---
+psycopg2-binary==2.9.9
+passlib[bcrypt]==1.7.4
+bcrypt==4.0.1
+python-jose[cryptography]==3.3.0
+
+# --- Data ---
+numpy==1.26.4
+pandas==2.2.3
+pypdf>=5.0.0
+pdfminer.six>=20240706  # Agriculture RAG ingest / _compat_shims (optional at API runtime)
+tqdm==4.66.5
+
+# --- Geospatial (Agriculture) ---
+shapely==2.0.6
+pyproj==3.6.1
+tifffile==2024.9.20
+
+# --- LLM / agents ---
+mistralai>=1.5.0,<1.6.0
+langchain-core>=0.3.0
+langchain-mistralai>=0.2.0
+langgraph>=0.0.30
+tavily-python>=0.5.0
+
+# --- Vector search (Regulation / Waste) ---
+qdrant-client>=1.12.1,<2.0.0
+fastembed>=0.7.4
+
+# --- Tests ---
+pytest>=8.2.0
