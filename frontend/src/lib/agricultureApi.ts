@@ -209,9 +209,12 @@ export type ReliefGrid = {
       ndwi_moyen: number | null;
       ndwi_min: number | null;
       ndwi_max: number | null;
+      signal_eau_libre_pct: number | null;
       ndmi_moyen: number | null;
       ndmi_min: number | null;
       ndmi_max: number | null;
+      vegetation_faible_pct: number | null;
+      humidite_vegetation_faible_pct: number | null;
     couverture_pct: number;
   };
   stats_pente: { moyenne_pct: number; p95_pct: number; max_pct: number };
