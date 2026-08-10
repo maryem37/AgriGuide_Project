@@ -755,6 +755,13 @@ function Page() {
                   </ul>
                 </div>
               )}
+              <div className="mt-4 flex justify-end">
+                <img
+                  src="/LABEL_AI%20GENERATED_black%20transparent.png"
+                  alt="Contenu généré par IA"
+                  className="h-16 w-auto"
+                />
+              </div>
             </div>
           )}
         </>

@@ -26,6 +26,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
+const LANGUAGES = [
+  { code: "fr", label: "Français", flag: "🇫🇷" },
+  { code: "en", label: "English", flag: "🇬🇧" },
+  { code: "de", label: "Deutsch", flag: "🇩🇪" },
+  { code: "es", label: "Español", flag: "🇪🇸" },
+  { code: "it", label: "Italiano", flag: "🇮🇹" },
+] as const;
+
 const nav = [
   { to: "/dashboard", label: "Accueil", shortLabel: "Accueil", icon: Home, roles: ["farmer"] as Role[] },
   { to: "/agriculture", label: "Conseiller Agricole", shortLabel: "Agricole", icon: Sprout, roles: ["farmer"] as Role[] },
@@ -134,6 +142,8 @@ export function AppShell({
             )}
           />
         </Link>
+
+        <LanguageSwitcher expanded={expanded} />
 
         <nav className="flex flex-1 flex-col gap-0.5">
           {visibleNav.map(({ to, label, icon: Icon }, i) => {
@@ -245,6 +255,39 @@ export function AppShell({
         </div>
       </nav>
     </div>
+  );
+}
+
+function LanguageSwitcher({ expanded }: { expanded: boolean }) {
+  const [lang, setLang] = useState<(typeof LANGUAGES)[number]["code"]>("fr");
+  const current = LANGUAGES.find((l) => l.code === lang) ?? LANGUAGES[0];
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        className={cn(
+          "mb-2 flex items-center rounded-xl py-2 text-sm font-semibold transition-colors hover:bg-sidebar-accent",
+          expanded ? "gap-2.5 px-2.5 justify-start" : "justify-center px-0",
+        )}
+        title="Changer de langue"
+      >
+        <span className="text-lg leading-none">{current.flag}</span>
+        {expanded && <span className="text-sidebar-foreground/80">{current.label}</span>}
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" side="right" className="w-44">
+        <DropdownMenuLabel>Langue</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {LANGUAGES.map((l) => (
+          <DropdownMenuItem
+            key={l.code}
+            onClick={() => setLang(l.code)}
+            className={cn("gap-2", l.code === lang && "font-semibold")}
+          >
+            <span className="text-base leading-none">{l.flag}</span> {l.label}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
