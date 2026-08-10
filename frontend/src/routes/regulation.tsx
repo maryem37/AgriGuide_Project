@@ -16,7 +16,6 @@ import {
   ScrollText,
   Sparkles,
   ShieldCheck,
-  Bot,
   User,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -84,7 +83,7 @@ function Page() {
     {
       id: "welcome",
       role: "bot",
-      text: `Bonjour ${firstName}, je suis votre conseiller réglementaire. Posez-moi une question sur la PAC, les aides ou les normes, ou choisissez une suggestion.`,
+      text: `Bonjour ${firstName}, je suis un agent IA, votre conseiller réglementaire, et je vous réponds automatiquement. Posez-moi une question sur la PAC, les aides ou les normes, ou choisissez une suggestion.`,
       animate: false,
     },
   ]);
@@ -152,8 +151,8 @@ function Page() {
           <section className="flex h-[calc(100dvh-9.5rem)] min-h-[28rem] max-h-[920px] flex-col overflow-hidden rounded-2xl border border-border/80 bg-card shadow-[0_16px_48px_-28px_rgba(28,43,28,0.45)] ring-1 ring-black/[0.02] md:h-[calc(100dvh-8.25rem)]">
             <header className="flex items-center justify-between gap-3 border-b border-border/70 bg-gradient-to-r from-sky/25 via-card to-card px-4 py-3 md:px-5">
               <div className="flex items-center gap-3 min-w-0">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky/40 text-sky-foreground ring-1 ring-sky/30">
-                  <Bot className="h-5 w-5" />
+                <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-sky/40 text-sky-foreground ring-1 ring-sky/30">
+                  <img src="/logo_mistral_O.jpg" alt="Agent" className="h-full w-full object-cover" />
                 </span>
                 <div className="min-w-0">
                   <div className="font-display text-base font-semibold tracking-tight">
@@ -189,8 +188,8 @@ function Page() {
                   )}
                 >
                   {m.role === "bot" && (
-                    <span className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary text-primary ring-1 ring-border/70">
-                      <Bot className="h-4 w-4" />
+                    <span className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-secondary text-primary ring-1 ring-border/70">
+                      <img src="/logo_mistral_O.jpg" alt="Agent" className="h-full w-full object-cover" />
                     </span>
                   )}
                   <div
@@ -241,8 +240,8 @@ function Page() {
 
               {chatMutation.isPending && (
                 <div className="page-enter flex gap-2.5">
-                  <span className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary text-primary ring-1 ring-border/70">
-                    <Bot className="h-4 w-4" />
+                  <span className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-secondary text-primary ring-1 ring-border/70">
+                    <img src="/logo_mistral_O.jpg" alt="Agent" className="h-full w-full object-cover" />
                   </span>
                   <WaitingMascot label="Analyse de votre question…" />
                 </div>

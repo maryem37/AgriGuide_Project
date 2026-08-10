@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useMutation } from "@tanstack/react-query";
-import { Bot, MessageCircle, Send, User, X } from "lucide-react";
+import { MessageCircle, Send, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { WaitingMascot } from "@/components/chat/WaitingMascot";
@@ -27,7 +27,7 @@ type UiMessage = {
 };
 
 const WELCOME =
-  "Bonjour ! Posez-moi une question sur l'agriculture en général, ou sur la parcelle actuellement sélectionnée si vous en avez analysé une.";
+  "Bonjour ! Je suis un agent IA qui vous répond automatiquement. Posez-moi une question sur l'agriculture en général, ou sur la parcelle actuellement sélectionnée si vous en avez analysé une.";
 
 /**
  * Widget flottant, ouvert depuis une icône en bas à droite. Répond aux
@@ -118,8 +118,8 @@ export function AgricultureChatWidget({
           aria-label="Assistant agricole"
         >
           <header className="flex items-center gap-3 border-b border-border/70 bg-gradient-to-r from-primary/10 via-card to-card px-4 py-3">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary ring-1 ring-primary/20">
-              <Bot className="h-4.5 w-4.5" />
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primary/15 text-primary ring-1 ring-primary/20">
+              <img src="/logo_mistral_O.jpg" alt="Agent" className="h-full w-full object-cover" />
             </span>
             <div className="min-w-0">
               <div className="font-display text-sm font-semibold tracking-tight">Assistant agricole</div>
@@ -143,8 +143,8 @@ export function AgricultureChatWidget({
             {messages.map((m) => (
               <div key={m.id} className={cn("flex gap-2", m.role === "user" ? "justify-end" : "justify-start")}>
                 {m.role === "assistant" && (
-                  <span className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-primary ring-1 ring-border/70">
-                    <Bot className="h-3.5 w-3.5" />
+                  <span className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-secondary text-primary ring-1 ring-border/70">
+                    <img src="/logo_mistral_O.jpg" alt="Agent" className="h-full w-full object-cover" />
                   </span>
                 )}
                 <div
@@ -201,8 +201,8 @@ export function AgricultureChatWidget({
 
             {chatMutation.isPending && (
               <div className="flex gap-2">
-                <span className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-primary ring-1 ring-border/70">
-                  <Bot className="h-3.5 w-3.5" />
+                <span className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-secondary text-primary ring-1 ring-border/70">
+                  <img src="/logo_mistral_O.jpg" alt="Agent" className="h-full w-full object-cover" />
                 </span>
                 <WaitingMascot label="Réflexion en cours…" />
               </div>
