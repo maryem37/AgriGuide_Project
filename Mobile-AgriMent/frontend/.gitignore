@@ -1,0 +1,28 @@
+node_modules/
+.expo/
+dist/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+
+# Local env files
+.env*.local
+
+# macOS
+.DS_Store
+
+# Temporary
+*.tsbuildinfo
+NUL
+**/NUL
+nul 
+**/nul
+# Ignore Windows reserved filename
+NUL
+**/NUL
+nul
+**/nul
