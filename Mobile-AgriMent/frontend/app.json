@@ -1,0 +1,48 @@
+{
+  "expo": {
+    "name": "AgriMent",
+    "slug": "agriment",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./src/assets/icon.png",
+    "userInterfaceStyle": "light",
+
+    "splash": {
+      "image": "./src/assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#2E7D32"
+    },
+
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.agriment.app"
+    },
+
+    "android": {
+      "package": "com.farminds.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./src/assets/adaptive-icon.png",
+        "backgroundColor": "#2E7D32"
+      }
+    },
+
+    "plugins": [
+      "expo-camera",
+      "expo-image-picker",
+      "expo-notifications",
+      "expo-asset",
+      "expo-font"
+    ],
+
+    "extra": {
+      "apiHost": "192.168.1.4:8080",
+      "eas": {
+        "projectId": "3c29e27d-2f43-43ce-839a-371724f1a667"
+      }
+    }
+  }
+}
