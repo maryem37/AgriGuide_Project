@@ -14,7 +14,7 @@ import mimetypes
 from pathlib import Path
 import app._compat_shims  # noqa: F401 — must run before the unstructured import below
 from unstructured.partition.auto import partition
-from app.services.rag_service import chunk_document, index_chunks, _collection
+from app.services.rag_service import chunk_document, index_chunks, is_source_indexed, count_indexed_chunks
 from app.taxonomy import normalize_crop
 from app.hal_title_lookup import lookup_title_and_url
 
@@ -85,12 +85,14 @@ def main():
             skipped.append(path.name)
             continue
 
-        if not args.force:
-            existing = _collection.get(where={"source_document": path.name}, limit=1)
-            if existing["ids"]:
-                print(f"[SKIP] {path.name} already indexed — skipping (use --force to re-index)")
-                already_indexed.append(path.name)
-                continue
+        # Deliberately OUTSIDE the per-file try below: a failure here means
+        # the store itself is unreachable, which would otherwise be logged
+        # once per file as a parse error and end with a misleading
+        # "N failed (parse errors)" summary over an empty collection.
+        if not args.force and is_source_indexed(path.name):
+            print(f"[SKIP] {path.name} already indexed — skipping (use --force to re-index)")
+            already_indexed.append(path.name)
+            continue
 
         try:
             title, url, is_real = lookup_title_and_url(path.name)
@@ -123,6 +125,15 @@ def main():
         print("Skipped (too large):", ", ".join(skipped))
     if failed:
         print("Failed (parse error):", ", ".join(failed))
+
+    total = count_indexed_chunks()
+    print(f"Collection now holds {total} chunks.")
+    if total == 0:
+        print(
+            "[ATTENTION] The collection is EMPTY. The advisor report will render "
+            "'Aucun conseil pratique disponible' for every parcel until this is "
+            "fixed — retrieval has nothing to return, so no claim can be grounded."
+        )
 
 
 if __name__ == "__main__":

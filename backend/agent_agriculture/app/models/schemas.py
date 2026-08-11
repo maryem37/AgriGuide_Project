@@ -170,6 +170,7 @@ class SynthesisJSON(BaseModel):
     yield_summary: dict = Field(default_factory=dict)  # set directly from YieldEstimate.model_dump() in Python — same treatment, never LLM-generated
     crop_recommendations: list[CropRecommendation]
     grounded_claims: list[dict]  # {"claim": str, "source_chunk_id": str}
+    retrieved_chunk_count: int = 0  # chunks RAG actually returned — lets the report say "corpus vide" vs "rien d'exploitable dans les documents trouvés" instead of one ambiguous message for both
     data_gaps: list[str]
 
 
