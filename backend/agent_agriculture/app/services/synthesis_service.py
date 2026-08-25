@@ -197,11 +197,34 @@ claim), rather than generated here — you were never given the document
 titles/links needed to write it correctly anyway.
 
 ## Alertes
-Risks and things to watch, grounded in the data provided. If
-dl_mismatch_note is present (not null) in the JSON, include it as its
-own bullet point, copied verbatim — do not paraphrase, reword, or
-recompute any figure inside it; it was already written and verified
-outside this generation step.
+Risks and things to watch, as a bulleted list, grounded ONLY in the
+data already present in the JSON (weather_stats, soil_summary,
+vegetation_summary, agro_calc_summary, yield_summary) — characterizing
+an existing number as "high"/"low"/"favorable" is judgement, not
+invention, so it is allowed; introducing a NEW number is not. Actively
+check each of these and include a bullet whenever it applies:
+- weather_stats.total_precip_mm very low relative to the crop's needs,
+  or rainy_days_count very low → water-stress / irrigation risk.
+- weather_stats.total_precip_mm or rainy_days_count high → disease/
+  fungal pressure risk, and (if soil.nitrogen_g_kg is also present)
+  nitrate leaching risk.
+- weather_stats.max_temp_c notably high → heat-stress risk during
+  sensitive growth stages.
+- soil.ph markedly acidic or alkaline → nutrient-availability risk for
+  the recommended crop(s).
+- soil.nitrogen_g_kg or soil.organic_carbon_g_kg low → soil fertility
+  risk.
+- agro_calc_summary.warning or yield_summary.warning present → restate
+  it plainly as a bulleted alert (these are real limitations of the
+  estimate, not invented risks).
+- dl_mismatch_note present (not null) → include it as its own bullet,
+  copied VERBATIM — do not paraphrase, reword, or recompute any figure
+  inside it; it was already written and verified outside this
+  generation step.
+If, after checking all of the above, genuinely none apply, write a
+single bullet saying plainly that no particular risk stands out in the
+available data — never leave this section with only the heading and no
+bullets.
 
 ## Données manquantes
 Restate data_gaps as a bulleted list.
@@ -364,19 +387,35 @@ def _audit_report_numbers(report_text: str, synthesis: SynthesisJSON, parcel: Pa
     return sorted(set(unverified))
 
 
-def _render_conseils_pratiques(grounded_claims: list[dict]) -> str:
+def _render_conseils_pratiques(grounded_claims: list[dict], retrieved_chunk_count: int) -> str:
     """
     Deterministic — built entirely from already-verified data, no LLM
     involved. Citation-first, real document title as a clickable link:
     "- [{title}]({url}) : {claim}"
+
+    Two distinct empty cases, so the message tells the operator where to
+    look: retrieved_chunk_count == 0 means retrieve() found nothing at
+    all (empty/misconfigured Chroma collection, or no chunk matched the
+    crop/region filters) — a corpus problem. retrieved_chunk_count > 0
+    but no grounded_claims survived means Stage 1 found chunks but
+    couldn't extract a claim it could cite precisely enough to pass
+    _validate_grounded_claims — a retrieval-relevance problem, not a
+    corpus-size one.
     """
     if not grounded_claims:
-        return (
-            "## Conseils pratiques\n"
-            "Aucun conseil pratique disponible : le corpus de documents pour cette "
-            "culture est actuellement insuffisant pour extraire des recommandations "
-            "fiables et sourcées.\n"
-        )
+        if retrieved_chunk_count == 0:
+            detail = (
+                "aucun document du corpus n'a pu être retrouvé pour cette culture "
+                "(corpus vide ou non indexé, ou aucun document ne correspond aux filtres "
+                "crop/région appliqués)"
+            )
+        else:
+            detail = (
+                f"{retrieved_chunk_count} extrait(s) de document ont été retrouvés mais "
+                f"n'ont permis d'extraire aucune recommandation directement exploitable "
+                f"et sourcée pour cette culture"
+            )
+        return f"## Conseils pratiques\nAucun conseil pratique disponible : {detail}.\n"
     lines = ["## Conseils pratiques"]
     for item in grounded_claims:
         lines.append(f"- [{item['title']}]({item['url']}) : {item['claim']}")
@@ -482,6 +521,7 @@ async def synthesize_stage1(
         yield_summary=yield_estimate.model_dump() if yield_estimate else {},
         crop_recommendations=crop_recs,
         grounded_claims=_validate_grounded_claims(raw.get("grounded_claims", []), chunks_by_id),
+        retrieved_chunk_count=len(chunks),
         data_gaps=_normalize_data_gaps(raw.get("data_gaps", [])),
     )
 
@@ -511,7 +551,7 @@ async def generate_report(synthesis: SynthesisJSON, parcel: ParcelResolution) ->
 
     unverified = _audit_report_numbers(report_text, synthesis, parcel)
 
-    conseils_section = _render_conseils_pratiques(synthesis.grounded_claims)
+    conseils_section = _render_conseils_pratiques(synthesis.grounded_claims, synthesis.retrieved_chunk_count)
     report_text = _insert_conseils_pratiques(report_text, conseils_section)
 
     return AdvisorReport(

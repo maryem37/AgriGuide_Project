@@ -269,6 +269,31 @@ def index_chunks(chunks: list[dict]) -> None:
     )
 
 
+def is_source_indexed(source_document: str) -> bool:
+    """
+    True if at least one chunk from this file is already in the store.
+    Exists because `_collection` is None until `_ensure_chroma()` runs —
+    importing the module-level name directly (as scripts/ingest_rag_corpus.py
+    used to) binds None forever, so every dedup check raised
+    AttributeError, was swallowed by the ingest loop's per-file
+    `except`, and the run reported every file as "failed" while
+    indexing nothing. That is how the collection ended up empty.
+    """
+    if not _ensure_chroma():
+        raise RuntimeError(_chroma_error or "Chroma unavailable")
+    existing = _collection.get(where={"source_document": source_document}, limit=1)
+    return bool(existing["ids"])
+
+
+def count_indexed_chunks() -> int:
+    """Chunks currently in the store — 0 means the advisor report will
+    have no documentary grounding at all. Used by scripts and by the
+    ingest run summary to make an empty store loud instead of silent."""
+    if not _ensure_chroma():
+        return 0
+    return _collection.count()
+
+
 def retrieve(
     query: str,
     crop_filter: str | None = None,
