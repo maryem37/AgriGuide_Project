@@ -649,52 +649,27 @@ export function Terrain3DDialog({
                 <StatsPanel data={data} />
                 <SatelliteContext data={data} mode={mode} />
 
-<<<<<<< Updated upstream
-                <div className="space-y-1.5 rounded-lg bg-muted/30 p-3">
-                  <p className="text-xs text-muted-foreground">
-                    Zones grises : données Sentinel-2 masquées (nuages, ombres, neige ou hors données)
-                    — aucune valeur n'est inventée.
-                  </p>
-                  {data.warnings.map((warning) => (
-                    <p
-                      key={warning}
-                      className="flex items-start gap-1.5 text-xs text-amber-700 dark:text-amber-400"
-                    >
-                      <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />
-                      {warning}
+                {/* Info */}
+                {data.warnings.length > 0 && (
+                  <div className="space-y-1.5 rounded-lg bg-muted/30 p-3">
+                    <p className="hidden">
+                      Zones grises : données Sentinel-2 masquées (nuages, ombres, neige ou hors données)
+                      — aucune valeur n'est inventée.
                     </p>
-                  ))}
-                </div>
+                    {data.warnings.map((warning) => (
+                      <p
+                        key={warning}
+                        className="flex items-start gap-1.5 text-xs text-amber-700 dark:text-amber-400"
+                      >
+                        <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />
+                        {warning}
+                      </p>
+                    ))}
+                  </div>
+                )}
               </>
             )}
           </div>
-=======
-              {/* Stats */}
-              <StatsPanel data={data} />
-              <SatelliteContext data={data} mode={mode} />
-              {mode === "photo" && <GeneralParcelConclusion data={data} />}
-
-              {/* Info */}
-              {data.warnings.length > 0 && (
-                <div className="space-y-1.5 rounded-lg bg-muted/30 p-3">
-                <p className="hidden">
-                  Zones grises : données Sentinel-2 masquées (nuages, ombres, neige ou hors données)
-                  — aucune valeur n'est inventée.
-                </p>
-                {data.warnings.map((warning) => (
-                  <p
-                    key={warning}
-                    className="flex items-start gap-1.5 text-xs text-amber-700 dark:text-amber-400"
-                  >
-                    <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />
-                    {warning}
-                  </p>
-                ))}
-                </div>
-              )}
-            </>
-          )}
->>>>>>> Stashed changes
         </div>
       </DialogContent>
     </Dialog>

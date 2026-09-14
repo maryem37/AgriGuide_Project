@@ -1,165 +1,156 @@
-# AgriAdvisor
+# AgriGuide — Plateforme d'Aide à la Décision Agricole par IA Multi-Agents
 
-Plateforme d'aide à la décision agricole (France) : réglementation, choix de
-culture, étude business, suivi quotidien et marketplace communautaire —
-propulsée par des agents IA.
+**AgriGuide** est une plateforme SaaS complète d'aide à la décision pour les agriculteurs, coopératives et conseillers agronomiques en France. Elle combine données satellitaires (Copernicus Sentinel-2), géomatique officielle (Cadastre, IGN LiDAR HD, RPG), modèles de Deep Learning / Machine Learning, et un écosystème d'agents IA autonomes (LangGraph, Mistral AI, Qdrant).
 
-## Vue d'ensemble
+---
 
-Voir `docs/ARCHITECTURE.md` pour l'architecture multi-agents complète et
-`database/schema.sql` pour le schéma de données.
+## 🌟 Fonctionnalités Principales
 
-## Structure du repo
+- 🗺️ **Conseiller Parcellaire & Agro-Écologique** (`/agriculture`) :
+  - Détection parcellaire automatique (Cadastre API Carto & Registre Parcellaire Graphique WFS).
+  - Analyse physico-chimique du sol (SoilGrids ISRIC) et historique climatique (Open-Meteo).
+  - Végétation & vigueur par satellite Sentinel-2 (NDVI, NDWI, NDMI).
+  - Modélisation du terrain en 3D interactif (Three.js + LiDAR HD IGN) et carte Mapbox GL JS.
+  - Recommandation culturale multicritère (RandomForest + TempCNN BreizhCrops) et modulation d'azote VRA (format ISOBUS / CSV).
+  - Estimateur de séquestration carbone et revenus de crédits carbone.
+- 💬 **Assistant Agronomique RAG & Chat Flottant** :
+  - Chatbot conversationnel contextualisé à la parcelle sélectionnée et au profil connecté.
+  - RAG hybride basé sur le corpus documentaire technique (ARVALIS, Terres Inovia, ITB, HAL).
+- ⚖️ **Agent Réglementation & PAC** (`/regulation`) :
+  - RAG juridique sur le Code Rural, les normes BCAE, éco-régimes et arrêtés ministériels.
+  - Moteur de synchronisation et de recherche des subventions et aides financières en temps réel (Tavily).
+- 📈 **Bourse Agricole & Vente à Terme** (`/trading`) :
+  - Cotations des marchés de matières premières agricoles (Euronext / MATIF) en direct et séries historiques.
+  - Simulateur de décision commerciale pour agriculteurs (Vendre, Stocker au hangar ou Patienter).
+  - Alertes de marché et signaux de couverture contre la volatilité des cours.
+- 🔬 **Scanner & Diagnostic Phytosanitaire par Vision IA** (`/diagnostic`) :
+  - Reconnaissance automatique de plus de 40 pathologies végétales, maladies fongiques et insectes ravageurs via Vision IA (Mistral Pixtral).
+  - Détection des auxiliaires bénéfiques (coccinelles, syrphes) et recommandations de biocontrôle.
+- 🐛 **Agent Détection d'Insectes & Cartes d'Alerte** (`backend/agent_insects`) :
+  - Détection des ravageurs par traitement d'images et génération de cartes d'alerte territorialisées avec LangGraph.
+- ♻️ **Valorisation des Déchets & Coproduits** (`backend/waste_agents`) :
+  - Base de connaissances et marketplace de valorisation des résidus de récolte (méthanisation, compostage, paillage).
+- 🌦️ **Dashboard Météo Agricole & Pulvérisation** (`/weather`) :
+  - Fenêtres météo optimales de traitement, cumul pluviométrique et alertes gel/canicule.
+- 📊 **Étude Économique & Business Plan** (`/business`) :
+  - Modélisation technico-économique, marges brutes, rentabilité prévisionnelle basée sur les séries FAOSTAT.
 
-```
-agriadvisor/
-├── backend/
-│   ├── orchestrator/        # Agent superviseur (LangGraph) — routage
-│   ├── auth/                 # Sign up/sign in, rôles farmer/acheteur, profil
-│   ├── agent_regulation/     # RAG légal (Code Rural, Cerfa, aides)
-│   ├── agent_agriculture/    # Analyse géo/sol/climat + RandomForest
-│   ├── agent_business/       # Scoring des scénarios + étude de marché
-│   ├── agent_monitoring/     # Suivi quotidien, alertes, déclenchement marketplace
-│   ├── waste_agents/         # Déchets & valorisation (KB + API port 8004)
-│   ├── marketplace/          # Module CRUD annonces (récolte + déchets)
-│   └── shared/               # Modèles de données, clients API externes communs
-├── database/
-│   └── schema.sql            # Schéma complet PostgreSQL + PostGIS + pgvector
-├── frontend/                 # Interface (générée via Lovable, voir README dédié)
-├── docs/
-│   ├── ARCHITECTURE.md       # Architecture technique détaillée
-│   └── team_guide.md         # Qui fait quoi, RGPD, conventions
-└── docker-compose.yml
-```
+---
 
-## Démarrage rapide (après `git clone`)
+## 🏛️ Architecture Multi-Agents & Ports Backend
 
-Prérequis : [Docker Desktop](https://www.docker.com/products/docker-desktop/),
-Python 3.11+, Node.js 20+.
+Le backend est architecturé en micro-services spécialisés FastAPI interconnectés :
 
-### 1. Configurer les variables d'environnement
+| Service | Port | Description |
+| :--- | :---: | :--- |
+| **Business Agent** | `8000` | Scénarios économiques, rentabilité, historique FAOSTAT |
+| **Auth Service** | `8001` | Authentification JWT, gestion des rôles (*farmer* / *acheteur*) et profils |
+| **Agriculture Agent** | `8002` | Cadastre, RPG, SoilGrids, Sentinel-2, Relief 3D, Diagnostic Vision |
+| **Monitoring Agent** | `8003` | Surveillance quotidienne, suivi d'exploitation et alertes |
+| **Waste Agent** | `8004` | Valorisation des coproduits et déchets agricoles |
+| **Regulation Agent** | `8005` | RAG Réglementaire PAC, BCAE, subventions et aides en direct |
+| **Weather Agent** | `8006` | Données météorologiques haute précision et fenêtres de traitement |
+| **Trading Agent** | `8007` | Cotations Euronext/MATIF, signaux de vente et stratégies de marché |
+| **Orchestrator** | `8008` | Agent superviseur LangGraph pour le routage et handoffs multi-agents |
+| **Insects Agent** | `8009` | Détection d'insectes, sévérité et cartographie des alertes |
 
+---
+
+## 🚀 Démarrage Rapide
+
+### Prérequis
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+- Python 3.11+
+- Node.js 20+
+
+### 1. Variables d'environnement
+À la racine du projet :
 ```bash
-cp .env.example .env    # macOS/Linux — sur Windows : Copy-Item .env.example .env
+# Windows PowerShell
+Copy-Item .env.example .env
+
+# Linux / macOS
+cp .env.example .env
 ```
+Ouvrez `.env` et renseignez votre clé **`MISTRAL_API_KEY`** (compte gratuit sur [console.mistral.ai](https://console.mistral.ai/)).
+Optionnellement, renseignez `SENTINEL_HUB_CLIENT_ID` / `SENTINEL_HUB_CLIENT_SECRET`, `VITE_MAPBOX_TOKEN`, et `WEB_SEARCH_API_KEY` (Tavily).
 
-Ouvrez `.env` et renseignez au minimum `MISTRAL_API_KEY` (clé gratuite sur
-[console.mistral.ai](https://console.mistral.ai)) — les autres clés (Sentinel
-Hub, Mapbox, Tavily...) sont optionnelles pour un premier lancement mais
-certaines fonctionnalités seront dégradées sans elles (voir les commentaires
-dans `.env.example`).
-
-**Important** : l'Agent Régulation et l'Agent Waste ont chacun leur propre
-`.env` (Qdrant Cloud déjà provisionné avec les données) :
-
-```bash
-cp backend/agent_regulation/.env.example backend/agent_regulation/.env
-cp backend/waste_agents/.env.example backend/waste_agents/.env
-```
-
-Ces identifiants Qdrant/Tavily ne se régénèrent pas tout seuls — demandez-les
-directement au porteur du projet (ne jamais commiter de vrai `.env`, ils sont
-dans `.gitignore`).
-
-### 2. Démarrer PostgreSQL (crée les tables automatiquement)
-
+### 2. Démarrer la base de données PostgreSQL / PostGIS
 ```bash
 docker compose up -d db
 ```
+*(Le schéma `database/schema.sql` est initialisé automatiquement au premier lancement).*
 
-Au tout premier démarrage, Postgres exécute automatiquement
-`database/schema.sql` (monté sur `/docker-entrypoint-initdb.d/`) et crée
-toutes les tables. Rien d'autre à faire.
-
-> Si vous récupérez un volume Postgres déjà existant (pas le cas sur un clone
-> tout neuf), les tables ne seront PAS recréées automatiquement — voir
-> [Dépannage](#dépannage) plus bas pour appliquer le schéma/les migrations à
-> la main.
-
-### 3. Installer les dépendances Python (un seul venv partagé)
-
+### 3. Installer les dépendances Python
+Utilisez le virtualenv partagé du projet :
 ```powershell
 # Windows
 .\scripts\setup_venv.ps1
 ```
-
 ```bash
-# macOS / Linux
+# Linux / macOS
 ./scripts/setup_venv.sh
 ```
 
-### 4. Lancer tous les agents backend
-
-```powershell
-.\dev.ps1
-```
-
+### 4. Lancer tous les agents Backend
+Lancez l'ensemble des agents et la base de données en une seule commande :
 ```bash
-./dev.sh
+python scripts/run_backend.py --with-db
 ```
+*Pour vérifier la santé des services : rendez-vous sur `http://localhost:8002/health`, `http://localhost:8005/health`, etc.*
 
-Ports locaux :
-
-| Service        | Port |
-|----------------|------|
-| Business       | 8000 |
-| Auth           | 8001 |
-| Agriculture    | 8002 |
-| Monitoring     | 8003 |
-| Waste          | 8004 |
-| Regulation     | 8005 |
-
-Vérifiez que tout tourne : `curl http://localhost:8001/health` (idem pour les
-autres ports) doit répondre `{"status":"ok",...}`.
-
-### 5. Lancer le frontend
-
+### 5. Démarrer le Frontend (React / Vite / TanStack Start)
 Dans un nouveau terminal :
-
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
+Ouvrez votre navigateur sur **`http://localhost:8080`** (ou l'URL locale affichée par Vite).
 
-L'app est disponible sur l'URL affichée dans le terminal (ligne `Local:`).
-Créez un compte via la page d'inscription pour vous
-connecter — il n'y a pas de compte de démo pré-créé (la base démarre vide).
+---
 
-Les `requirements.txt` dans chaque dossier `backend/*` restent valides pour Docker.
-Le venv global (`.venv/`) sert uniquement au développement local multi-agents.
+## 📂 Structure du Répertoire
 
-## Dépannage
-
-**`column "..." does not exist` / autre erreur SQL** — le volume Postgres est
-plus vieux que le schéma actuel (`schema.sql` ne s'exécute qu'à la toute
-première création du volume, pas aux redémarrages suivants). Appliquez les
-migrations manquantes (sans danger de les rejouer, elles sont idempotentes) :
-
-```bash
-docker compose exec -T db psql -U agriadvisor -d agriadvisor < database/migration_business_financials.sql
-docker compose exec -T db psql -U agriadvisor -d agriadvisor < database/migration_decision_allocations_scenario_cascade.sql
+```
+AgriGuide_Project/
+├── backend/
+│   ├── agent_agriculture/   # Cadastre, RPG, sol, satellite, 3D LiDAR, Diagnostic Vision
+│   ├── agent_business/      # Modèles financiers, scénarios, FAOSTAT
+│   ├── agent_insects/       # Détection d'insectes & cartographie des alertes (LangGraph)
+│   ├── agent_monitoring/    # Suivi d'exploitation et alertes
+│   ├── agent_regulation/    # RAG réglementaire PAC, subventions & aides
+│   ├── agent_trading/       # Bourse Euronext/MATIF & stratégie de commercialisation
+│   ├── agent_weather/       # Météorologie & fenêtres de pulvérisation
+│   ├── auth/                # Authentification, JWT, profils agriculteurs
+│   ├── orchestrator/        # Superviseur & coordination LangGraph
+│   ├── waste_agents/        # Valorisation des coproduits & marketplace déchets
+│   └── shared/              # Modèles et clients partagés
+├── database/
+│   ├── schema.sql           # Schéma PostgreSQL + PostGIS
+│   └── migrations/          # Scripts de migration incrémentaux
+├── frontend/                # Application React 19 / TanStack Router & Start / TailwindCSS
+├── scripts/                 # Scripts d'automatisation (run_backend.py, setup, etc.)
+└── docker-compose.yml       # Stack PostgreSQL PostGIS
 ```
 
-> `database/schema.sql`, lui, n'est PAS rejouable tel quel sur une base qui a
-> déjà des tables (`CREATE TABLE` sans `IF NOT EXISTS` → erreur "already
-> exists"). Il ne sert qu'à l'initialisation d'un volume neuf. Pour repartir
-> d'une base totalement vide : `docker compose down -v` puis `docker compose up -d db`
-> (⚠️ `-v` supprime tous les volumes Docker du projet, données Postgres comprises).
+---
 
-**`Failed to resolve import "three"` (frontend)** — `node_modules` désynchronisé
-du `package-lock.json` : `cd frontend && npm install`.
+## 🛠️ Dépannage Courant
 
-**401 Unauthorized en boucle** — session invalide en cache dans le navigateur.
-Déconnectez-vous/reconnectez-vous, ou dans la console DevTools :
-`localStorage.removeItem("agriguide.session")` puis rechargez.
-
-**Agent Régulation renvoie 503 / erreur au démarrage** — `backend/agent_regulation/.env`
-manquant ou incomplet (voir étape 1). Cet agent a besoin de `MISTRAL_API_KEY`,
-`QDRANT_URL` et `QDRANT_COLLECTION_NAME` pour démarrer.
-
-## Équipe — répartition suggérée
-
-Chaque dossier sous `backend/` est un lot de travail quasi indépendant.
-Voir `docs/team_guide.md` pour la répartition détaillée et les interfaces
-entre modules (ce que chaque agent reçoit / renvoie).
+- **Erreur 429 Mistral (Rate Limit)** :
+  Assurez-vous que votre modèle est configuré sur un modèle compatible avec votre plan dans `.env` :
+  ```env
+  MISTRAL_MODEL=open-mistral-7b
+  ```
+- **Base de données / migrations** :
+  Si vous devez réinitialiser la base de données locale à neuf :
+  ```bash
+  docker compose down -v
+  docker compose up -d db
+  ```
+- **Dépendances Frontend** :
+  En cas de problème avec des modules graphiques (Three.js, Mapbox, Leaflet) :
+  ```bash
+  cd frontend && npm install
+  ```
