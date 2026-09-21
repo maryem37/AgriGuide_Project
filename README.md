@@ -32,8 +32,66 @@
   - Base de connaissances et marketplace de valorisation des résidus de récolte (méthanisation, compostage, paillage).
 - 🌦️ **Dashboard Météo Agricole & Pulvérisation** (`/weather`) :
   - Fenêtres météo optimales de traitement, cumul pluviométrique et alertes gel/canicule.
+- 🛡️ **Agent Risk Analyst & Risque Climatique Paramétrique** (`/risk` • Port `8010`) :
+  - Évaluation du risque de sécheresse basée sur le papier scientifique de référence **Belhsen et al. (2026, JRACR)**.
+  - Calcul de l'anomalie pluviométrique $SPI_{3m}$ (loi Gamma) et du bilan hydrique $SPEI_{3m}$ (loi Pearson III).
+  - Détection du stress végétatif $NDVI_{\text{decay}}$ par imagerie Sentinel-2 et score composite $100 \times \Phi(-\text{CompositeIndex})$.
+  - Générateur de rapport d'expertise HTML 8 sections autonome avec graphiques vectoriels SVG natifs et recommandation d'assurance paramétrique.
+  - Optimisation d'assolement multi-cultures sous contraintes par programmation linéaire (solveur HiGHS) et calcul de l'indice de concentration Herfindahl-Hirschman ($HHI$).
 - 📊 **Étude Économique & Business Plan** (`/business`) :
   - Modélisation technico-économique, marges brutes, rentabilité prévisionnelle basée sur les séries FAOSTAT.
+
+---
+
+## 🔬 Fondement Scientifique — Agent Risk Analyst & Modèle Belhsen et al. (2026)
+
+L'**Agent Risk Analyst** (`backend/agent_risk`, Port `8010`) isole explicitement les modèles d'évaluation de risque pour garantir une rigueur académique irréprochable (PFE, soutenances et audits actuariels).
+
+### 📖 Référence Académique de la Publication Source
+> **Belhsen, Y., Ouhdouch, R., & Said, K. (2026).**  
+> *Drought Risk Mapping and Parametric Insurance in Agriculture: A Machine Learning-Based Framework.*  
+> **Journal of Risk Analysis and Crisis Response**, 16(2), 217–253.  
+> DOI : [10.54560/jracr.v16i2.726](https://doi.org/10.54560/jracr.v16i2.726)
+
+---
+
+### 🧮 Formulation Mathématique du Risque Climatique
+
+Le moteur climatique évalue le risque composite de sécheresse d'une parcelle à partir de trois grandeurs hydro-météorologiques et satellitaires :
+
+1. **Standardized Precipitation Index ($SPI_{3m}$)** :
+   Ajustement du cumul pluviométrique sur 3 mois glissants via la fonction de distribution de probabilité Gamma $\Gamma(\alpha, \beta)$ :
+   $$f(x) = \frac{1}{\beta^\alpha \Gamma(\alpha)} x^{\alpha-1} e^{-x/\beta} \quad \text{pour } x > 0$$
+   Gestion rigoureuse du cas limite $q_0 = P(x=0) = 100\%$ (zéro précipitation) avec retour à l'indice plancher $SPI = -2.5$ sans erreur de division par zéro (`NaN`).
+
+2. **Standardized Precipitation-Evapotranspiration Index ($SPEI_{3m}$)** :
+   Ajustement du bilan hydrique $D = P - ET_0$ (où $ET_0$ est calculé par le modèle de Hargreaves) via la distribution **Pearson Type III** à 3 paramètres (asymétrie $\gamma$, position $\mu$, échelle $\sigma$).
+
+3. **Sentinel-2 Canopy Vegetation Decay ($NDVI_{\text{decay}}$)** :
+   Mesure du décrochage relatif de la canopée végétale par rapport à la ligne de base historique de la parcelle :
+   $$NDVI_{\text{decay}} = \max\left(0, \frac{NDVI_{\text{baseline}} - NDVI_{\text{actuel}}}{NDVI_{\text{baseline}}}\right)$$
+
+4. **Synthèse de l'Indice Composite & Score de Risque (0 à 100)** :
+   $$\text{CompositeIndex} = 0.45 \cdot SPI_{3m} + 0.40 \cdot SPEI_{3m} - 0.15 \cdot NDVI_{\text{decay}}$$
+   $$\text{RiskScore} = 100 \times \Phi(-\text{CompositeIndex})$$
+   Où $\Phi$ est la fonction de répartition de la loi normale centrée réduite $\mathcal{N}(0,1)$.
+
+---
+
+### 🛡️ Moteur d'Assurance Paramétrique & Rapport HTML
+
+- **Niveaux de Risque** : `FAIBLE` (<30), `MODÉRÉ` (30-50), `ÉLEVÉ` (50-75), `CRITIQUE` ($\ge$75).
+- **Primes Indicatives & Seuils** : Calcul automatique des seuils d'indemnisation $s_{\text{trigger}}$ (ex: $SPEI < -1.5$) et d'épuisement $s_{\text{exhaustion}}$ ($SPEI = -2.5$).
+- **Export HTML Autonome (8 Sections)** : Génération d'un document complet responsive prêt pour l'impression (`@media print`) avec graphiques SVG natifs (courbes $SPI$/$SPEI$ et décrochage $NDVI$).
+
+---
+
+### ⚖️ Distinction de Transparence Scientifique (Evidence-Based vs. Heuristiques V1)
+
+Afin de respecter les principes d'honnêteté scientifique :
+- **Module Scientifique (Evidence-Based)** : Seul le **Risque Climatique Paramétrique** (SPI / SPEI / NDVI) s'appuie directement sur le framework publié par **Belhsen et al. (2026)**.
+- **Modules Heuristiques Internes (V1)** : Les modèles d'assolement (**HiGHS `linprog` + Indice $HHI$**), d'incompatibilité agronomique et de scénarios financiers sont des **heuristiques d'ingénierie interne (V1)**. Leurs disclaimers le mentionnent explicitement dans l'API et dans l'interface UI.
+
 
 ---
 
