@@ -334,77 +334,109 @@ export async function evaluateStrategy(
     const t = FALLBACK_TICKERS.find((x) => x.symbol === symbol) || FALLBACK_TICKERS[0];
     const marketPrice = t.price_eur_ton;
     const breakEven = req.break_even_cost_eur_ton || 180;
-    const targetMargin = req.target_margin_pct || 20;
+    const targetMargin = req.target_margin_pct ?? 20;
     const targetPrice = Math.round(breakEven * (1 + targetMargin / 100));
     const uncommitted = Math.max(0, req.total_harvest_tons - req.already_committed_tons);
+    const marginEur = Math.round(marketPrice - breakEven);
+    const marginPct = ((marginEur / breakEven) * 100).toFixed(1);
+    const priceGap = Math.round(targetPrice - marketPrice);
+    const storageCap = req.storage_capacity_tons || 0;
+    const storageDeficit = Math.max(0, uncommitted - storageCap);
 
     if (uncommitted <= 0) {
       return {
         action: "HOLD",
-        action_label: "Récolte déjà 100% vendue",
+        action_label: "MAINTENIR POSITION",
         confidence_score_pct: 95,
-        headline: "Tous vos volumes sont sous contrat",
+        headline: "Récolte 100% sous contrat",
         rationale: [
-          "Vous avez déjà contractualisé l'intégralité de votre récolte estimée.",
-          "Aucun risque de baisse du marché sur ce volume.",
+          `L'intégralité de votre récolte de ${req.total_harvest_tons} t est déjà sous contrat.`,
+          "Aucun risque de baisse de marché sur ce volume.",
         ],
         market_signals: { trend: "Neutre", price: `${marketPrice} €/t` },
         recommended_volume_tons: 0,
         recommended_target_price_eur_ton: marketPrice,
         estimated_total_gain_eur: 0,
         risk_level: "low",
-        step_by_step_plan: ["1. Suivre les dates de livraison prévues avec votre acheteur."],
+        step_by_step_plan: [`1. Suivre les livraisons prévues pour vos ${req.already_committed_tons} t.`],
         tri_source_snapshot: [],
       };
     }
 
     if (marketPrice >= targetPrice) {
-      const recVol = Math.round(uncommitted * 0.5);
-      const gain = Math.round(recVol * (marketPrice - breakEven));
+      const recVol = Math.round(uncommitted * 0.6);
+      const gain = Math.round(recVol * marginEur);
       return {
         action: "SELL",
-        action_label: "VENDRE MAINTENANT",
+        action_label: "VENTE RECOMMANDÉE (OBJECTIF ATTEINT)",
         confidence_score_pct: 88,
-        headline: `Le marché à ${marketPrice}€/t dépasse votre objectif (${targetPrice}€/t) : Sécurisez votre marge !`,
+        headline: `Le marché à ${marketPrice} €/t dépasse votre objectif (${targetPrice} €/t) !`,
         rationale: [
-          `Le prix actuel du marché (${marketPrice} €/t) est supérieur à votre prix cible calculé (${targetPrice} €/t).`,
-          `Vous réalisez un gain net estimé de +${Math.round(marketPrice - breakEven)} € par tonne vendue.`,
-          `Engager 50% du solde (${recVol} t) permet de verrouiller votre trésorerie sans fermer la porte à de futures hausses.`,
+          `Votre prix visé (${targetPrice} €/t pour ${targetMargin}% de marge) est atteint au cours actuel de ${marketPrice} €/t.`,
+          `Vendre ${recVol} t maintenant dégage un gain net de +${marginEur} €/t (+${gain.toLocaleString()} € au total).`,
+          `Libère ${recVol} t des hangars pour sécuriser votre trésorerie.`,
         ],
-        market_signals: { trend: "Haussière", rsi: "62 (Favorable)" },
+        market_signals: { trend: "Haussière", price: `${marketPrice} €/t` },
         recommended_volume_tons: recVol,
         recommended_target_price_eur_ton: marketPrice,
         estimated_total_gain_eur: gain,
         risk_level: "low",
         step_by_step_plan: [
-          `1. Contacter votre organisme stockeur ou courtier pour engager ${recVol} tonnes au cours actuel.`,
-          `2. Conserver les ${uncommitted - recVol} tonnes restantes en stockage au hangar ou pour la prochaine échéance.`,
-          "3. Surveiller les signaux hebdomadaires sur AgriGuide pour le reste du volume.",
+          `1. Valider la vente de ${recVol} t à ${marketPrice} €/t auprès de votre coopérative.`,
+          `2. Conserver ${uncommitted - recVol} t en option haussière.`,
+          `3. Poser un ordre limite à ${targetPrice} €/t.`,
         ],
         tri_source_snapshot: [],
       };
     }
 
-    if (req.storage_capacity_tons >= uncommitted) {
+    if (marginEur > 0) {
+      if (storageDeficit > 0) {
+        const recVol = Math.min(uncommitted, Math.max(50, Math.round(storageDeficit * 0.5)));
+        const gain = Math.round(recVol * marginEur);
+        return {
+          action: "HEDGE",
+          action_label: "VENTE PARTIELLE & STOCKAGE SÉLECTIF",
+          confidence_score_pct: 84,
+          headline: `Prix à ${marketPrice} €/t (Marge +${marginEur} €/t soit ${marginPct}%) — Stockage limité (${storageCap} t sur ${uncommitted} t).`,
+          rationale: [
+            `Le prix actuel (${marketPrice} €/t) est sous votre cible de ${targetPrice} €/t, mais génère tout de même +${marginEur} €/t de marge positive.`,
+            `Déficit de stockage de ${storageDeficit} t : Votre stockage disponible au hangar (${storageCap} t) ne suffit pas pour vos ${uncommitted} t restantes.`,
+            `Engager une tranche de ${recVol} t à ${marketPrice} €/t évite les frais de gardiennage extérieur tout en dégageant +${gain.toLocaleString()} € de trésorerie.`,
+          ],
+          market_signals: { trend: "Neutre", price: `${marketPrice} €/t` },
+          recommended_volume_tons: recVol,
+          recommended_target_price_eur_ton: marketPrice,
+          estimated_total_gain_eur: gain,
+          risk_level: "medium",
+          step_by_step_plan: [
+            `1. Vendre immédiatement ${recVol} t à ${marketPrice} €/t pour résorber le manque de stockage.`,
+            `2. Placer vos ${Math.min(storageCap, uncommitted)} t en stockage au hangar à l'abri.`,
+            `3. Déposer un ordre limite à ${targetPrice} €/t pour les ${Math.max(0, uncommitted - recVol - storageCap)} t restantes.`,
+          ],
+          tri_source_snapshot: [],
+        };
+      }
+
       return {
         action: "STORE",
-        action_label: "STOCKER & ATTENDRE UN MEILLEUR PRIX",
-        confidence_score_pct: 85,
-        headline: `Prix sous votre objectif (${marketPrice}€/t vs ${targetPrice}€/t) : Vous avez la capacité de stocker.`,
+        action_label: "STOCKER & ATTENDRE L'OBJECTIF",
+        confidence_score_pct: 82,
+        headline: `Prix à ${marketPrice} €/t sous l'objectif (${targetPrice} €/t) — Stockage suffisant (${storageCap} t).`,
         rationale: [
-          `Le cours actuel ne permet pas d'atteindre votre marge cible de ${targetMargin}%.`,
-          `Votre capacité de stockage libre (${req.storage_capacity_tons} t) permet de conserver les ${uncommitted} t sans frais de gardiennage extérieur.`,
-          "Le report de vente vers la fin de campagne d'hiver offre historiquement une prime de stockage.",
+          `Le cours actuel (${marketPrice} €/t) manque encore de ${priceGap} €/t pour atteindre votre cible de ${targetPrice} €/t (${targetMargin}% de marge).`,
+          `Votre capacité au hangar (${storageCap} t) permet de stocker vos ${uncommitted} t à l'abri sans frais de gardiennage.`,
+          "Le report de vente sur 2 à 4 mois permet d'attendre un rebond de marché.",
         ],
-        market_signals: { trend: "Consolidation", price: `${marketPrice} €/t` },
+        market_signals: { trend: "Neutre", price: `${marketPrice} €/t` },
         recommended_volume_tons: 0,
         recommended_target_price_eur_ton: targetPrice,
         estimated_total_gain_eur: 0,
         risk_level: "medium",
         step_by_step_plan: [
-          "1. Mettre le grain sous ventilation et vérifier l'hygrométrie régulièrement.",
-          `2. Placer une alerte automatique dès que le marché franchit les ${targetPrice} €/t.`,
-          "3. Ne pas précipiter de vente à terme tant que les cours sont en consolidation.",
+          `1. Mettre vos ${uncommitted} t sous ventilation au hangar.`,
+          `2. Placer un ordre à cours limité de ${targetPrice} €/t avec votre organisme stockeur.`,
+          "3. Suivre les alertes Euronext hebdomadaires sur AgriGuide.",
         ],
         tri_source_snapshot: [],
       };
@@ -412,21 +444,23 @@ export async function evaluateStrategy(
 
     return {
       action: "HOLD",
-      action_label: "PATIENTER (ATTENTE DE REBOND)",
-      confidence_score_pct: 78,
-      headline: `Conservez votre position et attendez la prochaine fenêtre d'opportunité`,
+      action_label: "PATIENTER (MARGE EN DANGER)",
+      confidence_score_pct: 75,
+      headline: `Prix du marché (${marketPrice} €/t) sous votre coût de revient (${breakEven} €/t) !`,
       rationale: [
-        `Le cours est temporairement inférieur à votre coût de revient + marge.`,
-        `Une vente précipitée aujourd'hui dégraderait votre rentabilité d'exploitation.`,
+        `Une vente immédiate à ${marketPrice} €/t génèrerait une perte de ${Math.abs(marginEur)} €/t.`,
+        `Votre prix visé est de ${targetPrice} €/t (écart de ${priceGap} €/t).`,
+        "Conservez vos volumes et attendez le redressement des cours.",
       ],
       market_signals: { trend: "Neutre", price: `${marketPrice} €/t` },
       recommended_volume_tons: 0,
       recommended_target_price_eur_ton: targetPrice,
       estimated_total_gain_eur: 0,
-      risk_level: "medium",
+      risk_level: "high",
       step_by_step_plan: [
-        "1. Surveiller l'évolution des cotations sur les 15 prochains jours.",
-        "2. Fixer un ordre limite avec votre coopérative.",
+        "1. Stopper toute nouvelle vente ferme à ce niveau de cours.",
+        `2. Fixer un ordre d'alerte dès que le marché repasse au-dessus de ${breakEven} €/t.`,
+        "3. Contacter votre conseiller agronomique pour étudier les options de stockage prolongé.",
       ],
       tri_source_snapshot: [],
     };
