@@ -19,6 +19,7 @@ import {
   Zap,
   MessageCircle,
   Share2,
+  ShieldAlert,
 } from "lucide-react";
 
 export type AgentNode = {
@@ -131,6 +132,17 @@ export const AGENT_NODES: AgentNode[] = [
     angle: 180, // Left
     keywords: ["trading", "prix", "cours", "euronext", "marché", "vente", "vendre", "cotation", "tonne", "tendance", "contrat", "matif"],
     sampleQuestions: ["Cours du blé sur Euronext ?", "Quand vendre ma récolte de colza ?"],
+  },
+  {
+    id: "risk_analyst",
+    label: "Risk Analyst",
+    sublabel: "Risque Climatique & Belhsen",
+    category: "Analyse de Risque",
+    route: "/risk",
+    icon: ShieldAlert,
+    angle: 225, // Top-Left
+    keywords: ["sécheresse", "risque", "assurance", "belhsen", "spi", "spei", "ndvi", "sinistre", "paramétrique", "couverture", "indemnité"],
+    sampleQuestions: ["Évaluer le risque de sécheresse sur ma parcelle", "Générer le rapport de risque climatique Belhsen"],
   },
   {
     id: "assets",

@@ -13,6 +13,7 @@ import {
   TrendingUp,
   Camera,
   Users,
+  ShieldAlert,
 } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
@@ -36,6 +37,7 @@ const nav = [
   { to: "/regulation", label: "Conseiller Réglementaire", shortLabel: "Règles", icon: ScrollText, roles: ["farmer"] as Role[] },
   { to: "/agriculture", label: "Conseiller Agricole", shortLabel: "Agricole", icon: Sprout, roles: ["farmer"] as Role[] },
   { to: "/business", label: "Conseiller Financier", shortLabel: "Financier", icon: LineChart, roles: ["farmer"] as Role[] },
+  { to: "/risk", label: "Analyse de Risque", shortLabel: "Risque", icon: ShieldAlert, roles: ["farmer"] as Role[] },
   { to: "/trading", label: "Bourse & Vente à Terme", shortLabel: "Trading", icon: TrendingUp, roles: ["farmer"] as Role[] },
   { to: "/aujourd-hui", label: "Aujourd'hui", shortLabel: "Aujourd'hui", icon: CalendarDays, roles: ["farmer"] as Role[] },
   { to: "/weather", label: "Météo · Dashboard", shortLabel: "Météo", icon: CloudSun, roles: ["farmer"] as Role[] },
@@ -43,6 +45,7 @@ const nav = [
   { to: "/diagnostic", label: "Diagnostic & Scanner IA", shortLabel: "Scanner", icon: Camera, roles: ["farmer", "acheteur"] as Role[] },
   { to: "/organizations", label: "Organisations & Contacts", shortLabel: "Contacts", icon: Users, roles: ["farmer", "acheteur"] as Role[] },
 ] as const;
+
 
 function FullPageLoader() {
   return (

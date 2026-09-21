@@ -53,6 +53,8 @@ Le backend est architecturé en micro-services spécialisés FastAPI interconnec
 | **Trading Agent** | `8007` | Cotations Euronext/MATIF, signaux de vente et stratégies de marché |
 | **Orchestrator** | `8008` | Agent superviseur LangGraph pour le routage et handoffs multi-agents |
 | **Insects Agent** | `8009` | Détection d'insectes, sévérité et cartographie des alertes |
+| **Risk Analyst Agent** | `8010` | Évaluation des risques climatiques (Belhsen et al., 2026), assolement HiGHS & rapports HTML |
+
 
 ---
 

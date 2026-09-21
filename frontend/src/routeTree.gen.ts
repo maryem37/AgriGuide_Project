@@ -21,6 +21,7 @@ import { Route as MarketplaceRouteImport } from './routes/marketplace'
 import { Route as OrganizationsRouteImport } from './routes/organizations'
 import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as RegulationRouteImport } from './routes/regulation'
+import { Route as RiskRouteImport } from './routes/risk'
 import { Route as TradingRouteImport } from './routes/trading'
 import { Route as WeatherRouteImport } from './routes/weather'
 import { Route as MarketplaceIndexRouteImport } from './routes/marketplace.index'
@@ -89,6 +90,11 @@ const RegulationRoute = RegulationRouteImport.update({
   path: '/regulation',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RiskRoute = RiskRouteImport.update({
+  id: '/risk',
+  path: '/risk',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TradingRoute = TradingRouteImport.update({
   id: '/trading',
   path: '/trading',
@@ -138,6 +144,7 @@ export interface FileRoutesByFullPath {
   '/organizations': typeof OrganizationsRoute
   '/profil': typeof ProfilRoute
   '/regulation': typeof RegulationRoute
+  '/risk': typeof RiskRoute
   '/trading': typeof TradingRoute
   '/weather': typeof WeatherRoute
   '/marketplace/$id': typeof MarketplaceIdRoute
@@ -158,6 +165,7 @@ export interface FileRoutesByTo {
   '/organizations': typeof OrganizationsRoute
   '/profil': typeof ProfilRoute
   '/regulation': typeof RegulationRoute
+  '/risk': typeof RiskRoute
   '/trading': typeof TradingRoute
   '/weather': typeof WeatherRoute
   '/marketplace/$id': typeof MarketplaceIdRoute
@@ -180,6 +188,7 @@ export interface FileRoutesById {
   '/organizations': typeof OrganizationsRoute
   '/profil': typeof ProfilRoute
   '/regulation': typeof RegulationRoute
+  '/risk': typeof RiskRoute
   '/trading': typeof TradingRoute
   '/weather': typeof WeatherRoute
   '/marketplace/$id': typeof MarketplaceIdRoute
@@ -203,6 +212,7 @@ export interface FileRouteTypes {
     | '/organizations'
     | '/profil'
     | '/regulation'
+    | '/risk'
     | '/trading'
     | '/weather'
     | '/marketplace/$id'
@@ -223,6 +233,7 @@ export interface FileRouteTypes {
     | '/organizations'
     | '/profil'
     | '/regulation'
+    | '/risk'
     | '/trading'
     | '/weather'
     | '/marketplace/$id'
@@ -244,6 +255,7 @@ export interface FileRouteTypes {
     | '/organizations'
     | '/profil'
     | '/regulation'
+    | '/risk'
     | '/trading'
     | '/weather'
     | '/marketplace/$id'
@@ -266,6 +278,7 @@ export interface RootRouteChildren {
   OrganizationsRoute: typeof OrganizationsRoute
   ProfilRoute: typeof ProfilRoute
   RegulationRoute: typeof RegulationRoute
+  RiskRoute: typeof RiskRoute
   TradingRoute: typeof TradingRoute
   WeatherRoute: typeof WeatherRoute
   OnboardingTerrainRoute: typeof OnboardingTerrainRoute
@@ -357,6 +370,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegulationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/risk': {
+      id: '/risk'
+      path: '/risk'
+      fullPath: '/risk'
+      preLoaderRoute: typeof RiskRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/trading': {
       id: '/trading'
       path: '/trading'
@@ -440,6 +460,7 @@ const rootRouteChildren: RootRouteChildren = {
   OrganizationsRoute: OrganizationsRoute,
   ProfilRoute: ProfilRoute,
   RegulationRoute: RegulationRoute,
+  RiskRoute: RiskRoute,
   TradingRoute: TradingRoute,
   WeatherRoute: WeatherRoute,
   OnboardingTerrainRoute: OnboardingTerrainRoute,

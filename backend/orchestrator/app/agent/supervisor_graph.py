@@ -25,6 +25,7 @@ class SupervisorState(TypedDict):
         "agriculture_agent",
         "regulation_agent", 
         "business_agent", 
+        "risk_agent",
         "monitoring_agent",
         "weather_agent",
         "insect_agent",
@@ -63,7 +64,8 @@ Your role is to route the conversation to the most appropriate specialized agent
 Available agents:
 - agriculture_agent: Soil analysis, crop recommendations, agronomy, satellite data, terrain analysis
 - regulation_agent: Legal regulations, PAC subsidies, administrative documents, compliance
-- business_agent: Financial scenarios, market analysis, profitability, risk assessment
+- business_agent: Financial scenarios, market analysis, profitability, costs, revenues
+- risk_agent: Parametric climate risk (SPI/SPEI/NDVI Belhsen et al. 2026), drought insurance, HiGHS crop mix diversification
 - monitoring_agent: Daily monitoring, alerts, weather tracking, harvest timing
 - weather_agent: Weather forecasts, climate data, meteorological analysis
 - insect_agent: Insect detection, alert mapping, pest analysis, treatment recommendations
@@ -89,7 +91,7 @@ Respond with ONLY the agent name (e.g., "agriculture_agent")."""
         
         # Validate and default to agriculture_agent if invalid
         valid_agents = [
-            "agriculture_agent", "regulation_agent", "business_agent", 
+            "agriculture_agent", "regulation_agent", "business_agent", "risk_agent",
             "monitoring_agent", "weather_agent", "insect_agent", "human_validation", "end"
         ]
         

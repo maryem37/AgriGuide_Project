@@ -29,6 +29,7 @@ python-jose[cryptography]==3.3.0
 # --- Data ---
 numpy==1.26.4
 pandas==2.2.3
+scipy>=1.11.0
 pypdf>=5.0.0
 pdfminer.six>=20240706  # Agriculture RAG ingest / _compat_shims (optional at API runtime)
 tqdm==4.66.5

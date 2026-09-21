@@ -32,8 +32,10 @@ SERVICES: list[tuple[str, str, str, int]] = [
     ("weather", "backend/agent_weather", "app.main:app", 8006),
     ("trading", "backend/agent_trading", "app.main:app", 8007),
     ("insects", "backend/agent_insects", "app.main:app", 8009),
+    ("risk", "backend/agent_risk", "app.main:app", 8010),
     ("orchestrator", "backend/orchestrator", "app.main:app", 8008),
 ]
+
 
 
 def _venv_python() -> Path:

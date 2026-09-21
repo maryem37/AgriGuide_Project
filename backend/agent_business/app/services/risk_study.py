@@ -1,4 +1,9 @@
-"""Deterministic risk study based on real upstream and market signals."""
+"""Business Heuristic Risk Study (internal AgriGuide methodology V1).
+
+Calculates operational scenario risk from agronomical incompatibility, market downside,
+yield variability and cost uncertainty. This heuristic is internal to AgriGuide and distinct
+from the evidence-based climate risk model (Belhsen et al., 2026).
+"""
 
 from app.models.schemas import CropRecommendation, EtudeMarche, EtudeRisque
 from app.services.financial_service import CostEstimate, _first_number
@@ -10,7 +15,7 @@ def evaluer_risque(
     cout: CostEstimate,
 ) -> EtudeRisque:
     """Combine Agriculture compatibility, market downside, historical yield
-    variability and cost-data quality. No LLM score is used."""
+    variability and cost-data quality (Internal Business Heuristic V1)."""
     incompatibilite = max(0.0, min(1.0, 1.0 - crop.score_compatibilite / 100.0))
     baisse_marche = max(0.0, -marche.tendance_prix)
     volatilite_rendement = 0.0
@@ -63,7 +68,7 @@ def evaluer_risque(
 
     return EtudeRisque(
         risque_principal=principal,
-        description="Risque composite calculé à partir des signaux Agriculture, marché et qualité des données.",
+        description="Score d'heuristique d'affaires interne V1 (Agriculture, marché, coût) — distinct du modèle climatique Belhsen et al. (2026).",
         probabilite=round(probabilite, 3),
         impact=round(impact, 3),
         risque_score_normalise=risque_score,

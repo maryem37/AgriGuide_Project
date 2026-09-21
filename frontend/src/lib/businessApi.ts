@@ -236,3 +236,19 @@ export async function fetchLatestFarmerDecision(
   }
   return response.json() as Promise<FarmerDecisionResponse>;
 }
+
+// ---------------------------------------------------------------------------
+// Climate Risk & Crop Mix API Helpers (Re-exported from riskApi for backward compatibility)
+// ---------------------------------------------------------------------------
+
+export type {
+  ClimateRiskRequest,
+  ClimateRiskResponse,
+  CropMixRequest,
+  CropMixResponse,
+  CropAllocation,
+} from "./riskApi";
+
+export { fetchClimateRisk, fetchCropMix, fetchClimateRiskReportHtml } from "./riskApi";
+
+

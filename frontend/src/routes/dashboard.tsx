@@ -16,6 +16,7 @@ import {
   MapPinned,
   BrainCircuit,
   ShieldCheck,
+  ShieldAlert,
 } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard")({
@@ -57,6 +58,14 @@ const ADVISOR_FLOW = [
     advisor: "Conseiller Financier",
     body: "Comparez les scénarios qui découlent de vos choix de culture.",
     icon: LineChart,
+  },
+  {
+    to: "/risk" as const,
+    step: "04",
+    label: "Évaluer les risques",
+    advisor: "Risk Analyst (Belhsen et al.)",
+    body: "Mesurez le risque climatique paramétrique et optimisez l'assolement.",
+    icon: ShieldAlert,
   },
 ] as const;
 
