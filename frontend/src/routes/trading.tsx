@@ -112,30 +112,32 @@ function Page() {
     queryFn: fetchMarketAlerts,
   });
 
-  // Strategy Mutation
+  // Strategy Query (Instant reactive recalculation on any input change)
   const {
     data: strategyData,
-    mutate: calculateStrategy,
-    isPending: strategyPending,
-  } = useMutation({
-    mutationFn: (req: StrategyEvaluationRequest) => evaluateStrategy(req),
+    isLoading: strategyPending,
+    refetch: recalculateStrategy,
+  } = useQuery({
+    queryKey: [
+      "trading-strategy",
+      selectedSymbol,
+      volumeTons,
+      alreadyCommittedTons,
+      breakEvenCost,
+      storageCapacity,
+      targetMarginPct,
+    ],
+    queryFn: () =>
+      evaluateStrategy({
+        commodity_symbol: selectedSymbol,
+        total_harvest_tons: volumeTons,
+        already_committed_tons: alreadyCommittedTons,
+        break_even_cost_eur_ton: breakEvenCost,
+        storage_capacity_tons: storageCapacity,
+        target_margin_pct: targetMarginPct,
+      }),
   });
 
-  const handleSimulateStrategy = (symbol = selectedSymbol) => {
-    calculateStrategy({
-      commodity_symbol: symbol,
-      total_harvest_tons: volumeTons,
-      already_committed_tons: alreadyCommittedTons,
-      break_even_cost_eur_ton: breakEvenCost,
-      storage_capacity_tons: storageCapacity,
-      target_margin_pct: targetMarginPct,
-    });
-  };
-
-  // Run automatically on mount or when crop or inputs change
-  useEffect(() => {
-    handleSimulateStrategy(selectedSymbol);
-  }, [selectedSymbol, volumeTons, alreadyCommittedTons, breakEvenCost, storageCapacity, targetMarginPct]);
 
 
   const selectedTicker = tickers?.find((t) => t.symbol === selectedSymbol) ?? tickers?.[0];
@@ -393,7 +395,7 @@ function Page() {
 
             <div className="flex items-end">
               <Button
-                onClick={() => handleSimulateStrategy()}
+                onClick={() => recalculateStrategy()}
                 disabled={strategyPending}
                 className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-9 gap-1.5 font-bold shadow-md cursor-pointer"
               >
