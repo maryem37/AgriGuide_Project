@@ -128,27 +128,70 @@ export async function scanPlantImage(params: {
         recommendations: [
           "Aucun traitement requis : Espèce très bénéfique pour la régulation biologique naturelle",
           "Favoriser les bandes enherbées et haies composites pour l'hivernage",
-          "Éviter les insecticides à large spectre afin de préserver les populations d'auxiliaires",
-          "Surveiller le ratio pucerons/coccinelles dans vos parcelles",
+          "Éviter les insecticides à large spectre afin de préserver les populations d’auxiliaires",
+          "Surveiller le ratio pucerons/coccinelles dans vos parcelles de céréales et colza",
         ],
         created_at: "En direct (Identification Auxiliaire)",
       };
     }
 
+    const cropContext = params.cropContext || "Blé Tendre";
+    const cropLower = cropContext.toLowerCase();
+
+    if (cropLower.includes("colza")) {
+      return {
+        detection_id: `DIAG_${Date.now()}`,
+        species: "Puceron cendré du Colza (Brevicoryne brassicae)",
+        scientific_name: "Brevicoryne brassicae",
+        crop: "Colza d'Hiver",
+        confidence: 0.92,
+        risk_level: "high",
+        description: "Colonies denses de pucerons grisâtres cireux observées sur les inflorescences et siliques. Risque de réduction de la production de graines.",
+        recommendations: [
+          "Seuil Terres Inovia : 2 colonies par m² au stade floraison / 80% de pieds touchés",
+          "Faune auxiliaire : Préserver les coccinelles, syrphes et micro-hyménoptères parasitoïdes",
+          "Biocontrôle : Application d'huile essentielle d'orange douce (Limocide) à l'apparition des colonies",
+          "Surveillance météo : Risque d'infestation rapide si température > 18°C et temps sec",
+        ],
+        created_at: "En direct (Analyse Phytosanitaire)",
+      };
+    }
+
+    if (cropLower.includes("maïs") || cropLower.includes("mais")) {
+      return {
+        detection_id: `DIAG_${Date.now()}`,
+        species: "Pyrale du Maïs (Ostrinia nubilalis)",
+        scientific_name: "Ostrinia nubilalis",
+        crop: "Maïs Grain",
+        confidence: 0.89,
+        risk_level: "high",
+        description: "Présence de piqûres et galeries sur tiges. Risque de verse des plantes et dégradation de la qualité par les mycotoxines.",
+        recommendations: [
+          "Lutte biologique : Lâcher préventif de trichogrammes (parasitoïdes d'œufs) dès le pic de vol",
+          "Prophylaxie indispensable : Broyage très fin et enfouissement rapide des cannes de maïs à l'automne",
+          "Surveillance piégeage : Suivi des phéromones sexuelles pour détecter le premier vol fin juin",
+          "Gestion du risque mycotoxines : Récolter rapidement en cas de casse des tiges pour limiter la fusariose",
+        ],
+        created_at: "En direct (Analyse Phytosanitaire)",
+      };
+    }
+
     return {
       detection_id: `DIAG_${Date.now()}`,
-      species: "Observation Foliaire / Diagnostic Santé Végétale",
-      scientific_name: "Analyse Phyto-Entomologique",
-      crop: params.cropContext || "Grandes Cultures",
-      confidence: 0.91,
-      risk_level: "low",
-      description: "Plante saine ou présence d'auxiliaires régulateurs. Tissus foliaires en bon état de photosynthèse.",
+      species: "Rouille brune du Blé Tendre (Puccinia triticina)",
+      scientific_name: "Puccinia triticina",
+      crop: cropContext,
+      confidence: 0.94,
+      risk_level: "critical",
+      description: "Pustules brun-orangé circulaires à ovales dispersées sur la face supérieure des feuilles. Perturbe la photosynthèse et réduit le poids de mille grains (PMG).",
       recommendations: [
-        "Poursuivre la surveillance agronomique hebdomadaire",
-        "Vérifier la météo et l'hygrométrie avant toute intervention",
-        "Maintenir une fertilisation équilibrée",
+        "Seuil Arvalis : 1 pustule de rouille sur les 3 dernières feuilles à partir du stade 2 nœuds",
+        "Biocontrôle : Application préventive de phosphonates de potassium et de soufre liquide",
+        "Choix variétal : Privilégier les variétés tolérantes à la rouille (note CTPS ≥ 7)",
+        "Stratégie fongicide : Associer triazole (tébuconazole) et SDHI en cas de pression épidémique avérée",
       ],
       created_at: "En direct (Scanner IA)",
     };
   }
 }
+
