@@ -343,6 +343,32 @@ export async function evaluateStrategy(
     const storageCap = req.storage_capacity_tons || 0;
     const storageDeficit = Math.max(0, uncommitted - storageCap);
 
+    if (req.already_committed_tons > req.total_harvest_tons) {
+      const shortfallTons = req.already_committed_tons - req.total_harvest_tons;
+      return {
+        action: "HEDGE",
+        action_label: "ALERTE SUR-ENGAGEMENT",
+        confidence_score_pct: 90,
+        headline: `Attention : Volume sous contrat (${req.already_committed_tons} t) supérieur à votre récolte (${req.total_harvest_tons} t) !`,
+        rationale: [
+          `Vous avez vendu ${req.already_committed_tons} t alors que votre récolte prévue n'est que de ${req.total_harvest_tons} t.`,
+          `Déficit physique de ${shortfallTons} t : Vous risquez un défaut de livraison auprès de votre acheteur.`,
+          "Risque financier en cas de rachat de contrat au cours de marché.",
+        ],
+        market_signals: { trend: "Neutre", price: `${marketPrice} €/t` },
+        recommended_volume_tons: 0,
+        recommended_target_price_eur_ton: marketPrice,
+        estimated_total_gain_eur: 0,
+        risk_level: "high",
+        step_by_step_plan: [
+          `1. Contacter votre acheteur pour renégocier un avenant sur les ${shortfallTons} t manquantes.`,
+          `2. Évaluer les options de rachat de contrat ou d'achat complémentaire.`,
+          "3. Revoir vos engagements de vente pour la saison prochaine.",
+        ],
+        tri_source_snapshot: [],
+      };
+    }
+
     if (uncommitted <= 0) {
       return {
         action: "HOLD",
@@ -350,7 +376,7 @@ export async function evaluateStrategy(
         confidence_score_pct: 95,
         headline: "Récolte 100% sous contrat",
         rationale: [
-          `L'intégralité de votre récolte de ${req.total_harvest_tons} t est déjà sous contrat.`,
+          `L'intégralité de votre récolte de ${req.total_harvest_tons} t est déjà sous contrat (100%).`,
           "Aucun risque de baisse de marché sur ce volume.",
         ],
         market_signals: { trend: "Neutre", price: `${marketPrice} €/t` },
@@ -358,7 +384,7 @@ export async function evaluateStrategy(
         recommended_target_price_eur_ton: marketPrice,
         estimated_total_gain_eur: 0,
         risk_level: "low",
-        step_by_step_plan: [`1. Suivre les livraisons prévues pour vos ${req.already_committed_tons} t.`],
+        step_by_step_plan: [`1. Suivre les livraisons prévues pour vos ${req.total_harvest_tons} t.`],
         tri_source_snapshot: [],
       };
     }

@@ -49,18 +49,38 @@ def calculate_strategy(req: StrategyEvaluationRequest) -> StrategyDecisionRespon
         "price_vs_target": f"{market_price} €/t vs cible {target_price} €/t (Écart : {price_gap_eur} €/t)"
     }
 
-    # Case 1: All harvest already committed
+    # Case 0: Over-committed / Shortfall risk (already_committed > total_harvest)
+    if req.already_committed_tons > req.total_harvest_tons:
+        shortfall_tons = req.already_committed_tons - req.total_harvest_tons
+        return _build_response(
+            "HEDGE", "ALERTE SUR-ENGAGEMENT", 90,
+            f"Attention : Volume sous contrat ({req.already_committed_tons} t) supérieur à votre récolte ({req.total_harvest_tons} t) !",
+            [
+                f"Vous avez vendu {req.already_committed_tons} t alors que votre production estimée n'est que de {req.total_harvest_tons} t.",
+                f"Déficit physique de {shortfall_tons} t : Vous risquez d'être en défaut de livraison auprès de votre acheteur.",
+                "Risque financier en cas de rachat de contrat au prix de marché actuel."
+            ],
+            signals, 0, market_price, 0, "high", None,
+            [
+                f"1. Contacter votre acheteur pour renégocier un avenant sur les {shortfall_tons} t manquantes.",
+                f"2. Évaluer les options de rachat de contrat ou d'achat de grain physique complémentaire.",
+                "3. Revoir vos engagements de vente pour la saison prochaine."
+            ],
+            snapshot
+        )
+
+    # Case 1: All harvest already committed exactly 100%
     if uncommitted <= 0:
         return _build_response(
             "HOLD", "MAINTENIR POSITION", 95,
             "Récolte 100% Sous Contrat",
             [
-                f"L'intégralité de votre récolte de {req.total_harvest_tons} t est déjà vendue ou engagée sous contrat.",
+                f"L'intégralité de votre récolte de {req.total_harvest_tons} t est déjà vendue sous contrat (100%).",
                 "Aucun risque de baisse du marché sur ce volume."
             ],
             signals, 0, market_price, 0, "low", None,
             [
-                f"1. Vérifier le calendrier de livraison de vos {req.already_committed_tons} t avec votre acheteur.",
+                f"1. Vérifier le calendrier de livraison de vos {req.total_harvest_tons} t avec votre acheteur.",
                 "2. Surveiller la bonne exécution logistique."
             ],
             snapshot
