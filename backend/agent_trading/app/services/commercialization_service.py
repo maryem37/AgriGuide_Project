@@ -13,14 +13,17 @@ from app.services.market_ticker_service import COMMODITIES_DB, get_live_quote, r
 def calculate_strategy(req: StrategyEvaluationRequest) -> StrategyDecisionResponse:
     """Evaluate the farmer's position and recommend the best commercial action."""
     require_execution_eligible_data()
-    symbol = req.commodity_symbol.upper()
+    symbol = (req.commodity_symbol or "EBM").upper()
+    if symbol not in COMMODITIES_DB:
+        symbol = "EBM"
     meta = COMMODITIES_DB[symbol]
     market_price = get_live_quote(symbol)["price_eur_ton"]
     trend = "neutral"
-    rsi = 0.0
+    rsi = 50.0
     
     uncommitted_tons = max(0, req.total_harvest_tons - req.already_committed_tons)
-    target_price = round(req.break_even_cost_eur_ton * (1.0 + req.target_margin_pct / 100.0), 2)
+    margin_pct = req.target_margin_pct if req.target_margin_pct is not None else 20.0
+    target_price = round(req.break_even_cost_eur_ton * (1.0 + margin_pct / 100.0), 2)
     
     # Calculate mock snapshot
     snapshot = [

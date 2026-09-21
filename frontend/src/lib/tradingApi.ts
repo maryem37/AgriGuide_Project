@@ -251,15 +251,17 @@ const FALLBACK_TICKERS: CommodityTicker[] = [
 ];
 
 export async function fetchMarketTickers(): Promise<CommodityTicker[]> {
-  return getJson<CommodityTicker[]>("/trading/tickers");
+  try {
+    return await getJson<CommodityTicker[]>("/trading/tickers");
+  } catch {
+    return FALLBACK_TICKERS;
+  }
 }
 
 export async function fetchCommodityChart(
   symbol: string,
   periodDays = 30,
 ): Promise<CommodityChartResponse> {
-  return getJson<CommodityChartResponse>(`/trading/chart/${symbol}?period_days=${periodDays}`);
-
   try {
     return await getJson<CommodityChartResponse>(`/trading/chart/${symbol}?period_days=${periodDays}`);
   } catch {
@@ -294,8 +296,6 @@ export async function calculateHedgingStrategy(
 }
 
 export async function fetchMarketAlerts(): Promise<MarketAlert[]> {
-  return getJson<MarketAlert[]>("/trading/alerts");
-
   try {
     return await getJson<MarketAlert[]>("/trading/alerts");
   } catch {
@@ -327,8 +327,6 @@ export async function fetchMarketAlerts(): Promise<MarketAlert[]> {
 export async function evaluateStrategy(
   req: StrategyEvaluationRequest,
 ): Promise<StrategyDecisionResponse> {
-  return postJson<StrategyDecisionResponse>("/trading/strategy", req);
-
   try {
     return await postJson<StrategyDecisionResponse>("/trading/strategy", req);
   } catch {

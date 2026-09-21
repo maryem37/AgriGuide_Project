@@ -132,10 +132,11 @@ function Page() {
     });
   };
 
-  // Run automatically on mount or when crop changes
+  // Run automatically on mount or when crop or inputs change
   useEffect(() => {
     handleSimulateStrategy(selectedSymbol);
-  }, [selectedSymbol]);
+  }, [selectedSymbol, volumeTons, alreadyCommittedTons, breakEvenCost, storageCapacity, targetMarginPct]);
+
 
   const selectedTicker = tickers?.find((t) => t.symbol === selectedSymbol) ?? tickers?.[0];
   const currentPrice = selectedTicker?.price_eur_ton ?? (strategyData?.recommended_target_price_eur_ton || 240);
